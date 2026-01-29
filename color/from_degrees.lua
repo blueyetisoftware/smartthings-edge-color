@@ -7,8 +7,8 @@ local scale = require 'color.scale'
 --- converting 1, 2, or 3 values depending on how many arguments are provided.
 ---
 --- @param a number First degree value to convert in range [0,360] (required)
---- @param b number Second degree value to convert in range [0,360] (optional)
---- @param c number Third degree value to convert in range [0,360] (optional)
+--- @param b number|nil Second degree value to convert in range [0,360] (optional)
+--- @param c number|nil Third degree value to convert in range [0,360] (optional)
 --- @return number|number,number|number,number,number The normalized value(s) in range [0,1]
 ---
 --- @raise error if a is nil
@@ -20,6 +20,9 @@ local scale = require 'color.scale'
 ---
 --- @see to_degrees
 local function from_degrees(a, b, c)
+    assert(a ~= nil and type(a) == "number" and a >= 0 and a <= 360, "a must be a number in range [0, 360]")
+    assert(b == nil or (type(b) == "number" and b >= 0 and b <= 360), "b must be a number in range [0, 360] or nil")
+    assert(c == nil or (type(c) == "number" and c >= 0 and c <= 360), "c must be a number in range [0, 360] or nil")
     return scale(1 / 360.0, a, b, c)
 end
 

@@ -15,6 +15,10 @@ local st_utils = require 'st.utils'
 --- local r, g, b = hsv_to_rgb(0.333, 1)  -- Pure green: 0, 1, 0
 --- local r, g, b = hsv_to_rgb(0.667, 1)  -- Pure blue: 0, 0, 1
 local function fn(hue, saturation)
-  return st_utils.hsv_to_rgb(hue, saturation)
+    assert(type(hue) == "number", "hue must be a number")
+    assert(type(saturation) == "number", "saturation must be a number")
+    hue = st_utils.clamp_value(hue, 0, 1)
+    saturation = st_utils.clamp_value(saturation, 0, 1)
+    return st_utils.hsv_to_rgb(hue, saturation)
 end
 return fn

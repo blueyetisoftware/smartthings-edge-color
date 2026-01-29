@@ -28,9 +28,8 @@ local from_8bit = require 'color.from_8bit'
 --- @see https://tannerhelland.com/2012/09/18/convert-temperature-rgb-algorithm-code.html
 --- @see https://en.wikipedia.org/wiki/Color_temperature
 local function cct_to_rgb(cct)
-    if type(cct) ~= "number" then
-        error("cct must be a number", 2)
-    end
+    assert(type(cct) == "number", "cct must be a number")
+    cct = st_utils.clamp_value(cct, 1000, 40000)
 
     local temperature = cct / 100.0  -- scale to match original fitting units (temp in 100-K increments)
     local red, green, blue
