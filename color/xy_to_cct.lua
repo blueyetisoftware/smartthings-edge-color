@@ -1,4 +1,4 @@
-local st_utils = require 'st.utils'
+local Clamp = require 'color.clamp'
 local xy_to_rgb = require 'color.xy_to_rgb'
 local rgb_to_cct = require 'color.rgb_to_cct'
 
@@ -24,12 +24,8 @@ local function xy_to_cct(x, y, Y)
     assert(type(x) == "number", "x must be a number")
     assert(type(y) == "number", "y must be a number")
     assert(Y == nil or type(Y) == "number", "Y must be a number or nil")
-    x = st_utils.clamp_value(x, 0, 1)
-    y = st_utils.clamp_value(y, 0, 1)
-    if Y ~= nil then
-        Y = st_utils.clamp_value(Y, 0, 1)
-    end
-    return rgb_to_cct(xy_to_rgb(x, y, Y or 1))
+    x, y, Y = Clamp.clampF(x, y, Y or 1)
+    return rgb_to_cct(xy_to_rgb(x, y, Y))
 end
 
 return xy_to_cct

@@ -1,0 +1,5 @@
+{
+  "terminal.integrated.env.osx": {
+    "LUA_PATH": "/Users/jason/Downloads/lua_libs-api_v16_59X/lua_libs-api_v16/?.lua;/Users/jason/Downloads/lua_libs-api_v16_59X/lua_libs-api_v16/?/init.lua;./?.lua;./?/init.lua;;"
+  }
+}
