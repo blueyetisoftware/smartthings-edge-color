@@ -1,4 +1,4 @@
-local st_utils = require 'st.utils'
+local Clamp = require 'color.clamp'
 local hsv_to_rgb = require 'color.hsv_to_rgb'
 local rgb_to_xy = require 'color.rgb_to_xy'
 
@@ -14,7 +14,7 @@ local rgb_to_xy = require 'color.rgb_to_xy'
 --- @param v number|nil value component in range [0,1], defaults to 1.0
 --- @return number, number, number equivalent x, y, Y coordinates where x,y are in [0,1] and Y=1
 ---
---- @raise error if h, s, or v are not numbers
+--- @raise error if h or s are not numbers
 --- @raise error if h, s, or v are outside valid ranges
 ---
 --- @usage
@@ -24,12 +24,9 @@ local function hsv_to_xy(h, s, v)
     assert(type(h) == "number", "h must be a number")
     assert(type(s) == "number", "s must be a number")
     assert(v == nil or type(v) == "number", "v must be a number or nil")
-    h = st_utils.clamp_value(h, 0, 1)
-    s = st_utils.clamp_value(s, 0, 1)
-    if v ~= nil then
-        v = st_utils.clamp_value(v, 0, 1)
-    end
-    return rgb_to_xy(hsv_to_rgb(h, s, v or 1))
+    h, s, v = Clamp.clampF(h, s, v or 1)
+
+    return rgb_to_xy(hsv_to_rgb(h, s, v))
 end
 
 return hsv_to_xy

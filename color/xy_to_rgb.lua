@@ -1,4 +1,5 @@
 local st_utils = require 'st.utils'
+local Clamp = require 'color.clamp'
 
 --- Converts CIE 1931 xyY color space coordinates to RGB color values.
 ---
@@ -8,14 +9,21 @@ local st_utils = require 'st.utils'
 ---
 --- @param x number x chromaticity coordinate (typically in [0,1])
 --- @param y number y chromaticity coordinate (typically in [0,1])
---- @param Y number Y luminance coordinate (typically in [0,1])
+--- @param Y number|nil Y luminance coordinate (typically in [0,1]), defaults to 1.0 for full brightness
 --- @return number, number, number RGB color values (red, green, blue) in the range [0,1]
 ---
+--- @raise error if x or y are not numbers, or if Y is provided and not a number
+---
 --- @usage
---- local r, g, b = xy_to_rgb(0.64, 0.33, 0.21)    -- Red: approximately 1, 0, 0
---- local r, g, b = xy_to_rgb(0.30, 0.60, 0.72)    -- Green: approximately 0, 1, 0
---- local r, g, b = xy_to_rgb(0.15, 0.06, 0.07)    -- Blue: approximately 0, 0, 1
+--- local r, g, b = xy_to_rgb(0.64, 0.33, 0.21)    -- Red with specific luminance
+--- local r, g, b = xy_to_rgb(0.64, 0.33)          -- Red at full brightness (Y=1.0)
+--- local r, g, b = xy_to_rgb(0.30, 0.60, 0.72)    -- Green with specific luminance
+--- local r, g, b = xy_to_rgb(0.15, 0.06, 0.07)    -- Blue with specific luminance
 local function fn(x, y, Y)
-  return st_utils.xy_to_rgb(x, y, Y)
+    assert(type(x) == "number", "x must be a number")
+    assert(type(y) == "number", "y must be a number")
+    assert(Y == nil or type(Y) == "number", "Y must be a number or nil")
+    x, y, Y = Clamp.clampF(x, y, Y or 1)
+    return st_utils.xy_to_rgb(x, y, Y)
 end
 return fn

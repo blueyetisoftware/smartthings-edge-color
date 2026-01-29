@@ -1,4 +1,4 @@
-local st_utils = require 'st.utils'
+local Clamp = require 'color.clamp'
 local hsv_to_xy = require 'color.hsv_to_xy'
 local xy_to_cct = require 'color.xy_to_cct'
 
@@ -24,12 +24,8 @@ local function hsv_to_cct(h, s, v)
     assert(type(h) == "number", "h must be a number")
     assert(type(s) == "number", "s must be a number")
     assert(v == nil or type(v) == "number", "v must be a number or nil")
-    h = st_utils.clamp_value(h, 0, 1)
-    s = st_utils.clamp_value(s, 0, 1)
-    if v ~= nil then
-        v = st_utils.clamp_value(v, 0, 1)
-    end
-    return xy_to_cct(hsv_to_xy(h, s, v or 1))
+    h, s, v = Clamp.clampF(h, s, v or 1)
+    return xy_to_cct(hsv_to_xy(h, s, v))
 end
 
 return hsv_to_cct

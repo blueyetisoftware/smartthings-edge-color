@@ -1,29 +1,25 @@
-local scale = require 'color.scale'
-
---- Converts degree values [0,360] to normalized values [0,1].
+--- Converts degree values to normalized values [0,1].
 ---
 --- This function scales degree-based color components (typically hue) to
---- floating-point values in the range [0,1] by dividing by 360. It supports
---- converting 1, 2, or 3 values depending on how many arguments are provided.
+--- floating-point values in the range [0,1) by dividing by 360. Values outside
+--- [0,360] are wrapped circularly (e.g., 390° = 30°, -30° = 330°).
+--- Note: The output range is [0,1), meaning 360° maps to 0.0 due to circular wrapping.
 ---
---- @param a number First degree value to convert in range [0,360] (required)
---- @param b number|nil Second degree value to convert in range [0,360] (optional)
---- @param c number|nil Third degree value to convert in range [0,360] (optional)
---- @return number|number,number|number,number,number The normalized value(s) in range [0,1]
+--- @param degrees number Degree value to convert (any real number, circular)
+--- @return number The normalized value in range [0,1)
 ---
---- @raise error if a is nil
+--- @raise error if degrees is nil or not a number
 ---
 --- @usage
---- local hue = from_degrees(180)           -- returns 0.5
---- local h1, h2 = from_degrees(0, 240)     -- returns 0.0, 0.667
---- local h, s, v = from_degrees(60, 100, 50) -- returns 0.167, 1.0, 0.139
+--- local hue = from_degrees(180)     -- returns 0.5
+--- local wrapped = from_degrees(-30) -- returns 0.833 (330°)
+--- local wrapped2 = from_degrees(390) -- returns 0.083 (30°)
 ---
 --- @see to_degrees
-local function from_degrees(a, b, c)
-    assert(a ~= nil and type(a) == "number" and a >= 0 and a <= 360, "a must be a number in range [0, 360]")
-    assert(b == nil or (type(b) == "number" and b >= 0 and b <= 360), "b must be a number in range [0, 360] or nil")
-    assert(c == nil or (type(c) == "number" and c >= 0 and c <= 360), "c must be a number in range [0, 360] or nil")
-    return scale(1 / 360.0, a, b, c)
+local function from_degrees(degrees)
+    assert(type(degrees) == "number", "degrees must be a number")
+    -- Circular wrapping: any real number is valid for degrees
+    return (degrees % 360) / 360.0
 end
 
 return from_degrees
