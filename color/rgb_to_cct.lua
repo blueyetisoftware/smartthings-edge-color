@@ -27,7 +27,7 @@ local function rgb_to_cct(r, g, b)
 
     local ratio = b / r
     local cct
-    local epsilon = 0.4
+    local epsilon = 0.4  -- convergence threshold for binary search (reasonable precision for temperature)
     local min = 1000
     local max = 40000
 

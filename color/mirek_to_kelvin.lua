@@ -20,7 +20,7 @@ local function mirek_to_kelvin(mirek)
         error("mirek must be a positive number", 2)
     end
 
-    return st_utils.round(1000000.0 / mirek)
+    return st_utils.round(1000000.0 / mirek)  -- kelvin = 1,000,000 / mirek (micro reciprocal degrees)
 end
 
 return mirek_to_kelvin
