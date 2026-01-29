@@ -68,10 +68,10 @@ describe("hsv_to_rgb", function()
 
   it("clamps input values", function()
     local r, g, b = hsv_to_rgb(-0.1, 1.1)
-    -- Should clamp hue to 0, saturation to 1
+    -- Hue wraps circularly to 0.9, saturation clamps to 1, value defaults to 1
     spec_helper.assert_near(r, 1, 1e-6)
     spec_helper.assert_near(g, 0, 1e-6)
-    spec_helper.assert_near(b, 0, 1e-6)
+    spec_helper.assert_near(b, 0.6, 1e-6)
   end)
 
   it("rejects non-number inputs", function()

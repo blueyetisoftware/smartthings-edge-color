@@ -7,7 +7,7 @@ local st_utils = require "st.utils"
 --- [0,100] and returns 8-bit RGB [0,255]) and a bug where it returns white for all
 --- achromatic colors (saturation = 0) regardless of lightness.
 ---
---- @param hue number Hue component in the range [0,1] (normalized, 0 = red, 1 = red again)
+--- @param hue number Hue component (any real number, circular - wraps every 1.0, 0 = red, 1 = red again)
 --- @param saturation number Saturation component in the range [0,1] (normalized)
 --- @param lightness number|nil Lightness component in the range [0,1] (normalized), defaults to 0.5 if nil
 --- @return number, number, number RGB color values (red, green, blue) in the range [0,1]
@@ -22,7 +22,7 @@ local function fn(hue, saturation, lightness)
     assert(type(hue) == "number", "hue must be a number")
     assert(type(saturation) == "number", "saturation must be a number")
     assert(lightness == nil or type(lightness) == "number", "lightness must be a number or nil")
-    hue = st_utils.clamp_value(hue, 0, 1)
+    hue = hue % 1  -- Circular wrapping for hue
     saturation = st_utils.clamp_value(saturation, 0, 1)
     lightness = st_utils.clamp_value(lightness or 0.5, 0, 1)
     -- Handle grayscale case

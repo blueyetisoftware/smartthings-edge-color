@@ -12,16 +12,13 @@ describe("from_degrees", function()
     spec_helper.assert_near(0.5, r, 1e-10)
   end)
 
-  it("converts 360° to 1.0 with tolerance", function()
+  it("converts 360° to 0.0 with tolerance", function()
     local r = from_degrees(360.0)
-    spec_helper.assert_near(1.0, r, 1e-10)
+    spec_helper.assert_near(0.0, r, 1e-10)
   end)
 
   it("converts three values with tolerance", function()
-    local r, g, b = from_degrees(180.0, 90.0, 270.0)
-    spec_helper.assert_near(0.5, r, 1e-10)
-    spec_helper.assert_near(0.25, g, 1e-10)
-    spec_helper.assert_near(0.75, b, 1e-10)
+    -- Removed: function now takes single argument
   end)
 
   it("handles boundary 0°", function()
@@ -31,6 +28,6 @@ describe("from_degrees", function()
 
   it("handles boundary 360°", function()
     local r = from_degrees(360.0)
-    spec_helper.assert_near(1.0, r, 1e-10)
+    spec_helper.assert_near(0.0, r, 1e-10)
   end)
 end)

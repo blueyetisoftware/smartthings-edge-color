@@ -6,7 +6,7 @@ local st_utils = require 'st.utils'
 --- For compatibility with SmartThings Edge, when only hue and saturation are provided,
 --- it defaults to value=1.0 (full brightness) matching st_utils.hsv_to_rgb behavior.
 ---
---- @param hue number Hue component in the range [0,1] (normalized)
+--- @param hue number Hue component (any real number, circular - wraps every 1.0)
 --- @param saturation number Saturation component in the range [0,1] (normalized)
 --- @param value number|nil Value/Brightness component in the range [0,1] (normalized), defaults to 1.0
 --- @return number, number, number RGB color values (red, green, blue) in the range [0,1]
@@ -24,7 +24,7 @@ local function fn(hue, saturation, value)
     assert(type(saturation) == "number", "saturation must be a number")
     assert(value == nil or type(value) == "number", "value must be a number or nil")
 
-    hue = st_utils.clamp_value(hue, 0, 1)
+    hue = hue % 1  -- Circular wrapping for hue
     saturation = st_utils.clamp_value(saturation, 0, 1)
     value = st_utils.clamp_value(value or 1.0, 0, 1)
 
