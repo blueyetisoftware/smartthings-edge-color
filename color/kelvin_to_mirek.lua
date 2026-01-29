@@ -18,9 +18,7 @@ local st_utils = require 'st.utils'
 ---
 --- @see mirek_to_kelvin
 local function kelvin_to_mirek(kelvin)
-    if type(kelvin) ~= "number" or kelvin <= 0 then
-        error("kelvin must be a positive number", 2)
-    end
+    assert(type(kelvin) == "number" and kelvin > 0, "kelvin must be a positive number")
 
     return st_utils.round(1000000.0 / kelvin)  -- mirek = 1,000,000 / kelvin (micro reciprocal degrees)
 end
