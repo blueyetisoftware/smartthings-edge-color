@@ -32,7 +32,7 @@ local function cct_to_rgb(cct)
         error("cct must be a number", 2)
     end
 
-    local temperature = cct / 100.0
+    local temperature = cct / 100.0  -- scale to match original fitting units (temp in 100-K increments)
     local red, green, blue
 
     local fit = function(a, b, c, x)
@@ -42,7 +42,7 @@ local function cct_to_rgb(cct)
 
     -- calculate red
 
-    if temperature < 66.0 then
+    if temperature < 66.0 then  -- ~6600 K breakpoint where warmer/cooler blackbody behaviors switch
         red = 255
     else
         red = fit(351.97690566805693, 0.114206453784165, -40.25366309332127, temperature - 55.0)
@@ -50,7 +50,7 @@ local function cct_to_rgb(cct)
 
     -- calculate green
 
-    if temperature < 66.0 then
+    if temperature < 66.0 then  -- ~6600 K breakpoint where warmer/cooler blackbody behaviors switch
         green = fit(-155.25485562709179, -0.44596950469579133, 104.49216199393888, temperature - 2)
     else
         green = fit(325.4494125711974, 0.07943456536662342, -28.0852963507957, temperature - 50)
@@ -58,9 +58,9 @@ local function cct_to_rgb(cct)
 
     -- calculate blue
 
-    if temperature >= 66.0 then
+    if temperature >= 66.0 then  -- ~6600 K breakpoint where warmer/cooler blackbody behaviors switch
         blue = 255
-    elseif temperature <= 20.0 then
+    elseif temperature <= 20.0 then  -- below ~2000 K, blue component is negligible (blackbody approximation)
         blue = 0
     else
         blue = fit(-254.76935184120902, 0.8274096064007395, 115.67994401066147, temperature - 10)
