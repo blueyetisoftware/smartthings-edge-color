@@ -1,0 +1,26 @@
+local hsv_to_rgb = require 'color.hsv_to_rgb'
+local rgb_to_xy = require 'color.rgb_to_xy'
+
+--- Converts HSV (Hue, Saturation, Value) to CIE 1931 xyY color coordinates.
+---
+--- This function converts HSV color coordinates to CIE 1931 xyY color coordinates
+--- by first converting HSV to RGB using the hsv_to_rgb function, then converting
+--- RGB to xyY using the rgb_to_xy function. The V (value) component defaults to 1.0
+--- if not provided.
+---
+--- @param h number hue component in range [0,1]
+--- @param s number saturation component in range [0,1]
+--- @param v number|nil value component in range [0,1], defaults to 1.0
+--- @return number, number, number equivalent x, y, Y coordinates where x,y are in [0,1] and Y=1
+---
+--- @raise error if h, s, or v are not numbers
+--- @raise error if h, s, or v are outside valid ranges
+---
+--- @usage
+--- local x, y, Y = hsv_to_xy(0.1, 0.8, 1.0)  -- Warm color
+--- local x, y, Y = hsv_to_xy(0.6, 0.2, 0.8)  -- Cool color
+local function hsv_to_xy(h, s, v)
+    return rgb_to_xy(hsv_to_rgb(h, s, v or 1))
+end
+
+return hsv_to_xy

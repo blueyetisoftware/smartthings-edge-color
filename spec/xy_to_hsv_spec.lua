@@ -1,0 +1,31 @@
+local xy_to_hsv = require 'color.xy_to_hsv'
+
+describe("xy_to_hsv", function()
+  it("converts xy (16206, 21550) to HSV", function()
+    local h, s, v = xy_to_hsv(16206, 21550)
+    assert.is_true(math.abs(h - 0.16666666666667) < 1e-10)
+    assert.are.equal(1.0, s)
+    assert.is_true(math.abs(v - 1.0) < 1e-10)
+  end)
+
+  it("handles valid xy ranges", function()
+    local h, s, v = xy_to_hsv(0, 0)
+    assert.is_true(h >= 0 and h <= 1)
+    assert.is_true(s >= 0 and s <= 1)
+    assert.is_true(v >= 0 and v <= 1)
+  end)
+
+  it("handles boundary xy (0,0)", function()
+    local h, s, v = xy_to_hsv(0, 0)
+    assert.is_true(h >= 0 and h <= 1)
+    assert.is_true(s >= 0 and s <= 1)
+    assert.is_true(v >= 0 and v <= 1)
+  end)
+
+  it("handles boundary xy (65535,65535)", function()
+    local h, s, v = xy_to_hsv(65535, 65535)
+    assert.is_true(h >= 0 and h <= 1)
+    assert.is_true(s >= 0 and s <= 1)
+    assert.is_true(v >= 0 and v <= 1)
+  end)
+end)
