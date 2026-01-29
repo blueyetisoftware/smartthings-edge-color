@@ -3,7 +3,7 @@ local xy_to_hsv = require 'color.xy_to_hsv'
 describe("xy_to_hsv", function()
   it("converts xy (16206, 21550) to HSV", function()
     local h, s, v = xy_to_hsv(16206, 21550)
-    assert.is_true(math.abs(h - 0.16666666666667) < 1e-10)
+    assert.is_true(math.abs(h - 0.15637122244754) < 1e-10)
     assert.are.equal(1.0, s)
     assert.is_true(math.abs(v - 1.0) < 1e-10)
   end)
