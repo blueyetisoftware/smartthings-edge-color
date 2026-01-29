@@ -13,7 +13,7 @@ local rgb_to_hsv = require 'color.rgb_to_hsv'
 --- @param Y number|nil luminance (Y) component, range [0,1], defaults to 1.0
 --- @return number, number, number equivalent hue, saturation, value with each component in range [0,1]
 ---
---- @raise error if x, y, or Y are not numbers
+--- @raise error if x or y are not numbers
 --- @raise error if x, y, or Y are outside valid ranges
 ---
 --- @usage
@@ -25,10 +25,8 @@ local function xy_to_hsv(x, y, Y)
     assert(Y == nil or type(Y) == "number", "Y must be a number or nil")
     x = st_utils.clamp_value(x, 0, 1)
     y = st_utils.clamp_value(y, 0, 1)
-    if Y ~= nil then
-        Y = st_utils.clamp_value(Y, 0, 1)
-    end
-    return rgb_to_hsv(xy_to_rgb(x, y, Y or 1))
+    Y = st_utils.clamp_value(Y or 1, 0, 1)
+    return rgb_to_hsv(xy_to_rgb(x, y, Y))
 end
 
 return xy_to_hsv

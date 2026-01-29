@@ -9,7 +9,7 @@ local st_utils = require 'st.utils'
 --- @param a number First value to convert in range [0,1] (required)
 --- @param b number|nil Second value to convert in range [0,1] (optional)
 --- @param c number|nil Third value to convert in range [0,1] (optional)
---- @return number|number,number|number,number,number The converted 16-bit value(s) in range [0,65535]
+--- @return integer|integer,integer|integer,integer,integer The converted 16-bit integer value(s) in range [0,65535]
 ---
 --- @raise error if a is nil
 ---

@@ -12,11 +12,19 @@ local st_utils = require 'st.utils'
 --- @return number, number, number CIE 1931 xyY coordinates (x, y, Y)
 ---   where x,y are chromaticity coordinates in [0,1] and Y is luminance in [0,1]
 ---
+--- @raise error if red, green, or blue are not numbers
+---
 --- @usage
 --- local x, y, Y = rgb_to_xy(1, 0, 0)    -- Red: approximately 0.64, 0.33, 0.21
 --- local x, y, Y = rgb_to_xy(0, 1, 0)    -- Green: approximately 0.30, 0.60, 0.72
 --- local x, y, Y = rgb_to_xy(0, 0, 1)    -- Blue: approximately 0.15, 0.06, 0.07
 local function fn(red, green, blue)
-  return st_utils.rgb_to_xy(red, green, blue)
+    assert(type(red) == "number", "red must be a number")
+    assert(type(green) == "number", "green must be a number")
+    assert(type(blue) == "number", "blue must be a number")
+    red = st_utils.clamp_value(red, 0, 1)
+    green = st_utils.clamp_value(green, 0, 1)
+    blue = st_utils.clamp_value(blue, 0, 1)
+    return st_utils.rgb_to_xy(red, green, blue)
 end
 return fn

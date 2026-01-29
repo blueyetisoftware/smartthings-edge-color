@@ -26,9 +26,7 @@ local function xy_to_cct(x, y, Y)
     assert(Y == nil or type(Y) == "number", "Y must be a number or nil")
     x = st_utils.clamp_value(x, 0, 1)
     y = st_utils.clamp_value(y, 0, 1)
-    if Y ~= nil then
-        Y = st_utils.clamp_value(Y, 0, 1)
-    end
+    Y = st_utils.clamp_value(Y or 1, 0, 1)
     return rgb_to_cct(xy_to_rgb(x, y, Y or 1))
 end
 

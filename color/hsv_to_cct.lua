@@ -26,9 +26,7 @@ local function hsv_to_cct(h, s, v)
     assert(v == nil or type(v) == "number", "v must be a number or nil")
     h = st_utils.clamp_value(h, 0, 1)
     s = st_utils.clamp_value(s, 0, 1)
-    if v ~= nil then
-        v = st_utils.clamp_value(v, 0, 1)
-    end
+    v = st_utils.clamp_value(v or 1, 0, 1)
     return xy_to_cct(hsv_to_xy(h, s, v or 1))
 end
 

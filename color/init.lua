@@ -25,7 +25,5 @@ Color.to_16bit = require 'color.to_16bit'
 Color.from_16bit = require 'color.from_16bit'
 Color.kelvin_to_mirek = require 'color.kelvin_to_mirek'
 Color.mirek_to_kelvin = require 'color.mirek_to_kelvin'
-Color.safe_hsv_to_xy = require 'color.safe_hsv_to_xy'
-Color.safe_xy_to_hsv = require 'color.safe_xy_to_hsv'
 
 return Color
