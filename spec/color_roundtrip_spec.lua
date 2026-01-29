@@ -16,7 +16,7 @@ describe("Color conversion roundtrips", function()
       local test_temps = {3000, 4000, 5000, 6500}
       for _, cct in ipairs(test_temps) do
         local x, y, Y = Color.cct_to_xy(cct)
-        local cct2 = Color.xy_to_cct(x, y)
+        local cct2 = Color.xy_to_cct(x, y, Y)
         spec_helper.assert_near(cct, cct2, 700) -- Allow larger tolerance
       end
     end)
@@ -25,7 +25,7 @@ describe("Color conversion roundtrips", function()
       local test_temps = {3000, 4000, 5000, 6500}
       for _, cct in ipairs(test_temps) do
         local h, s, v = Color.cct_to_hsv(cct)
-        local cct2 = Color.hsv_to_cct(h, s)
+        local cct2 = Color.hsv_to_cct(h, s, v)
         spec_helper.assert_near(cct, cct2, 500)
       end
     end)
@@ -81,7 +81,8 @@ describe("Color conversion roundtrips", function()
       for _, xy in ipairs(test_xy) do
         local cct = Color.xy_to_cct(xy[1], xy[2])
         local x2, y2, Y2 = Color.cct_to_xy(cct)
-        spec_helper.assert_xyy_near(xy[1], xy[2], 1, x2, y2, Y2, 1.0)  -- Larger tolerance since CCT doesn't preserve luminance exactly
+        spec_helper.assert_xyy_near(xy[1], xy[2], 1, x2, y2, Y2, 1.0)
+        -- Larger tolerance since CCT doesn't preserve luminance exactly
       end
     end)
   end)

@@ -26,19 +26,15 @@ local function fn(red, green, blue)
     red = st_utils.clamp_value(red, 0, 1)
     green = st_utils.clamp_value(green, 0, 1)
     blue = st_utils.clamp_value(blue, 0, 1)
-    
     local max = math.max(red, green, blue)
     local min = math.min(red, green, blue)
     local lightness = (max + min) / 2
-    
     if max == min then
         -- Grayscale
         return 0, 0, lightness
     end
-    
     local delta = max - min
     local saturation = delta / (1 - math.abs(2 * lightness - 1))
-    
     local hue
     if max == red then
         hue = ((green - blue) / delta) % 6
@@ -48,7 +44,6 @@ local function fn(red, green, blue)
         hue = (red - green) / delta + 4
     end
     hue = hue / 6
-    
     return hue, saturation, lightness
 end
 return fn

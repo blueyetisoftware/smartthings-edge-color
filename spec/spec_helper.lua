@@ -9,7 +9,9 @@ local M = {}
 function M.assert_near(actual, expected, tolerance, message)
   tolerance = tolerance or 1e-6
   local diff = math.abs(actual - expected)
-  assert(diff <= tolerance, message or string.format("Expected %f to be near %f (diff: %f, tolerance: %f)", actual, expected, diff, tolerance))
+  assert(diff <= tolerance, message or string.format(
+    "Expected %f to be near %f (diff: %f, tolerance: %f)",
+    actual, expected, diff, tolerance))
 end
 
 --- Assert that three RGB values are approximately equal within tolerance

@@ -31,7 +31,7 @@ describe("rgb_to_xy", function()
   end)
 
   it("converts black RGB to xyY", function()
-    local x, y, Y = rgb_to_xy(0, 0, 0)
+    local _, _, Y = rgb_to_xy(0, 0, 0)
     -- Black has undefined chromaticity, but often returns D65 white point
     spec_helper.assert_near(Y, 0, 1e-6)
   end)

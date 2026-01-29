@@ -30,13 +30,6 @@ describe("hsv_to_rgb", function()
     spec_helper.assert_near(b, 1, 1e-6)
   end)
 
-  it("converts black HSV to RGB", function()
-    local r, g, b = hsv_to_rgb(0, 1)
-    -- Wait, saturation 1 with any hue should be pure color, not black
-    -- Black would be value 0, but this function doesn't take value
-    -- Probably assumes value=1
-  end)
-
   it("converts cyan HSV to RGB", function()
     local r, g, b = hsv_to_rgb(0.5, 1)
     spec_helper.assert_near(r, 0, 1e-6)
@@ -134,7 +127,7 @@ describe("hsv_to_rgb", function()
     -- Test several hue/saturation combinations
     local test_cases = {
       {0, 1},      -- Red
-      {1/6, 1},    -- Yellow  
+      {1/6, 1},    -- Yellow
       {1/3, 1},    -- Green
       {0.5, 1},    -- Cyan
       {2/3, 1},    -- Blue
@@ -142,12 +135,11 @@ describe("hsv_to_rgb", function()
       {0, 0},      -- White
       {0, 0.5},    -- Light red
     }
-    
+
     for _, case in ipairs(test_cases) do
       local h, s = case[1], case[2]
       local st_r, st_g, st_b = require('st.utils').hsv_to_rgb(h, s)
       local my_r, my_g, my_b = hsv_to_rgb(h, s, 1.0)
-      
       spec_helper.assert_near(st_r, my_r, 1e-10, string.format("H=%.3f S=%.3f red mismatch", h, s))
       spec_helper.assert_near(st_g, my_g, 1e-10, string.format("H=%.3f S=%.3f green mismatch", h, s))
       spec_helper.assert_near(st_b, my_b, 1e-10, string.format("H=%.3f S=%.3f blue mismatch", h, s))

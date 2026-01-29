@@ -22,22 +22,18 @@ local function fn(hue, saturation, lightness)
     assert(type(hue) == "number", "hue must be a number")
     assert(type(saturation) == "number", "saturation must be a number")
     assert(lightness == nil or type(lightness) == "number", "lightness must be a number or nil")
-    
     hue = st_utils.clamp_value(hue, 0, 1)
     saturation = st_utils.clamp_value(saturation, 0, 1)
     lightness = st_utils.clamp_value(lightness or 0.5, 0, 1)
-    
     -- Handle grayscale case
     if saturation <= 0 then
         return lightness, lightness, lightness
     end
-    
     -- Standard HSL to RGB conversion
     local chroma = (1 - math.abs(2 * lightness - 1)) * saturation
     local hue_prime = hue * 6
     local x = chroma * (1 - math.abs(hue_prime % 2 - 1))
     local m = lightness - chroma / 2
-    
     local r, g, b
     if hue_prime < 1 then
         r, g, b = chroma, x, 0
@@ -52,7 +48,6 @@ local function fn(hue, saturation, lightness)
     else
         r, g, b = chroma, 0, x
     end
-    
     return r + m, g + m, b + m
 end
 return fn

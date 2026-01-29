@@ -24,20 +24,20 @@ describe("rgb_to_hsl", function()
   end)
 
   it("converts white RGB to HSL", function()
-    local h, s, l = rgb_to_hsl(1, 1, 1)
+    local _, s, l = rgb_to_hsl(1, 1, 1)
     spec_helper.assert_near(s, 0, 1e-6)
     spec_helper.assert_near(l, 1, 1e-6)
     -- Hue is undefined for grayscale, but often 0
   end)
 
   it("converts black RGB to HSL", function()
-    local h, s, l = rgb_to_hsl(0, 0, 0)
+    local _, s, l = rgb_to_hsl(0, 0, 0)
     spec_helper.assert_near(s, 0, 1e-6)
     spec_helper.assert_near(l, 0, 1e-6)
   end)
 
   it("converts gray RGB to HSL", function()
-    local h, s, l = rgb_to_hsl(0.5, 0.5, 0.5)
+    local _, s, l = rgb_to_hsl(0.5, 0.5, 0.5)
     spec_helper.assert_near(s, 0, 1e-6)
     spec_helper.assert_near(l, 0.5, 1e-6)
   end)
