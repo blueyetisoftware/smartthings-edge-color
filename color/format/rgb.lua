@@ -69,7 +69,7 @@ end
 --- @param r number Red value to convert (0-1)
 --- @param g number Green value to convert (0-1)
 --- @param b number Blue value to convert (0-1)
---- @return number,number,number Converted 8-bit RGB values
+--- @return integer,integer,integer Converted 8-bit RGB integer values
 local function toRGB8(r, g, b)
     return roundRGB(clampRGB8(r * 255, g * 255, b * 255))
 end
@@ -89,7 +89,7 @@ end
 --- @param r number Red value to convert (0-1)
 --- @param g number Green value to convert (0-1)
 --- @param b number Blue value to convert (0-1)
---- @return number,number,number Converted 16-bit RGB values
+--- @return integer,integer,integer Converted 16-bit RGB integer values
 local function toRGB16(r, g, b)
     return roundRGB(clampRGB16(r * 65535, g * 65535, b * 65535))
 end

@@ -29,7 +29,7 @@ end
 --- correspond to cooler (higher temperature) light.
 ---
 --- @param kelvin number Color temperature in Kelvin
---- @return number Color temperature in Mired, rounded to nearest integer
+--- @return integer Color temperature in Mired, rounded to nearest integer
 ---
 --- @usage
 --- local mired = toMired(3000)  -- returns 333 (warm white)
@@ -46,7 +46,7 @@ end
 --- back to Kelvin by dividing 1,000,000 by the mired value.
 ---
 --- @param mired number Color temperature in Mired
---- @return number Color temperature in Kelvin, rounded to nearest integer
+--- @return integer Color temperature in Kelvin, rounded to nearest integer
 ---
 --- @usage
 --- local kelvin = toKelvin(333)  -- returns 3000 (warm white)

@@ -3,6 +3,7 @@
 --- This module provides scaling and clamping functions for converting between
 --- different color value representations (normalized, 8-bit, 16-bit, percentage, degrees).
 
+local st_utils = require 'st.utils'
 local RGB = require 'color.format.rgb'
 local Hue = require 'color.format.hue'
 local XYY = require 'color.format.xyy'
@@ -35,5 +36,34 @@ return {
     clampKelvin = CCT.clampKelvin,
     clampMired = CCT.clampMired,
     toMired = CCT.toMired,
-    toKelvin = CCT.toKelvin
+    toKelvin = CCT.toKelvin,
+
+    -- Generic scaling functions
+    to8 = function(a, b, c)
+        if c then
+            return st_utils.round(a * 255), st_utils.round(b * 255), st_utils.round(c * 255)
+        elseif b then
+            return st_utils.round(a * 255), st_utils.round(b * 255)
+        else
+            return st_utils.round(a * 255)
+        end
+    end,
+    to16 = function(a, b, c)
+        if c then
+            return st_utils.round(a * 65535), st_utils.round(b * 65535), st_utils.round(c * 65535)
+        elseif b then
+            return st_utils.round(a * 65535), st_utils.round(b * 65535)
+        else
+            return st_utils.round(a * 65535)
+        end
+    end,
+    toPct = function(a, b, c)
+        if c then
+            return a * 100, b * 100, c * 100
+        elseif b then
+            return a * 100, b * 100
+        else
+            return a * 100
+        end
+    end
 }
