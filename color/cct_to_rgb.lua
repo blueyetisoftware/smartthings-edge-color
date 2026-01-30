@@ -1,5 +1,4 @@
-local st_utils = require 'st.utils'
-local from_8bit = require 'color.from_8bit'
+local Format = require 'color.format'
 
 --- Converts correlated color temperature (CCT) in Kelvin to RGB color values.
 ---
@@ -29,9 +28,9 @@ local from_8bit = require 'color.from_8bit'
 --- @see https://en.wikipedia.org/wiki/Color_temperature
 local function cct_to_rgb(cct)
     assert(type(cct) == "number", "cct must be a number")
-    cct = st_utils.clamp_value(cct, 1000, 40000)
+    cct = Format.clampKelvin(cct)
 
-    local temperature = cct / 100.0  -- scale to match original fitting units (temp in 100-K increments)
+    local temperature = cct / 100  -- scale to match original fitting units (temp in 100-K increments)
     local red, green, blue
 
     local fit = function(a, b, c, x)
@@ -65,11 +64,7 @@ local function cct_to_rgb(cct)
         blue = fit(-254.76935184120902, 0.8274096064007395, 115.67994401066147, temperature - 10)
     end
 
-    return from_8bit(
-        st_utils.clamp_value(red, 0, 255),
-        st_utils.clamp_value(green, 0, 255),
-        st_utils.clamp_value(blue, 0, 255)
-    )
+    return Format.fromRGB8(Format.clampRGB8(red, green, blue))
 end
 
 return cct_to_rgb

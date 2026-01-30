@@ -1,11 +1,14 @@
-local Clamp = require 'color.clamp'
+local Format = require 'color.format'
 
 --- Converts RGB color values to HSL (Hue/Saturation/Lightness) color values.
 ---
---- This function implements standard RGB to HSL conversion. Note that this differs
---- from st_utils.rgb_to_hsl which expects 8-bit RGB input [0,255] and returns HSL
---- in percentage format [0,100], while our implementation uses normalized [0,1] ranges
---- for consistency with the rest of the library.
+--- This function implements correct, standard RGB to HSL conversion using normalized [0,1] ranges.
+--- The SmartThings st_utils.rgb_to_hsl API is problematic:
+--- - Inconsistent: expects 8-bit RGB input [0,255] while most color APIs use [0,1]
+--- - Inconsistent: returns HSL in percentages [0,100] instead of normalized values
+--- - This creates unnecessary format conversions and API confusion
+---
+--- This implementation provides consistent normalized ranges throughout the color pipeline.
 ---
 --- @param red number Red component in the range [0,1] (normalized)
 --- @param green number Green component in the range [0,1] (normalized)
@@ -23,7 +26,7 @@ local function fn(red, green, blue)
     assert(type(red) == "number", "red must be a number")
     assert(type(green) == "number", "green must be a number")
     assert(type(blue) == "number", "blue must be a number")
-    red, green, blue = Clamp.clampF(red, green, blue)
+    red, green, blue = Format.clampRGB(red, green, blue)
     local max = math.max(red, green, blue)
     local min = math.min(red, green, blue)
     local lightness = (max + min) / 2
@@ -42,6 +45,6 @@ local function fn(red, green, blue)
         hue = (red - green) / delta + 4
     end
     hue = hue / 6
-    return hue, saturation, lightness
+    return Format.clampHFF(hue, saturation, lightness)
 end
 return fn

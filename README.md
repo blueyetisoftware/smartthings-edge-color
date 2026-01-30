@@ -7,7 +7,7 @@ A comprehensive color space conversion library for SmartThings Edge lighting dri
 While SmartThings Edge provides basic color conversion functions through `st.utils`, this library offers significant improvements in reliability, consistency, and developer experience:
 
 ### 🔧 Consistent API Design
-- **Normalized Input Ranges**: All functions use the standard [0,1] range for color components, eliminating confusion about whether inputs should be [0,255], [0,1], or other ranges
+- **Normalized Input Ranges**: All functions use the standard [0,1] range for color components, eliminating confusion about whether inputs should be [0,255], [0,1], or other ranges. SmartThings `st_utils` is inconsistent - HSL functions use percentages [0,100] while RGB functions use 8-bit values [0,255].
 - **Uniform Parameter Order**: Consistent parameter ordering across all conversion functions (e.g., always `red, green, blue` for RGB inputs)
 - **Predictable Return Values**: All functions return values in the same normalized [0,1] range
 
@@ -17,7 +17,8 @@ While SmartThings Edge provides basic color conversion functions through `st.uti
 - **Nil-Safe Operations**: Handles edge cases gracefully without crashing
 
 ### 🐛 Bug Fixes and Improvements
-- **Fixed HSL Grayscale Bug**: The original `st.utils` HSL conversion had a critical bug where achromatic (grayscale) colors with zero saturation would ignore the lightness component, always producing black. This library implements the correct algorithm.
+- **Fixed HSL Grayscale Bug**: The original `st.utils` HSL conversion had a critical bug where achromatic (grayscale) colors with zero saturation would ignore the lightness component, always producing pure white (255,255,255) regardless of the lightness value. This library implements the mathematically correct algorithm.
+- **Eliminated API Inconsistencies**: SmartThings `st_utils` uses arbitrary, inconsistent ranges (HSL in percentages [0,100], RGB in 8-bit [0,255]) that don't match standard color APIs. This library uses normalized [0,1] ranges throughout for consistency.
 - **Accurate Documentation**: Comments accurately describe what each function does, rather than making incorrect claims about "standard algorithms" when st_utils is actually used
 - **Comprehensive Testing**: 187 automated tests ensure correctness and prevent regressions
 
@@ -40,15 +41,18 @@ While SmartThings Edge provides basic color conversion functions through `st.uti
 - `xy_to_rgb()` - CIE xyY to RGB (via st_utils)
 - `cct_to_rgb()` - Color temperature to RGB
 - `rgb_to_cct()` - RGB to color temperature
-- `kelvin_to_mirek()` / `mirek_to_kelvin()` - Temperature unit conversions
+- `toMired(kelvin)` / `toKelvin(mired)` - Temperature unit conversions (format module)
+- `kelvin_to_mired()` / `mired_to_kelvin()` - Backward compatibility aliases
+- `kelvin_to_mirek()` / `mirek_to_kelvin()` - Backward compatibility aliases for Philips Hue API
 
 ### 🧮 Utility Functions
 
-- `to_8bit()` / `from_8bit()` - Convert between [0,1] and [0,255]
-- `to_16bit()` / `from_16bit()` - Convert between [0,1] and [0,65535]
-- `to_percentage()` / `from_percentage()` - Convert between [0,1] and [0,100]
+- `to_rgb8(r, g, b)` / `from_rgb8(r8, g8, b8)` - Convert between [0,1] and [0,255] RGB
+- `to_rgb16(r, g, b)` / `from_rgb16(r16, g16, b16)` - Convert between [0,1] and [0,65535] RGB
+- `to_rgb100(r, g, b)` / `from_rgb100(r100, g100, b100)` - Convert between [0,1] and [0,100] RGB
+- `clampRGB8(r, g, b)` / `clampRGB16(r, g, b)` / `clampRGB100(r, g, b)` - Clamp RGB values to integer ranges
+- `roundRGB(r, g, b)` - Round RGB values to integers (no scaling)
 - `to_degrees()` / `from_degrees()` - Convert between [0,1] and [0,360] (for hue)
-- `scale()` - Scale color values by a factor
 
 ## Installation
 

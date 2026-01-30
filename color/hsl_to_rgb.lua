@@ -1,11 +1,15 @@
-local Clamp = require 'color.clamp'
+local Format = require 'color.format'
 
 --- Converts HSL (Hue/Saturation/Lightness) color values to RGB color values.
 ---
---- This function implements standard HSL to RGB conversion. Note that this differs
---- from st_utils.hsl_to_rgb which has an API inconsistency (expects HSL in percentages
---- [0,100] and returns 8-bit RGB [0,255]) and a bug where it returns white for all
---- achromatic colors (saturation = 0) regardless of lightness.
+--- This function implements correct, standard HSL to RGB conversion using normalized [0,1] ranges.
+--- The SmartThings st_utils.hsl_to_rgb API is problematic:
+--- - Inconsistent: expects HSL in percentages [0,100] while most color APIs use [0,1]
+--- - Buggy: returns pure white (255,255,255) for all achromatic colors (saturation = 0)
+---   regardless of lightness value, which is mathematically incorrect
+--- - Inconvenient: returns 8-bit RGB [0,255] instead of normalized values
+---
+--- This implementation provides mathematically correct results with consistent normalized ranges.
 ---
 --- @param hue number Hue component (any real number, circular - wraps every 1.0, 0 = red, 1 = red again)
 --- @param saturation number Saturation component in the range [0,1] (normalized)
@@ -22,9 +26,7 @@ local function fn(hue, saturation, lightness)
     assert(type(hue) == "number", "hue must be a number")
     assert(type(saturation) == "number", "saturation must be a number")
     assert(lightness == nil or type(lightness) == "number", "lightness must be a number or nil")
-    hue = Clamp.clampHue(hue)
-    saturation = Clamp.clampF(saturation)
-    lightness = Clamp.clampF(lightness or 0.5)
+    hue, saturation, lightness = Format.clampHFF(hue, saturation, lightness or 0.5)
     -- Handle grayscale case
     if saturation <= 0 then
         return lightness, lightness, lightness
