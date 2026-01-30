@@ -39,3 +39,7 @@ luac.out
 *.x86_64
 *.hex
 
+# Generated conversion modules and tests
+color/conversions/
+spec/conversions/
+

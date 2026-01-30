@@ -1,4 +1,4 @@
-local clamp_hff = require 'color.format.hue'.clamp_hff
+local clamp_hsv = require 'color.format.hsv'.clamp_hsv
 
 --- Converts HSV (Hue/Saturation/Value) color values to RGB color values.
 ---
@@ -24,7 +24,7 @@ local function fn(hue, saturation, value)
     assert(type(saturation) == "number", "saturation must be a number")
     assert(value == nil or type(value) == "number", "value must be a number or nil")
 
-    hue, saturation, value = clamp_hff(hue, saturation, value or 1.0)
+    hue, saturation, value = clamp_hsv(hue, saturation, value or 1.0)
 
     -- Implement proper HSV to RGB with value scaling
     local r, g, b

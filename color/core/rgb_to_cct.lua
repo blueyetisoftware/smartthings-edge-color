@@ -1,10 +1,6 @@
 local st_utils = require 'st.utils'
 local clamp_rgb = require 'color.format.rgb'.clamp_rgb
-local cct_to_rgb = require 'color.cct_to_rgb'
-
--- Performance constants for driver guidance
-local PERFORMANCE_FAST_FACTOR = 200  -- Fast algorithm is ~200x faster than accurate
-local RGB_TO_CCT_DEFAULT_FAST = true  -- Self-documenting constant: fast is default
+local cct_to_rgb = require 'color.core.cct_to_rgb'
 
 -- Lookup table for ratio-based CCT approximation (78 entries, ~600 bytes)
 local RATIO_LOOKUP = {}
@@ -85,7 +81,6 @@ local function rgb_to_cct_ratio(r, _g, b)
     for i = 1, #RATIO_LOOKUP - 1 do
         if ratio >= RATIO_LOOKUP[i].ratio and ratio <= RATIO_LOOKUP[i + 1].ratio then
             local lower, upper = RATIO_LOOKUP[i], RATIO_LOOKUP[i + 1]
-            
             -- Linear interpolation between bracketing points
             local ratio_range = upper.ratio - lower.ratio
             local cct_range = upper.cct - lower.cct

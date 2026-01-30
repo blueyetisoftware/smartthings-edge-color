@@ -16,18 +16,6 @@ local function clamp_rgb8(r, g, b)
            st_utils.clamp_value(b, 0, 255)
 end
 
---- Clamps RGB values to 16-bit integer range [0, 65535].
----
---- @param r number Red value to clamp
---- @param g number Green value to clamp
---- @param b number Blue value to clamp
---- @return number,number,number Clamped 16-bit RGB values
-local function clamp_rgb16(r, g, b)
-    return st_utils.clamp_value(r, 0, 65535),
-           st_utils.clamp_value(g, 0, 65535),
-           st_utils.clamp_value(b, 0, 65535)
-end
-
 --- Clamps RGB values to normalized range [0, 1].
 ---
 --- @param r number Red value to clamp
@@ -84,26 +72,6 @@ local function from_rgb8(r8, g8, b8)
     return clamp_rgb(r8 / 255, g8 / 255, b8 / 255)
 end
 
---- Converts normalized RGB values to 16-bit integers (scale, clamp, then round).
----
---- @param r number Red value to convert (0-1)
---- @param g number Green value to convert (0-1)
---- @param b number Blue value to convert (0-1)
---- @return integer,integer,integer Converted 16-bit RGB integer values
-local function to_rgb16(r, g, b)
-    return round_rgb(clamp_rgb16(r * 65535, g * 65535, b * 65535))
-end
-
---- Converts 16-bit RGB integers to normalized values.
----
---- @param r16 number Red value to convert (0-65535)
---- @param g16 number Green value to convert (0-65535)
---- @param b16 number Blue value to convert (0-65535)
---- @return number,number,number Converted normalized RGB values
-local function from_rgb16(r16, g16, b16)
-    return clamp_rgb(r16 / 65535, g16 / 65535, b16 / 65535)
-end
-
 --- Converts normalized RGB values to percentage values [0,100].
 ---
 --- @param r number Red value to convert (0-1)
@@ -124,16 +92,47 @@ local function from_rgb100(r100, g100, b100)
     return clamp_rgb(r100 / 100, g100 / 100, b100 / 100)
 end
 
+--- Converts normalized RGB values to hex color integer.
+---
+--- @param r number Red value to convert (0-1)
+--- @param g number Green value to convert (0-1)
+--- @param b number Blue value to convert (0-1)
+--- @return integer Hex color integer in format 0xRRGGBB
+local function to_hex24(r, g, b)
+    local r8, g8, b8 = to_rgb8(r, g, b)
+    return (r8 << 16) | (g8 << 8) | b8
+end
+
+--- Converts hex color integer to normalized RGB values.
+---
+--- @param hex integer Hex color as integer (0xRRGGBB)
+--- @return number,number,number Converted normalized RGB values
+local function from_hex24(hex)
+    assert(type(hex) == "number", "hex must be a number")
+    
+    -- Round float to integer if necessary
+    hex = st_utils.round(hex)
+    
+    -- Validate range (0x000000 to 0xFFFFFF)
+    assert(hex >= 0 and hex <= 0xFFFFFF, "hex must be in range 0x000000 to 0xFFFFFF")
+    
+    -- Extract RGB components
+    local r8 = (hex >> 16) & 0xFF
+    local g8 = (hex >> 8) & 0xFF
+    local b8 = hex & 0xFF
+    
+    return from_rgb8(r8, g8, b8)
+end
+
 return {
     clamp_rgb8 = clamp_rgb8,
-    clamp_rgb16 = clamp_rgb16,
     clamp_rgb100 = clamp_rgb100,
     clamp_rgb = clamp_rgb,
     round_rgb = round_rgb,
     to_rgb8 = to_rgb8,
     from_rgb8 = from_rgb8,
-    to_rgb16 = to_rgb16,
-    from_rgb16 = from_rgb16,
     to_rgb100 = to_rgb100,
-    from_rgb100 = from_rgb100
+    from_rgb100 = from_rgb100,
+    to_hex24 = to_hex24,
+    from_hex24 = from_hex24
 }
