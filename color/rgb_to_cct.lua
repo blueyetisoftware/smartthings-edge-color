@@ -1,4 +1,5 @@
 local st_utils = require 'st.utils'
+local Format = require 'color.format'
 local cct_to_rgb = require 'color.cct_to_rgb'
 
 --- Converts RGB color values to correlated color temperature (CCT) in Kelvin.
@@ -22,12 +23,12 @@ local cct_to_rgb = require 'color.cct_to_rgb'
 --- local cct = rgb_to_cct(0.8, 0.9, 1.0)  -- Approximately 10000K (cool white)
 local function rgb_to_cct(r, g, b)
     assert(type(r) == "number" and type(g) == "number" and type(b) == "number", "r, g, b must be numbers")
-    r = st_utils.clamp_value(r, 0, 1)
+    r, g, b = Format.clampFFF(r, g, b)
+
     -- g is intentionally not used: this inverse approximation relies only on the blue/red ratio,
     -- as green varies less independently along the blackbody locus in the underlying forward fit.
     -- This is a common simplification for fast CCT estimation from RGB (inspired by similar bidirectional
     -- implementations of the Bartlett/Helland approximation).
-    b = st_utils.clamp_value(b, 0, 1)
 
     local ratio = b / r
     local cct

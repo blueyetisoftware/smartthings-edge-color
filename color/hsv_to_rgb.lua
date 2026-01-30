@@ -1,4 +1,4 @@
-local Clamp = require 'color.clamp'
+local Format = require 'color.format'
 
 --- Converts HSV (Hue/Saturation/Value) color values to RGB color values.
 ---
@@ -24,9 +24,7 @@ local function fn(hue, saturation, value)
     assert(type(saturation) == "number", "saturation must be a number")
     assert(value == nil or type(value) == "number", "value must be a number or nil")
 
-    hue = Clamp.clampHue(hue)
-    saturation = Clamp.clampF(saturation)
-    value = Clamp.clampF(value or 1.0)
+    hue, saturation, value = Format.clampHFF(hue, saturation, value or 1.0)
 
     -- Implement proper HSV to RGB with value scaling
     local r, g, b

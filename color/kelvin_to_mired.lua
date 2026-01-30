@@ -13,14 +13,14 @@ local st_utils = require 'st.utils'
 --- @raise error if kelvin is not a number or is zero/negative
 ---
 --- @usage
---- local mired = kelvin_to_mirek(3000)  -- returns 333 (warm white)
---- local mired = kelvin_to_mirek(6500)  -- returns 154 (daylight white)
+--- local mired = kelvin_to_mired(3000)  -- returns 333 (warm white)
+--- local mired = kelvin_to_mired(6500)  -- returns 154 (daylight white)
 ---
---- @see mirek_to_kelvin
-local function kelvin_to_mirek(kelvin)
+--- @see mired_to_kelvin
+local function kelvin_to_mired(kelvin)
     assert(type(kelvin) == "number" and kelvin > 0, "kelvin must be a positive number")
 
-    return st_utils.round(1000000.0 / kelvin)  -- mirek = 1,000,000 / kelvin (micro reciprocal degrees)
+    return st_utils.round(1000000.0 / kelvin)  -- mired = 1,000,000 / kelvin (micro reciprocal degrees)
 end
 
-return kelvin_to_mirek
+return kelvin_to_mired
