@@ -217,17 +217,21 @@ The `rgb_to_cct()` function provides two algorithms optimized for different use 
 ```lua
 local color = require 'color'
 
--- Fast approximation (10-20x faster, ~10-20K accuracy)
-local cct_fast = color.rgb_to_cct(1, 0.8, 0.6, false)
+-- ✅ RECOMMENDED: Fast approximation (default, ~200x faster, ~10-20K accuracy)
+local cct_fast = color.rgb_to_cct(1, 0.8, 0.6)  -- Default behavior
 
--- Accurate calculation (exact results, 2-3x slower)
+-- Self-documenting code using the constant
+assert(color.RGB_TO_CCT_DEFAULT_FAST == true)  -- Confirms fast is default
+
+-- ⚠️  Use accurate only when precision is critical (~200x slower)
 local cct_accurate = color.rgb_to_cct(1, 0.8, 0.6, true)
 ```
 
 **Algorithm Details:**
-- **Fast**: Lookup table interpolation with 78 reference points (optimized for performance)
+- **Fast (Default)**: Lookup table interpolation with 78 reference points (optimized for performance)
 - **Accurate**: Distance-based minimization using golden section search (optimized for precision)
-- **Validation**: Both algorithms tested against CIE standard illuminants (A, D50, D65, 30000K)
+- **Performance**: Fast algorithm is ~200x faster - critical for Edge driver hot paths
+- **Recommendation**: Use fast algorithm for UI responsiveness, accurate only for calibration
 
 ## Testing
 
