@@ -13,7 +13,7 @@ local st_utils = require 'st.utils'
 --- @param y number y chromaticity coordinate
 --- @param Y number Y luminance value (defaults to 1 if nil)
 --- @return number,number,number Clamped xyY values
-local function clampXYY(x, y, Y)
+local function clamp_xyy(x, y, Y)
     Y = Y or 1
     return st_utils.clamp_value(x, 0, 1),
            st_utils.clamp_value(y, 0, 1),
@@ -21,5 +21,5 @@ local function clampXYY(x, y, Y)
 end
 
 return {
-    clampXYY = clampXYY
+    clamp_xyy = clamp_xyy
 }
