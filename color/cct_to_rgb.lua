@@ -1,4 +1,6 @@
-local Format = require 'color.format'
+local clampKelvin = require 'color.format.cct'.clampKelvin
+local clampRGB8 = require 'color.format.rgb'.clampRGB8
+local fromRGB8 = require 'color.format.rgb'.fromRGB8
 
 --- Converts correlated color temperature (CCT) in Kelvin to RGB color values.
 ---
@@ -28,7 +30,7 @@ local Format = require 'color.format'
 --- @see https://en.wikipedia.org/wiki/Color_temperature
 local function cct_to_rgb(cct)
     assert(type(cct) == "number", "cct must be a number")
-    cct = Format.clampKelvin(cct)
+    cct = clampKelvin(cct)
 
     local temperature = cct / 100  -- scale to match original fitting units (temp in 100-K increments)
     local red, green, blue
@@ -64,7 +66,7 @@ local function cct_to_rgb(cct)
         blue = fit(-254.76935184120902, 0.8274096064007395, 115.67994401066147, temperature - 10)
     end
 
-    return Format.fromRGB8(Format.clampRGB8(red, green, blue))
+    return fromRGB8(clampRGB8(red, green, blue))
 end
 
 return cct_to_rgb

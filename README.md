@@ -65,7 +65,7 @@ local color = require 'color'
 
 ### 📦 Bundle Size Optimization
 
-This library is designed for **selective imports** to minimize bundle size in Edge drivers. Use granular requires instead of the top-level `color` module to enable tree-shaking:
+This library is designed for **selective imports** to minimize bundle size in Edge drivers. Use granular requires instead of the top-level `color` module to enable tree-shaking. The library internals also use selective imports from leaf modules (e.g., `color.format.rgb.clampRGB`) rather than top-level format modules, enabling maximum tree-shaking efficiency.
 
 ```lua
 -- ✅ RECOMMENDED: Selective imports for minimal bundles

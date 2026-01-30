@@ -1,4 +1,4 @@
-local Format = require 'color.format'
+local clampHFF = require 'color.format.hue'.clampHFF
 local hsv_to_xy = require 'color.hsv_to_xy'
 local xy_to_cct = require 'color.xy_to_cct'
 
@@ -24,7 +24,7 @@ local function hsv_to_cct(h, s, v)
     assert(type(h) == "number", "h must be a number")
     assert(type(s) == "number", "s must be a number")
     assert(v == nil or type(v) == "number", "v must be a number or nil")
-    h, s, v = Format.clampHFF(h, s, v or 1)
+    h, s, v = clampHFF(h, s, v or 1)
     return xy_to_cct(hsv_to_xy(h, s, v))
 end
 
