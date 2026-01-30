@@ -1,5 +1,5 @@
 local st_utils = require 'st.utils'
-local Format = require 'color.format'
+local clampRGB = require 'color.format.rgb'.clampRGB
 local cct_to_rgb = require 'color.cct_to_rgb'
 
 -- Performance constants for driver guidance
@@ -144,7 +144,7 @@ end
 --- local cct = rgb_to_cct(1.0, 0.7, 0.4, true)  -- Approximately 2913K (200x slower)
 local function rgb_to_cct(r, g, b, accurate)
     assert(type(r) == "number" and type(g) == "number" and type(b) == "number", "r, g, b must be numbers")
-    r, g, b = Format.clampRGB(r, g, b)
+    r, g, b = clampRGB(r, g, b)
 
     if accurate == true then
         return rgb_to_cct_distance(r, g, b)

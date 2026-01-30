@@ -1,4 +1,5 @@
-local Format = require 'color.format'
+local clampRGB = require 'color.format.rgb'.clampRGB
+local clampHFF = require 'color.format.hue'.clampHFF
 
 --- Converts RGB color values to HSL (Hue/Saturation/Lightness) color values.
 ---
@@ -26,7 +27,7 @@ local function fn(red, green, blue)
     assert(type(red) == "number", "red must be a number")
     assert(type(green) == "number", "green must be a number")
     assert(type(blue) == "number", "blue must be a number")
-    red, green, blue = Format.clampRGB(red, green, blue)
+    red, green, blue = clampRGB(red, green, blue)
     local max = math.max(red, green, blue)
     local min = math.min(red, green, blue)
     local lightness = (max + min) / 2
@@ -45,6 +46,6 @@ local function fn(red, green, blue)
         hue = (red - green) / delta + 4
     end
     hue = hue / 6
-    return Format.clampHFF(hue, saturation, lightness)
+    return clampHFF(hue, saturation, lightness)
 end
 return fn
