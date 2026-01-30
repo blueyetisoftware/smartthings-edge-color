@@ -1,4 +1,5 @@
 local st_utils = require 'st.utils'
+local Format = require 'color.format'
 --- Converts Red/Green/Blue to Hue/Saturation/Value
 ---
 --- This function converts RGB color values to HSV (Hue, Saturation, Value) color space.
@@ -21,9 +22,6 @@ local function fn(red, green, blue)
     assert(type(red) == "number", "red must be a number")
     assert(type(green) == "number", "green must be a number")
     assert(type(blue) == "number", "blue must be a number")
-    red = st_utils.clamp_value(red, 0, 1)
-    green = st_utils.clamp_value(green, 0, 1)
-    blue = st_utils.clamp_value(blue, 0, 1)
-    return st_utils.rgb_to_hsv(red, green, blue)
+    return st_utils.rgb_to_hsv(Format.clampRGB(red, green, blue))
 end
 return fn

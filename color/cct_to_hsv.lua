@@ -1,4 +1,4 @@
-local st_utils = require 'st.utils'
+local Format = require 'color.format'
 local cct_to_xy = require 'color.cct_to_xy'
 local xy_to_hsv = require 'color.xy_to_hsv'
 
@@ -20,8 +20,7 @@ local xy_to_hsv = require 'color.xy_to_hsv'
 --- local h, s, v = cct_to_hsv(6500)  -- Daylight white (D65)
 local function cct_to_hsv(cct)
     assert(type(cct) == "number", "cct must be a number")
-    cct = st_utils.clamp_value(cct, 1000, 40000)
-    return xy_to_hsv(cct_to_xy(cct))
+    return Format.clampHFF(xy_to_hsv(cct_to_xy(cct)))
 end
 
 return cct_to_hsv
