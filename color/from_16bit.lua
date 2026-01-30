@@ -19,8 +19,8 @@ local scale = require 'color.scale'
 --- local x, y, Y = from_16bit(6554, 13107, 19661) -- returns ~0.1, ~0.2, ~0.3
 local function from_16bit(a, b, c)
     assert(type(a) == "number", "a must be a number")
-    assert(b == nil or (type(b) == "number" and b >= 0 and b <= 65535), "b must be a number in range [0, 65535] or nil")
-    assert(c == nil or (type(c) == "number" and c >= 0 and c <= 65535), "c must be a number in range [0, 65535] or nil")
+    assert(b == nil or type(b) == "number", "b must be a number or nil")
+    assert(c == nil or type(c) == "number", "c must be a number or nil")
     return scale(1 / 65535.0, a, b, c)
 end
 

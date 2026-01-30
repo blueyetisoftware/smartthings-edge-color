@@ -21,8 +21,8 @@ local scale = require 'color.scale'
 --- @see to_percentage
 local function from_percentage(a, b, c)
     assert(type(a) == "number", "a must be a number")
-    assert(b == nil or (type(b) == "number" and b >= 0 and b <= 100), "b must be a number in range [0, 100] or nil")
-    assert(c == nil or (type(c) == "number" and c >= 0 and c <= 100), "c must be a number in range [0, 100] or nil")
+    assert(b == nil or type(b) == "number", "b must be a number or nil")
+    assert(c == nil or type(c) == "number", "c must be a number or nil")
     return scale(1 / 100.0, a, b, c)
 end
 
