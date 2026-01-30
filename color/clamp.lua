@@ -40,7 +40,7 @@ end
 --- @param b number|nil Second value to clamp (optional)
 --- @param c number|nil Third value to clamp (optional)
 --- @return number|number,number|number,number,number Clamped value(s)
-function Clamp.clampf(a, b, c)
+function Clamp.clampF(a, b, c)
     if c ~= nil then
         return st_utils.clamp_value(a, 0, 1), st_utils.clamp_value(b, 0, 1), st_utils.clamp_value(c, 0, 1)
     elseif b ~= nil then
@@ -50,13 +50,29 @@ function Clamp.clampf(a, b, c)
     end
 end
 
---- Clamps values to angle range [0, 360).
+--- Clamps values to normalized hue range [0, 1).
 ---
 --- @param a number First value to clamp
 --- @param b number|nil Second value to clamp (optional)
 --- @param c number|nil Third value to clamp (optional)
 --- @return number|number,number|number,number,number Clamped value(s)
-function Clamp.clampA(a, b, c)
+function Clamp.clampHue(a, b, c)
+    if c ~= nil then
+        return a % 1, b % 1, c % 1
+    elseif b ~= nil then
+        return a % 1, b % 1
+    else
+        return a % 1
+    end
+end
+
+--- Clamps values to degree range [0, 360).
+---
+--- @param a number First value to clamp
+--- @param b number|nil Second value to clamp (optional)
+--- @param c number|nil Third value to clamp (optional)
+--- @return number|number,number|number,number,number Clamped value(s)
+function Clamp.clampDeg(a, b, c)
     if c ~= nil then
         return a % 360, b % 360, c % 360
     elseif b ~= nil then

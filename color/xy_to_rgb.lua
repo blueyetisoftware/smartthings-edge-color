@@ -1,4 +1,5 @@
 local st_utils = require 'st.utils'
+local Clamp = require 'color.clamp'
 
 --- Converts CIE 1931 xyY color space coordinates to RGB color values.
 ---
@@ -22,9 +23,7 @@ local function fn(x, y, Y)
     assert(type(x) == "number", "x must be a number")
     assert(type(y) == "number", "y must be a number")
     assert(Y == nil or type(Y) == "number", "Y must be a number or nil")
-    x = st_utils.clamp_value(x, 0, 1)
-    y = st_utils.clamp_value(y, 0, 1)
-    Y = st_utils.clamp_value(Y or 1, 0, 1)
+    x, y, Y = Clamp.clampF(x, y, Y or 1)
     return st_utils.xy_to_rgb(x, y, Y)
 end
 return fn

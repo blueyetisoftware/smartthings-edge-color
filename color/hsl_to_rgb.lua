@@ -1,4 +1,4 @@
-local st_utils = require "st.utils"
+local Clamp = require 'color.clamp'
 
 --- Converts HSL (Hue/Saturation/Lightness) color values to RGB color values.
 ---
@@ -22,9 +22,9 @@ local function fn(hue, saturation, lightness)
     assert(type(hue) == "number", "hue must be a number")
     assert(type(saturation) == "number", "saturation must be a number")
     assert(lightness == nil or type(lightness) == "number", "lightness must be a number or nil")
-    hue = hue % 1  -- Circular wrapping for hue
-    saturation = st_utils.clamp_value(saturation, 0, 1)
-    lightness = st_utils.clamp_value(lightness or 0.5, 0, 1)
+    hue = Clamp.clampHue(hue)
+    saturation = Clamp.clampF(saturation)
+    lightness = Clamp.clampF(lightness or 0.5)
     -- Handle grayscale case
     if saturation <= 0 then
         return lightness, lightness, lightness
