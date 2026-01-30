@@ -1,5 +1,4 @@
 local Format = require 'color.format'
-local spec_helper = require 'spec.spec_helper'
 
 describe("to_16bit", function()
   it("converts 0.0 to 0 exactly", function()
