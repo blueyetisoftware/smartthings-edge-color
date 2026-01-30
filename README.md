@@ -20,7 +20,7 @@ While SmartThings Edge provides basic color conversion functions through `st.uti
 - **Fixed HSL Grayscale Bug**: The original `st.utils` HSL conversion had a critical bug where achromatic (grayscale) colors with zero saturation would ignore the lightness component, always producing pure white (255,255,255) regardless of the lightness value. This library implements the mathematically correct algorithm.
 - **Eliminated API Inconsistencies**: SmartThings `st_utils` uses arbitrary, inconsistent ranges (HSL in percentages [0,100], RGB in 8-bit [0,255]) that don't match standard color APIs. This library uses normalized [0,1] ranges throughout for consistency.
 - **Accurate Documentation**: Comments accurately describe what each function does, rather than making incorrect claims about "standard algorithms" when st_utils is actually used
-- **Comprehensive Testing**: 187 automated tests ensure correctness and prevent regressions
+- **Comprehensive Testing**: 214+ automated tests ensure correctness and prevent regressions, including industry standard benchmarks against CIE illuminants
 
 ### 📊 Supported Color Spaces and Conversions
 
@@ -40,7 +40,7 @@ While SmartThings Edge provides basic color conversion functions through `st.uti
 - `rgb_to_xy()` - RGB to CIE xyY (via st_utils)
 - `xy_to_rgb()` - CIE xyY to RGB (via st_utils)
 - `cct_to_rgb()` - Color temperature to RGB
-- `rgb_to_cct()` - RGB to color temperature
+- `rgb_to_cct()` - RGB to color temperature (dual-algorithm: fast approximation + accurate distance-based)
 - `toMired(kelvin)` / `toKelvin(mired)` - Temperature unit conversions (format module)
 - `kelvin_to_mired()` / `mired_to_kelvin()` - Backward compatibility aliases
 - `kelvin_to_mirek()` / `mirek_to_kelvin()` - Backward compatibility aliases for Philips Hue API
@@ -100,6 +100,25 @@ local x, y, Y = color.rgb_to_xy(1, 0, 0)  -- Red chromaticity coordinates
 local r, g, b = color.xy_to_rgb(x, y, Y)
 ```
 
+### RGB to Color Temperature Conversion
+
+The `rgb_to_cct()` function provides two algorithms optimized for different use cases:
+
+```lua
+local color = require 'color'
+
+-- Fast approximation (10-20x faster, ~10-20K accuracy)
+local cct_fast = color.rgb_to_cct(1, 0.8, 0.6, false)
+
+-- Accurate calculation (exact results, 2-3x slower)
+local cct_accurate = color.rgb_to_cct(1, 0.8, 0.6, true)
+```
+
+**Algorithm Details:**
+- **Fast**: Lookup table interpolation with 78 reference points (optimized for performance)
+- **Accurate**: Distance-based minimization using golden section search (optimized for precision)
+- **Validation**: Both algorithms tested against CIE standard illuminants (A, D50, D65)
+
 ## Testing
 
 This library includes comprehensive test coverage using the [busted](https://lunarmodules.github.io/busted/) testing framework.
@@ -108,11 +127,13 @@ This library includes comprehensive test coverage using the [busted](https://lun
 busted
 ```
 
-All 187 tests should pass, covering:
-- Round-trip conversion accuracy
-- Edge cases (black, white, grayscale)
-- Input validation and error handling
-- Range boundary conditions
+All 214+ tests should pass, covering:
+- **Round-trip conversion accuracy** with exact equality assertions
+- **Industry standard benchmarks** against CIE illuminants (A, D50, D65, 7500K)
+- **Dual-algorithm validation** for RGB to CCT (fast approximation vs accurate distance-based)
+- **Edge cases** (black, white, grayscale, boundary conditions)
+- **Input validation and error handling** with type enforcement
+- **Performance characteristics** and algorithm accuracy tradeoffs
 
 ## API Reference
 
