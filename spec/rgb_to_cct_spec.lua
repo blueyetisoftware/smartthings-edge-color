@@ -176,7 +176,7 @@ describe("rgb_to_cct", function()
     describe("fuzz testing", function()
       it("handles random RGB inputs without crashing", function()
         -- Test 100 random RGB combinations
-        for i = 1, 100 do
+        for _ = 1, 100 do
           local r = math.random()
           local g = math.random()
           local b = math.random()
