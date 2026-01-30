@@ -1,12 +1,12 @@
 local clamp_hff = require 'color.format.hue'.clamp_hff
-local hsv_to_xy = require 'color.hsv_to_xy'
-local xy_to_cct = require 'color.xy_to_cct'
+local hsv_to_xyy = require 'color.hsv_to_xyy'
+local xyy_to_cct = require 'color.xyy_to_cct'
 
 --- Converts HSV (Hue, Saturation, Value) to correlated color temperature (CCT).
 ---
 --- This function converts HSV color coordinates to correlated color temperature in Kelvin
---- by first converting HSV to CIE 1931 xyY coordinates using the hsv_to_xy function,
---- then converting xyY to CCT using the xy_to_cct function. The V (value) component
+--- by first converting HSV to CIE 1931 xyY coordinates using the hsv_to_xyy function,
+--- then converting xyY to CCT using the xyy_to_cct function. The V (value) component
 --- defaults to 1.0 if not provided.
 ---
 --- @param h number hue component in range [0,1]
@@ -25,7 +25,7 @@ local function hsv_to_cct(h, s, v)
     assert(type(s) == "number", "s must be a number")
     assert(v == nil or type(v) == "number", "v must be a number or nil")
     h, s, v = clamp_hff(h, s, v or 1)
-    return xy_to_cct(hsv_to_xy(h, s, v))
+    return xyy_to_cct(hsv_to_xyy(h, s, v))
 end
 
 return hsv_to_cct

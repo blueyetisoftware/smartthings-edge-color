@@ -20,8 +20,8 @@ describe("Color module round trip tests", function()
 
     it("CCT -> XY -> CCT with tolerance", function()
       local original_cct = 3000
-      local x, y, Y = Color.cct_to_xy(original_cct)
-      local recovered_cct = Color.xy_to_cct(x, y, Y)
+      local x, y, Y = Color.cct_to_xyy(original_cct)
+      local recovered_cct = Color.xyy_to_cct(x, y, Y)
       spec_helper.assert_near(original_cct, recovered_cct, 1000)
     end)
   end)
@@ -55,24 +55,24 @@ describe("Color module round trip tests", function()
   describe("XY round trip", function()
     it("XY -> CCT -> XY with tolerance", function()
       local original_x, original_y = 0.4, 0.4
-      local cct = Color.xy_to_cct(original_x, original_y)
-      local recovered_x, recovered_y, _ = Color.cct_to_xy(cct)
+      local cct = Color.xyy_to_cct(original_x, original_y)
+      local recovered_x, recovered_y, _ = Color.cct_to_xyy(cct)
       spec_helper.assert_near(original_x, recovered_x, 0.1)
       spec_helper.assert_near(original_y, recovered_y, 0.1)
     end)
 
     it("XY -> HSV -> XY with tolerance", function()
       local original_x, original_y = 0.3, 0.5
-      local h, s, v = Color.xy_to_hsv(original_x, original_y)
-      local recovered_x, recovered_y, _ = Color.hsv_to_xy(h, s, v)
+      local h, s, v = Color.xyy_to_hsv(original_x, original_y)
+      local recovered_x, recovered_y, _ = Color.hsv_to_xyy(h, s, v)
       spec_helper.assert_near(original_x, recovered_x, 0.1)
       spec_helper.assert_near(original_y, recovered_y, 0.1)
     end)
 
     it("XY -> RGB -> XY with tolerance", function()
       local original_x, original_y = 0.2, 0.6
-      local r, g, b = Color.xy_to_rgb(original_x, original_y, 1.0)
-      local recovered_x, recovered_y, recovered_Y = Color.rgb_to_xy(r, g, b)
+      local r, g, b = Color.xyy_to_rgb(original_x, original_y, 1.0)
+      local recovered_x, recovered_y, recovered_Y = Color.rgb_to_xyy(r, g, b)
       spec_helper.assert_near(original_x, recovered_x, 0.1)
       spec_helper.assert_near(original_y, recovered_y, 0.1)
       assert.is_true(recovered_Y >= 0 and recovered_Y <= 1)
@@ -80,8 +80,8 @@ describe("Color module round trip tests", function()
 
     it("XY -> RGB -> XY with default Y", function()
       local original_x, original_y = 0.2, 0.6
-      local r, g, b = Color.xy_to_rgb(original_x, original_y)  -- Y defaults to 1.0
-      local recovered_x, recovered_y, recovered_Y = Color.rgb_to_xy(r, g, b)
+      local r, g, b = Color.xyy_to_rgb(original_x, original_y)  -- Y defaults to 1.0
+      local recovered_x, recovered_y, recovered_Y = Color.rgb_to_xyy(r, g, b)
       spec_helper.assert_near(original_x, recovered_x, 0.1)
       spec_helper.assert_near(original_y, recovered_y, 0.1)
       assert.is_true(recovered_Y >= 0 and recovered_Y <= 1)

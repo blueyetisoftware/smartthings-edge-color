@@ -1,12 +1,12 @@
 local clamp_xyy = require 'color.format.xyy'.clamp_xyy
-local rgb_to_xy = require 'color.rgb_to_xy'
+local rgb_to_xyy = require 'color.rgb_to_xyy'
 local cct_to_rgb = require 'color.cct_to_rgb'
 
 --- Converts correlated color temperature (CCT) to CIE 1931 xyY color coordinates.
 ---
 --- This function converts a correlated color temperature in Kelvin to CIE 1931 xyY
 --- color coordinates by first converting CCT to RGB using the cct_to_rgb function,
---- then converting RGB to xyY using the rgb_to_xy function. The resulting xyY coordinates
+--- then converting RGB to xyY using the rgb_to_xyy function. The resulting xyY coordinates
 --- represent the color appearance of a blackbody radiator at the given temperature.
 ---
 --- @param cct number correlated color temperature in Kelvin, range [1,30000]
@@ -16,11 +16,11 @@ local cct_to_rgb = require 'color.cct_to_rgb'
 --- @raise error if cct is outside the valid range [1,30000]
 ---
 --- @usage
---- local x, y, Y = cct_to_xy(2700)  -- Warm white (incandescent bulb)
---- local x, y, Y = cct_to_xy(6500)  -- Daylight white (D65)
-local function cct_to_xy(cct)
+--- local x, y, Y = cct_to_xyy(2700)  -- Warm white (incandescent bulb)
+--- local x, y, Y = cct_to_xyy(6500)  -- Daylight white (D65)
+local function cct_to_xyy(cct)
     assert(type(cct) == "number", "cct must be a number")
-    return clamp_xyy(rgb_to_xy(cct_to_rgb(cct)))
+    return clamp_xyy(rgb_to_xyy(cct_to_rgb(cct)))
 end
 
-return cct_to_xy
+return cct_to_xyy

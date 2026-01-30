@@ -1,11 +1,11 @@
 local clamp_xyy = require 'color.format.xyy'.clamp_xyy
-local xy_to_rgb = require 'color.xy_to_rgb'
+local xyy_to_rgb = require 'color.xyy_to_rgb'
 local rgb_to_cct = require 'color.rgb_to_cct'
 
 --- Converts CIE 1931 xyY color coordinates to correlated color temperature (CCT).
 ---
 --- This function converts CIE 1931 xyY color coordinates to correlated color temperature
---- in Kelvin by first converting xyY to RGB using the xy_to_rgb function, then converting
+--- in Kelvin by first converting xyY to RGB using the xyy_to_rgb function, then converting
 --- RGB to CCT using the rgb_to_cct function. The Y (luminance) component defaults to 1.0
 --- if not provided.
 ---
@@ -18,14 +18,14 @@ local rgb_to_cct = require 'color.rgb_to_cct'
 --- @raise error if x, y, or Y are outside valid ranges
 ---
 --- @usage
---- local cct = xy_to_cct(0.3127, 0.3290, 1.0)  -- D65 white point
---- local cct = xy_to_cct(0.4476, 0.4074, 1.0)  -- A (2856K) illuminant
-local function xy_to_cct(x, y, Y)
+--- local cct = xyy_to_cct(0.3127, 0.3290, 1.0)  -- D65 white point
+--- local cct = xyy_to_cct(0.4476, 0.4074, 1.0)  -- A (2856K) illuminant
+local function xyy_to_cct(x, y, Y)
     assert(type(x) == "number", "x must be a number")
     assert(type(y) == "number", "y must be a number")
     assert(Y == nil or type(Y) == "number", "Y must be a number or nil")
     x, y, Y = clamp_xyy(x, y, Y or 1)
-    return rgb_to_cct(xy_to_rgb(x, y, Y))
+    return rgb_to_cct(xyy_to_rgb(x, y, Y))
 end
 
-return xy_to_cct
+return xyy_to_cct

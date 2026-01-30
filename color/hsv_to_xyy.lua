@@ -1,12 +1,12 @@
 local clamp_hff = require 'color.format.hue'.clamp_hff
 local hsv_to_rgb = require 'color.hsv_to_rgb'
-local rgb_to_xy = require 'color.rgb_to_xy'
+local rgb_to_xyy = require 'color.rgb_to_xyy'
 
 --- Converts HSV (Hue, Saturation, Value) to CIE 1931 xyY color coordinates.
 ---
 --- This function converts HSV color coordinates to CIE 1931 xyY color coordinates
 --- by first converting HSV to RGB using the hsv_to_rgb function, then converting
---- RGB to xyY using the rgb_to_xy function. The V (value) component defaults to 1.0
+--- RGB to xyY using the rgb_to_xyy function. The V (value) component defaults to 1.0
 --- if not provided.
 ---
 --- @param h number hue component in range [0,1]
@@ -18,15 +18,15 @@ local rgb_to_xy = require 'color.rgb_to_xy'
 --- @raise error if h, s, or v are outside valid ranges
 ---
 --- @usage
---- local x, y, Y = hsv_to_xy(0.1, 0.8, 1.0)  -- Warm color
---- local x, y, Y = hsv_to_xy(0.6, 0.2, 0.8)  -- Cool color
-local function hsv_to_xy(h, s, v)
+--- local x, y, Y = hsv_to_xyy(0.1, 0.8, 1.0)  -- Warm color
+--- local x, y, Y = hsv_to_xyy(0.6, 0.2, 0.8)  -- Cool color
+local function hsv_to_xyy(h, s, v)
     assert(type(h) == "number", "h must be a number")
     assert(type(s) == "number", "s must be a number")
     assert(v == nil or type(v) == "number", "v must be a number or nil")
     h, s, v = clamp_hff(h, s, v or 1)
 
-    return rgb_to_xy(hsv_to_rgb(h, s, v))
+    return rgb_to_xyy(hsv_to_rgb(h, s, v))
 end
 
-return hsv_to_xy
+return hsv_to_xyy

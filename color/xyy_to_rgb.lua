@@ -15,14 +15,14 @@ local clamp_xyy = require 'color.format.xyy'.clamp_xyy
 --- @raise error if x or y are not numbers, or if Y is provided and not a number
 ---
 --- @usage
---- local r, g, b = xy_to_rgb(0.64, 0.33, 0.21)    -- Red with specific luminance
---- local r, g, b = xy_to_rgb(0.64, 0.33)          -- Red at full brightness (Y=1.0)
---- local r, g, b = xy_to_rgb(0.30, 0.60, 0.72)    -- Green with specific luminance
---- local r, g, b = xy_to_rgb(0.15, 0.06, 0.07)    -- Blue with specific luminance
-local function fn(x, y, Y)
+--- local r, g, b = xyy_to_rgb(0.64, 0.33, 0.21)    -- Red with specific luminance
+--- local r, g, b = xyy_to_rgb(0.64, 0.33)          -- Red at full brightness (Y=1.0)
+--- local r, g, b = xyy_to_rgb(0.30, 0.60, 0.72)    -- Green with specific luminance
+--- local r, g, b = xyy_to_rgb(0.15, 0.06, 0.07)    -- Blue with specific luminance
+local function xyy_to_rgb(x, y, Y)
     assert(type(x) == "number", "x must be a number")
     assert(type(y) == "number", "y must be a number")
     assert(Y == nil or type(Y) == "number", "Y must be a number or nil")
     return st_utils.xy_to_rgb(clamp_xyy(x, y, Y or 1))
 end
-return fn
+return xyy_to_rgb

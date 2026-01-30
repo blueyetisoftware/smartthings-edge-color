@@ -22,7 +22,29 @@ While SmartThings Edge provides basic color conversion functions through `st.uti
 - **Accurate Documentation**: Comments accurately describe what each function does, rather than making incorrect claims about "standard algorithms" when st_utils is actually used
 - **Comprehensive Testing**: 220+ automated tests ensure correctness and prevent regressions, including industry standard benchmarks against CIE illuminants
 
-### 📊 Supported Color Spaces and Conversions
+### � SmartThings Edge API Differences
+
+This library intentionally diverges from SmartThings Edge `st_utils` APIs to provide a better developer experience. All differences are documented here:
+
+#### Color Space Naming
+- **Library**: Uses `xyy_to_rgb()` and `rgb_to_xyy()` for CIE 1931 xyY color space conversions
+- **st_utils**: Uses misleading `xy_to_rgb()` and `rgb_to_xy()` names that suggest only xy chromaticity coordinates
+- **Rationale**: xyY functions return 3 values (x, y, Y), not 2. The `xyy` naming accurately represents the full color space operations.
+
+#### Input Range Normalization
+- **Library**: All color components use normalized [0,1] ranges for consistency
+- **st_utils**: Inconsistent ranges:
+  - HSL: Hue/Saturation/Lightness in [0,100] (percentages)
+  - RGB: Red/Green/Blue in [0,255] (8-bit values)
+  - xyY: x/y/Y in [0,1] (normalized)
+- **Rationale**: Normalized ranges eliminate confusion and match standard color APIs. Use `color.to_rgb100()`, `color.from_rgb8()`, etc. for conversions.
+
+#### Function Behavior
+- **Library**: Robust input validation with automatic clamping and clear error messages
+- **st_utils**: Limited validation, may crash on invalid inputs or produce undefined results
+- **Rationale**: Production-ready drivers need defensive programming to handle edge cases gracefully.
+
+### �📊 Supported Color Spaces and Conversions
 
 | Color Space | Description | Range |
 |-------------|-------------|-------|
@@ -37,8 +59,8 @@ While SmartThings Edge provides basic color conversion functions through `st.uti
 - `rgb_to_hsl()` - RGB to HSL
 - `hsl_to_rgb()` - HSL to RGB
 - `rgb_to_hsv()` - RGB to HSV (via st_utils)
-- `rgb_to_xy()` - RGB to CIE xyY (via st_utils)
-- `xy_to_rgb()` - CIE xyY to RGB (via st_utils)
+- `rgb_to_xyy()` - RGB to CIE xyY (via st_utils)
+- `xyy_to_rgb()` - CIE xyY to RGB (via st_utils)
 - `cct_to_rgb()` - Color temperature to RGB
 - `rgb_to_cct()` - RGB to color temperature (dual-algorithm: fast approximation + accurate distance-based)
 - `clampKelvin(k)` - Clamp Kelvin to SmartThings [1,30000] range
@@ -116,10 +138,10 @@ local r8, g8, b8 = color.to_8bit(1, 0.5, 0)  -- 255, 128, 0
 local color = require 'color'
 
 -- Convert RGB to CIE xyY chromaticity
-local x, y, Y = color.rgb_to_xy(1, 0, 0)  -- Red chromaticity coordinates
+local x, y, Y = color.rgb_to_xyy(1, 0, 0)  -- Red chromaticity coordinates
 
 -- Convert back to RGB
-local r, g, b = color.xy_to_rgb(x, y, Y)
+local r, g, b = color.xyy_to_rgb(x, y, Y)
 ```
 
 ### SmartThings Edge Compatibility
