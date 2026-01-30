@@ -20,7 +20,7 @@ While SmartThings Edge provides basic color conversion functions through `st.uti
 - **Fixed HSL Grayscale Bug**: The original `st.utils` HSL conversion had a critical bug where achromatic (grayscale) colors with zero saturation would ignore the lightness component, always producing pure white (255,255,255) regardless of the lightness value. This library implements the mathematically correct algorithm.
 - **Eliminated API Inconsistencies**: SmartThings `st_utils` uses arbitrary, inconsistent ranges (HSL in percentages [0,100], RGB in 8-bit [0,255]) that don't match standard color APIs. This library uses normalized [0,1] ranges throughout for consistency.
 - **Accurate Documentation**: Comments accurately describe what each function does, rather than making incorrect claims about "standard algorithms" when st_utils is actually used
-- **Comprehensive Testing**: 214+ automated tests ensure correctness and prevent regressions, including industry standard benchmarks against CIE illuminants
+- **Comprehensive Testing**: 220+ automated tests ensure correctness and prevent regressions, including industry standard benchmarks against CIE illuminants
 
 ### 📊 Supported Color Spaces and Conversions
 
