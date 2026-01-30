@@ -1,4 +1,5 @@
 local st_utils = require 'st.utils'
+local Clamp = require 'color.clamp'
 
 --- Converts floating-point color values to 8-bit integer values.
 ---
@@ -21,11 +22,11 @@ local function to_8bit(a, b, c)
     assert(b == nil or type(b) == "number", "b must be a number or nil")
     assert(c == nil or type(c) == "number", "c must be a number or nil")
     if c ~= nil then
-        return st_utils.clamp_value(st_utils.round(a * 255.0), 0, 255), st_utils.clamp_value(st_utils.round(b * 255.0), 0, 255), st_utils.clamp_value(st_utils.round(c * 255.0), 0, 255)
+        return Clamp.clamp8(st_utils.round(a * 255.0), st_utils.round(b * 255.0), st_utils.round(c * 255.0))
     elseif b ~= nil then
-        return st_utils.clamp_value(st_utils.round(a * 255.0), 0, 255), st_utils.clamp_value(st_utils.round(b * 255.0), 0, 255)
+        return Clamp.clamp8(st_utils.round(a * 255.0), st_utils.round(b * 255.0))
     else
-        return st_utils.clamp_value(st_utils.round(a * 255.0), 0, 255)
+        return Clamp.clamp8(st_utils.round(a * 255.0))
     end
 end
 

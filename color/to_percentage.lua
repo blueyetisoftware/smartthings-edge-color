@@ -1,5 +1,6 @@
 local scale = require 'color.scale'
 local st_utils = require 'st.utils'
+local Clamp = require 'color.clamp'
 
 --- Converts normalized values to percentage values.
 ---
@@ -24,11 +25,11 @@ local function to_percentage(a, b, c)
     assert(b == nil or type(b) == "number", "b must be a number or nil")
     assert(c == nil or type(c) == "number", "c must be a number or nil")
     if c ~= nil then
-        return st_utils.clamp_value(a * 100.0, 0, 100), st_utils.clamp_value(b * 100.0, 0, 100), st_utils.clamp_value(c * 100.0, 0, 100)
+        return Clamp.clampPct(a * 100.0, b * 100.0, c * 100.0)
     elseif b ~= nil then
-        return st_utils.clamp_value(a * 100.0, 0, 100), st_utils.clamp_value(b * 100.0, 0, 100)
+        return Clamp.clampPct(a * 100.0, b * 100.0)
     else
-        return st_utils.clamp_value(a * 100.0, 0, 100)
+        return Clamp.clampPct(a * 100.0)
     end
 end
 
