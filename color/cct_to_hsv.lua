@@ -9,11 +9,11 @@ local xy_to_hsv = require 'color.xy_to_hsv'
 --- then converting xyY to HSV using the xy_to_hsv function. The resulting HSV represents
 --- the color appearance of a blackbody radiator at the given temperature.
 ---
---- @param cct number correlated color temperature in Kelvin, range [1000,40000]
+--- @param cct number correlated color temperature in Kelvin, range [1,30000]
 --- @return number, number, number equivalent hue, saturation, value with each component in range [0,1]
 ---
 --- @raise error if cct is not a number
---- @raise error if cct is outside the valid range [1000,40000]
+--- @raise error if cct is outside the valid range [1,30000]
 ---
 --- @usage
 --- local h, s, v = cct_to_hsv(2700)  -- Warm white (incandescent bulb)

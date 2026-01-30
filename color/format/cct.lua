@@ -5,20 +5,26 @@
 
 local st_utils = require 'st.utils'
 
---- Clamps values to Kelvin temperature range [1000, 40000].
+--- Clamps values to SmartThings colorTemperature capability range [1, 30000].
+---
+--- This matches the Kelvin range expected by SmartThings Edge color temperature
+--- capabilities. Values outside this range are clamped to the valid boundaries.
 ---
 --- @param a number Value to clamp
---- @return number Clamped Kelvin value
+--- @return number Clamped Kelvin value compatible with SmartThings
 local function clampKelvin(a)
-    return st_utils.clamp_value(a, 1000, 40000)
+    return st_utils.clamp_value(a, 1, 30000)
 end
 
---- Clamps values to Mired range [25, 1000].
+--- Clamps values to Mired range [33, 1000000].
+---
+--- This corresponds to the full SmartThings Kelvin range [1, 30000].
+--- In practice, most lighting applications use 150-500 mireds (2000K-6500K).
 ---
 --- @param a number Value to clamp
 --- @return number Clamped Mired value
 local function clampMired(a)
-    return st_utils.clamp_value(a, 25, 1000)
+    return st_utils.clamp_value(a, 33, 1000000)
 end
 
 --- Converts color temperature from Kelvin to Mired (micro reciprocal degrees).
