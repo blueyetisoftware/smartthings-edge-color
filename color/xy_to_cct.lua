@@ -12,7 +12,7 @@ local rgb_to_cct = require 'color.rgb_to_cct'
 --- @param x number x coordinate in CIE 1931 color space, range [0,1]
 --- @param y number y coordinate in CIE 1931 color space, range [0,1]
 --- @param Y number|nil luminance (Y) component, range [0,1], defaults to 1.0
---- @return number correlated color temperature in Kelvin, range [1000,40000]
+--- @return number correlated color temperature in Kelvin, range [1,30000]
 ---
 --- @raise error if x, y, or Y are not numbers
 --- @raise error if x, y, or Y are outside valid ranges

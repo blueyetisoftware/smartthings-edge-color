@@ -12,7 +12,7 @@ local xy_to_cct = require 'color.xy_to_cct'
 --- @param h number hue component in range [0,1]
 --- @param s number saturation component in range [0,1]
 --- @param v number|nil value component in range [0,1], defaults to 1.0
---- @return number correlated color temperature in Kelvin, range [1000,40000]
+--- @return number correlated color temperature in Kelvin, range [1,30000]
 ---
 --- @raise error if h, s, or v are not numbers
 --- @raise error if h, s, or v are outside valid ranges

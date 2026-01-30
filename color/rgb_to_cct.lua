@@ -5,7 +5,7 @@ local cct_to_rgb = require 'color.cct_to_rgb'
 -- Lookup table for ratio-based CCT approximation (78 entries, ~600 bytes)
 local RATIO_LOOKUP = {}
 do
-    for cct = 1000, 40000, 500 do
+    for cct = 1000, 30000, 400 do  -- Adjusted step size for new range
         local r, _, b = cct_to_rgb(cct)
         RATIO_LOOKUP[#RATIO_LOOKUP + 1] = {ratio = b / r, cct = cct}
     end
@@ -13,8 +13,8 @@ end
 
 --- Accurate algorithm using full RGB distance comparison with golden section search
 local function rgb_to_cct_distance(r, g, b)
-    local min = 1000
-    local max = 40000
+    local min = 1
+    local max = 30000
     local best_cct = 1000
     local best_distance = math.huge
     local epsilon = 0.1  -- convergence threshold
@@ -30,8 +30,8 @@ local function rgb_to_cct_distance(r, g, b)
     end
 
     -- Refine with golden section search around the best candidate
-    min = math.max(1000, best_cct - 300)
-    max = math.min(40000, best_cct + 300)
+    min = math.max(1, best_cct - 300)
+    max = math.min(30000, best_cct + 300)
 
     local golden_ratio = (math.sqrt(5) - 1) / 2  -- ~0.618
 
@@ -62,7 +62,7 @@ local function rgb_to_cct_ratio(r, _g, b)
     -- Use reasonable defaults based on color characteristics
     if r == 0 then
         if b > 0 then
-            return 40000  -- Colors with no red but some blue are very cool
+            return 30000  -- Colors with no red but some blue are very cool
         else
             return 2251   -- Pure green approximation (closest Planckian point)
         end
@@ -72,9 +72,9 @@ local function rgb_to_cct_ratio(r, _g, b)
 
     -- Handle remaining edge cases
     if ratio <= RATIO_LOOKUP[1].ratio then
-        return 1000  -- Minimum CCT
+        return 1  -- Minimum CCT
     elseif ratio >= RATIO_LOOKUP[#RATIO_LOOKUP].ratio then
-        return 40000  -- Maximum CCT
+        return 30000  -- Maximum CCT
     end
 
     -- Find bracketing entries in lookup table
@@ -95,8 +95,8 @@ local function rgb_to_cct_ratio(r, _g, b)
     -- Fallback to binary search (handles any remaining edge cases)
     local cct
     local epsilon = 0.4
-    local min = 1000
-    local max = 40000
+    local min = 1
+    local max = 30000
 
     while max - min > epsilon do
         cct = (max + min) / 2

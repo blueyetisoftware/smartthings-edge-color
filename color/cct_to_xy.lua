@@ -9,11 +9,11 @@ local cct_to_rgb = require 'color.cct_to_rgb'
 --- then converting RGB to xyY using the rgb_to_xy function. The resulting xyY coordinates
 --- represent the color appearance of a blackbody radiator at the given temperature.
 ---
---- @param cct number correlated color temperature in Kelvin, range [1000,40000]
+--- @param cct number correlated color temperature in Kelvin, range [1,30000]
 --- @return number, number, number equivalent x, y, Y coordinates where x,y are in [0,1] and Y=1
 ---
 --- @raise error if cct is not a number
---- @raise error if cct is outside the valid range [1000,40000]
+--- @raise error if cct is outside the valid range [1,30000]
 ---
 --- @usage
 --- local x, y, Y = cct_to_xy(2700)  -- Warm white (incandescent bulb)

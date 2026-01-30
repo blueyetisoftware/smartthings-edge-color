@@ -1,23 +1,23 @@
 local Format = require 'color.format'
 
 describe("clampKelvin", function()
-  it("clamps values to Kelvin range", function()
-    local k = Format.clampKelvin(500)
-    assert.are.equal(1000, k)
+  it("clamps values to SmartThings Kelvin range [1, 30000]", function()
+    local k = Format.clampKelvin(0)
+    assert.are.equal(1, k)
   end)
 
   it("handles boundary values", function()
-    local k1 = Format.clampKelvin(1000)
-    local k2 = Format.clampKelvin(40000)
-    assert.are.equal(1000, k1)
-    assert.are.equal(40000, k2)
+    local k1 = Format.clampKelvin(1)
+    local k2 = Format.clampKelvin(30000)
+    assert.are.equal(1, k1)
+    assert.are.equal(30000, k2)
   end)
 
   it("clamps out-of-range values", function()
-    local k1 = Format.clampKelvin(500)
-    local k2 = Format.clampKelvin(50000)
-    assert.are.equal(1000, k1)
-    assert.are.equal(40000, k2)
+    local k1 = Format.clampKelvin(0)
+    local k2 = Format.clampKelvin(40000)
+    assert.are.equal(1, k1)
+    assert.are.equal(30000, k2)
   end)
 end)
 
@@ -33,9 +33,9 @@ describe("clampMired", function()
 
   it("clamps out-of-range values", function()
     local m1 = Format.clampMired(10)
-    local m2 = Format.clampMired(1500)
-    assert.are.equal(25, m1)
-    assert.are.equal(1000, m2)
+    local m2 = Format.clampMired(1500000)
+    assert.are.equal(33, m1)
+    assert.are.equal(1000000, m2)
   end)
 end)
 
@@ -65,14 +65,19 @@ describe("toMired", function()
     assert.is_true(mired >= 100 and mired <= 1000)
   end)
 
-  it("clamps low kelvin values to 1000K", function()
-    local mired = Format.toMired(500)  -- Below minimum
-    assert.equals(1000, mired)  -- 1000000 / 1000 = 1000
+  it("handles valid kelvin values", function()
+    local mired = Format.toMired(500)  -- Valid value
+    assert.equals(2000, mired)  -- 1000000 / 500 = 2000
   end)
 
-  it("clamps high kelvin values to 40000K", function()
-    local mired = Format.toMired(50000)  -- Above maximum
-    assert.equals(25, mired)  -- 1000000 / 40000 = 25
+  it("clamps low kelvin values to 1K", function()
+    local mired = Format.toMired(0)  -- Below minimum
+    assert.equals(1000000, mired)  -- 1000000 / 1 = 1000000
+  end)
+
+  it("clamps high kelvin values to 30000K", function()
+    local mired = Format.toMired(40000)  -- Above maximum
+    assert.equals(33, mired)  -- 1000000 / 30000 ≈ 33
   end)
 end)
 
@@ -99,16 +104,16 @@ describe("toKelvin", function()
 
   it("handles maximum mired (1000)", function()
     local kelvin = Format.toKelvin(1000)
-    assert.is_true(kelvin >= 1000 and kelvin <= 10000)
+    assert.is_true(kelvin >= 1 and kelvin <= 30000)
   end)
 
-  it("clamps low mired values to 25", function()
+  it("clamps low mired values to 33", function()
     local kelvin = Format.toKelvin(10)  -- Below minimum
-    assert.equals(40000, kelvin)  -- 1000000 / 25 = 40000
+    assert.equals(30303, kelvin)  -- 1000000 / 33 ≈ 30303
   end)
 
-  it("clamps high mired values to 1000", function()
-    local kelvin = Format.toKelvin(1200)  -- Above maximum
-    assert.equals(1000, kelvin)  -- 1000000 / 1000 = 1000
+  it("clamps high mired values to 1000000", function()
+    local kelvin = Format.toKelvin(1200000)  -- Above maximum
+    assert.equals(1, kelvin)  -- 1000000 / 1000000 = 1
   end)
 end)
