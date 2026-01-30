@@ -22,11 +22,11 @@ local function to_16bit(a, b, c)
     assert(b == nil or type(b) == "number", "b must be a number or nil")
     assert(c == nil or type(c) == "number", "c must be a number or nil")
     if c ~= nil then
-        return Clamp.clamp16(st_utils.round(a * 65535.0), st_utils.round(b * 65535.0), st_utils.round(c * 65535.0))
+        return Clamp.clamp16(a * 65535.0, b * 65535.0, c * 65535.0)
     elseif b ~= nil then
-        return Clamp.clamp16(st_utils.round(a * 65535.0), st_utils.round(b * 65535.0))
+        return Clamp.clamp16(a * 65535.0, b * 65535.0)
     else
-        return Clamp.clamp16(st_utils.round(a * 65535.0))
+        return Clamp.clamp16(a * 65535.0)
     end
 end
 

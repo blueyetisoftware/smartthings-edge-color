@@ -22,11 +22,11 @@ local function to_8bit(a, b, c)
     assert(b == nil or type(b) == "number", "b must be a number or nil")
     assert(c == nil or type(c) == "number", "c must be a number or nil")
     if c ~= nil then
-        return Clamp.clamp8(st_utils.round(a * 255.0), st_utils.round(b * 255.0), st_utils.round(c * 255.0))
+        return Clamp.clamp8(a * 255.0, b * 255.0, c * 255.0)
     elseif b ~= nil then
-        return Clamp.clamp8(st_utils.round(a * 255.0), st_utils.round(b * 255.0))
+        return Clamp.clamp8(a * 255.0, b * 255.0)
     else
-        return Clamp.clamp8(st_utils.round(a * 255.0))
+        return Clamp.clamp8(a * 255.0)
     end
 end
 

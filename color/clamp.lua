@@ -10,11 +10,11 @@ local Clamp = {}
 --- @return number|number,number|number,number,number Clamped value(s)
 function Clamp.clamp8(a, b, c)
     if c ~= nil then
-        return st_utils.clamp_value(a, 0, 255), st_utils.clamp_value(b, 0, 255), st_utils.clamp_value(c, 0, 255)
+        return st_utils.round(st_utils.clamp_value(a, 0, 255)), st_utils.round(st_utils.clamp_value(b, 0, 255)), st_utils.round(st_utils.clamp_value(c, 0, 255))
     elseif b ~= nil then
-        return st_utils.clamp_value(a, 0, 255), st_utils.clamp_value(b, 0, 255)
+        return st_utils.round(st_utils.clamp_value(a, 0, 255)), st_utils.round(st_utils.clamp_value(b, 0, 255))
     else
-        return st_utils.clamp_value(a, 0, 255)
+        return st_utils.round(st_utils.clamp_value(a, 0, 255))
     end
 end
 
@@ -26,11 +26,11 @@ end
 --- @return number|number,number|number,number,number Clamped value(s)
 function Clamp.clamp16(a, b, c)
     if c ~= nil then
-        return st_utils.clamp_value(a, 0, 65535), st_utils.clamp_value(b, 0, 65535), st_utils.clamp_value(c, 0, 65535)
+        return st_utils.round(st_utils.clamp_value(a, 0, 65535)), st_utils.round(st_utils.clamp_value(b, 0, 65535)), st_utils.round(st_utils.clamp_value(c, 0, 65535))
     elseif b ~= nil then
-        return st_utils.clamp_value(a, 0, 65535), st_utils.clamp_value(b, 0, 65535)
+        return st_utils.round(st_utils.clamp_value(a, 0, 65535)), st_utils.round(st_utils.clamp_value(b, 0, 65535))
     else
-        return st_utils.clamp_value(a, 0, 65535)
+        return st_utils.round(st_utils.clamp_value(a, 0, 65535))
     end
 end
 
