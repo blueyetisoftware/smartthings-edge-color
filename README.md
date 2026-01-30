@@ -30,7 +30,7 @@ While SmartThings Edge provides basic color conversion functions through `st.uti
 | HSL | Hue, Saturation, Lightness | H: [0,1], S: [0,1], L: [0,1] |
 | HSV | Hue, Saturation, Value | H: [0,1], S: [0,1], V: [0,1] |
 | xyY | CIE 1931 chromaticity coordinates | x: [0,1], y: [0,1], Y: [0,1] |
-| CCT | Correlated Color Temperature | 1000K - 40000K |
+| CCT | Correlated Color Temperature | 1K - 30000K |
 
 ### 🔄 Available Conversions
 
@@ -41,6 +41,7 @@ While SmartThings Edge provides basic color conversion functions through `st.uti
 - `xy_to_rgb()` - CIE xyY to RGB (via st_utils)
 - `cct_to_rgb()` - Color temperature to RGB
 - `rgb_to_cct()` - RGB to color temperature (dual-algorithm: fast approximation + accurate distance-based)
+- `clampKelvin(k)` - Clamp Kelvin to SmartThings [1,30000] range
 - `toMired(kelvin)` / `toKelvin(mired)` - Temperature unit conversions (format module)
 - `kelvin_to_mired()` / `mired_to_kelvin()` - Backward compatibility aliases
 - `kelvin_to_mirek()` / `mirek_to_kelvin()` - Backward compatibility aliases for Philips Hue API
@@ -100,6 +101,22 @@ local x, y, Y = color.rgb_to_xy(1, 0, 0)  -- Red chromaticity coordinates
 local r, g, b = color.xy_to_rgb(x, y, Y)
 ```
 
+### SmartThings Edge Compatibility
+
+This library is designed for SmartThings Edge drivers and maintains full compatibility with platform color capabilities:
+
+- **colorTemperature**: `clampKelvin()` automatically handles [1–30000K] range
+- **colorControl**: Hue/saturation ranges [0–100] with automatic clamping
+- **CIE xy**: Full xyY support for color bulb integration
+- **No schema violations**: Compatible with developer.smartthings.com capability definitions
+
+```lua
+local color = require 'color'
+
+-- Kelvin values are automatically clamped to SmartThings range
+local kelvin = color.rgb_to_cct(r, g, b, true)  -- Already in [1, 30000] range
+```
+
 ### RGB to Color Temperature Conversion
 
 The `rgb_to_cct()` function provides two algorithms optimized for different use cases:
@@ -117,7 +134,7 @@ local cct_accurate = color.rgb_to_cct(1, 0.8, 0.6, true)
 **Algorithm Details:**
 - **Fast**: Lookup table interpolation with 78 reference points (optimized for performance)
 - **Accurate**: Distance-based minimization using golden section search (optimized for precision)
-- **Validation**: Both algorithms tested against CIE standard illuminants (A, D50, D65)
+- **Validation**: Both algorithms tested against CIE standard illuminants (A, D50, D65, 30000K)
 
 ## Testing
 
@@ -129,7 +146,7 @@ busted
 
 All 214+ tests should pass, covering:
 - **Round-trip conversion accuracy** with exact equality assertions
-- **Industry standard benchmarks** against CIE illuminants (A, D50, D65, 7500K)
+- **Industry standard benchmarks** against CIE illuminants (A, D50, D65, 30000K)
 - **Dual-algorithm validation** for RGB to CCT (fast approximation vs accurate distance-based)
 - **Edge cases** (black, white, grayscale, boundary conditions)
 - **Input validation and error handling** with type enforcement

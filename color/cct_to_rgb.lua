@@ -11,7 +11,7 @@ local Format = require 'color.format'
 --- blackbody chromaticities converted to sRGB. This provides smoother and more accurate
 --- results than the original 2012 coefficients, particularly around the 6600K breakpoint.
 ---
---- @param cct number Color temperature in Kelvin. Valid range: 1000K to 40000K.
+--- @param cct number Color temperature in Kelvin. Valid range: 1K to 30000K.
 ---     Values outside this range will be clamped.
 --- @return number red Red component in range [0, 1]
 --- @return number green Green component in range [0, 1]
