@@ -59,9 +59,13 @@ end
 --- Based on Neil Bartlett's 2015 blackbody approximation algorithm
 local function rgb_to_cct_ratio(r, _g, b)
     -- Handle edge case where red component is zero (ratio undefined)
+    -- Use reasonable defaults based on color characteristics
     if r == 0 then
-        -- Fall back to distance algorithm for colors with no red component
-        return rgb_to_cct_distance(r, _g, b)
+        if b > 0 then
+            return 40000  -- Colors with no red but some blue are very cool
+        else
+            return 2251   -- Pure green approximation (closest Planckian point)
+        end
     end
 
     local ratio = b / r
