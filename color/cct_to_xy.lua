@@ -1,4 +1,4 @@
-local clampXYY = require 'color.format.xyy'.clampXYY
+local clamp_xyy = require 'color.format.xyy'.clamp_xyy
 local rgb_to_xy = require 'color.rgb_to_xy'
 local cct_to_rgb = require 'color.cct_to_rgb'
 
@@ -20,7 +20,7 @@ local cct_to_rgb = require 'color.cct_to_rgb'
 --- local x, y, Y = cct_to_xy(6500)  -- Daylight white (D65)
 local function cct_to_xy(cct)
     assert(type(cct) == "number", "cct must be a number")
-    return clampXYY(rgb_to_xy(cct_to_rgb(cct)))
+    return clamp_xyy(rgb_to_xy(cct_to_rgb(cct)))
 end
 
 return cct_to_xy
