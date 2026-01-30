@@ -27,4 +27,7 @@ Color.mired_to_kelvin = Format.toKelvin
 Color.kelvin_to_mirek = Format.toMired
 Color.mirek_to_kelvin = Format.toKelvin
 
+-- Algorithm constants for self-documenting code
+Color.RGB_TO_CCT_DEFAULT_FAST = true
+
 return Color
