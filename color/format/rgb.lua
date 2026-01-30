@@ -3,7 +3,6 @@
 --- This module provides scaling, clamping, and rounding functions for RGB color values.
 
 local st_utils = require 'st.utils'
-local Clamp = require 'color.format.clamp'
 
 --- Clamps RGB values to 8-bit integer range [0, 255].
 ---
@@ -27,6 +26,18 @@ local function clampRGB16(r, g, b)
     return st_utils.clamp_value(r, 0, 65535),
            st_utils.clamp_value(g, 0, 65535),
            st_utils.clamp_value(b, 0, 65535)
+end
+
+--- Clamps RGB values to normalized range [0, 1].
+---
+--- @param r number Red value to clamp
+--- @param g number Green value to clamp
+--- @param b number Blue value to clamp
+--- @return number,number,number Clamped normalized RGB values
+local function clampRGB(r, g, b)
+    return st_utils.clamp_value(r, 0, 1),
+           st_utils.clamp_value(g, 0, 1),
+           st_utils.clamp_value(b, 0, 1)
 end
 
 --- Clamps RGB values to percentage range [0, 100].
@@ -70,7 +81,7 @@ end
 --- @param b8 number Blue value to convert (0-255)
 --- @return number,number,number Converted normalized RGB values
 local function fromRGB8(r8, g8, b8)
-    return Clamp.clampFFF(r8 / 255, g8 / 255, b8 / 255)
+    return clampRGB(r8 / 255, g8 / 255, b8 / 255)
 end
 
 --- Converts normalized RGB values to 16-bit integers (scale, clamp, then round).
@@ -90,7 +101,7 @@ end
 --- @param b16 number Blue value to convert (0-65535)
 --- @return number,number,number Converted normalized RGB values
 local function fromRGB16(r16, g16, b16)
-    return Clamp.clampFFF(r16 / 65535, g16 / 65535, b16 / 65535)
+    return clampRGB(r16 / 65535, g16 / 65535, b16 / 65535)
 end
 
 --- Converts normalized RGB values to percentage values [0,100].
@@ -110,13 +121,14 @@ end
 --- @param b100 number Blue value to convert (0-100)
 --- @return number,number,number Converted normalized RGB values
 local function fromRGB100(r100, g100, b100)
-    return Clamp.clampFFF(r100 / 100, g100 / 100, b100 / 100)
+    return clampRGB(r100 / 100, g100 / 100, b100 / 100)
 end
 
 return {
     clampRGB8 = clampRGB8,
     clampRGB16 = clampRGB16,
     clampRGB100 = clampRGB100,
+    clampRGB = clampRGB,
     roundRGB = roundRGB,
     toRGB8 = toRGB8,
     fromRGB8 = fromRGB8,

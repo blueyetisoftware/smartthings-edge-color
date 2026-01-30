@@ -23,6 +23,6 @@ local function fn(red, green, blue)
     assert(type(red) == "number", "red must be a number")
     assert(type(green) == "number", "green must be a number")
     assert(type(blue) == "number", "blue must be a number")
-    return st_utils.rgb_to_xy(Format.clampFFF(red, green, blue))
+    return st_utils.rgb_to_xy(Format.clampRGB(red, green, blue))
 end
 return fn

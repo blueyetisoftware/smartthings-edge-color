@@ -41,7 +41,8 @@ While SmartThings Edge provides basic color conversion functions through `st.uti
 - `xy_to_rgb()` - CIE xyY to RGB (via st_utils)
 - `cct_to_rgb()` - Color temperature to RGB
 - `rgb_to_cct()` - RGB to color temperature
-- `kelvin_to_mired()` / `mired_to_kelvin()` - Temperature unit conversions
+- `toMired(kelvin)` / `toKelvin(mired)` - Temperature unit conversions (format module)
+- `kelvin_to_mired()` / `mired_to_kelvin()` - Backward compatibility aliases
 - `kelvin_to_mirek()` / `mirek_to_kelvin()` - Backward compatibility aliases for Philips Hue API
 
 ### 🧮 Utility Functions

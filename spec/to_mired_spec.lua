@@ -26,4 +26,14 @@ describe("toMired", function()
     local mired = Format.toMired(10000)
     assert.is_true(mired >= 100 and mired <= 1000)
   end)
+
+  it("clamps low kelvin values to 1000K", function()
+    local mired = Format.toMired(500)  -- Below minimum
+    assert.equals(1000, mired)  -- 1000000 / 1000 = 1000
+  end)
+
+  it("clamps high kelvin values to 40000K", function()
+    local mired = Format.toMired(50000)  -- Above maximum
+    assert.equals(25, mired)  -- 1000000 / 40000 = 25
+  end)
 end)

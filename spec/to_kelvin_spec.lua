@@ -26,4 +26,14 @@ describe("toKelvin", function()
     local kelvin = Format.toKelvin(1000)
     assert.is_true(kelvin >= 1000 and kelvin <= 10000)
   end)
+
+  it("clamps low mired values to 25", function()
+    local kelvin = Format.toKelvin(10)  -- Below minimum
+    assert.equals(40000, kelvin)  -- 1000000 / 25 = 40000
+  end)
+
+  it("clamps high mired values to 1000", function()
+    local kelvin = Format.toKelvin(1200)  -- Above maximum
+    assert.equals(1000, kelvin)  -- 1000000 / 1000 = 1000
+  end)
 end)

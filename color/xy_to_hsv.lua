@@ -23,7 +23,7 @@ local function xy_to_hsv(x, y, Y)
     assert(type(x) == "number", "x must be a number")
     assert(type(y) == "number", "y must be a number")
     assert(Y == nil or type(Y) == "number", "Y must be a number or nil")
-    x, y, Y = Format.clampFFF(x, y, Y or 1)
+    x, y, Y = Format.clampXYY(x, y, Y or 1)
     return rgb_to_hsv(xy_to_rgb(x, y, Y))
 end
 

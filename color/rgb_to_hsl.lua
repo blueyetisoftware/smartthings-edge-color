@@ -26,7 +26,7 @@ local function fn(red, green, blue)
     assert(type(red) == "number", "red must be a number")
     assert(type(green) == "number", "green must be a number")
     assert(type(blue) == "number", "blue must be a number")
-    red, green, blue = Format.clampFFF(red, green, blue)
+    red, green, blue = Format.clampRGB(red, green, blue)
     local max = math.max(red, green, blue)
     local min = math.min(red, green, blue)
     local lightness = (max + min) / 2

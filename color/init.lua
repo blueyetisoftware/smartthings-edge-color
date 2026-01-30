@@ -22,9 +22,9 @@ Color.to_rgb16 = Format.toRGB16
 Color.from_rgb16 = Format.fromRGB16
 Color.to_rgb100 = Format.toRGB100
 Color.from_rgb100 = Format.fromRGB100
-Color.kelvin_to_mired = require 'color.kelvin_to_mired'
-Color.mired_to_kelvin = require 'color.mired_to_kelvin'
-Color.kelvin_to_mirek = Color.kelvin_to_mired
-Color.mirek_to_kelvin = Color.mired_to_kelvin
+Color.kelvin_to_mired = Format.toMired
+Color.mired_to_kelvin = Format.toKelvin
+Color.kelvin_to_mirek = Format.toMired
+Color.mirek_to_kelvin = Format.toKelvin
 
 return Color

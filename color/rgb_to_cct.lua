@@ -23,7 +23,7 @@ local cct_to_rgb = require 'color.cct_to_rgb'
 --- local cct = rgb_to_cct(0.8, 0.9, 1.0)  -- Approximately 10000K (cool white)
 local function rgb_to_cct(r, g, b)
     assert(type(r) == "number" and type(g) == "number" and type(b) == "number", "r, g, b must be numbers")
-    r, g, b = Format.clampFFF(r, g, b)
+    r, g, b = Format.clampRGB(r, g, b)
 
     -- g is intentionally not used: this inverse approximation relies only on the blue/red ratio,
     -- as green varies less independently along the blackbody locus in the underlying forward fit.

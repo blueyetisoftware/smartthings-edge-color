@@ -20,8 +20,7 @@ local cct_to_rgb = require 'color.cct_to_rgb'
 --- local x, y, Y = cct_to_xy(6500)  -- Daylight white (D65)
 local function cct_to_xy(cct)
     assert(type(cct) == "number", "cct must be a number")
-    local x, y, Y = rgb_to_xy(cct_to_rgb(cct))
-    return Format.clampFFF(x, y, Y)
+    return Format.clampXYY(rgb_to_xy(cct_to_rgb(cct)))
 end
 
 return cct_to_xy

@@ -23,6 +23,6 @@ local function fn(x, y, Y)
     assert(type(x) == "number", "x must be a number")
     assert(type(y) == "number", "y must be a number")
     assert(Y == nil or type(Y) == "number", "Y must be a number or nil")
-    return st_utils.xy_to_rgb(Format.clampFFF(x, y, Y or 1))
+    return st_utils.xy_to_rgb(Format.clampXYY(x, y, Y or 1))
 end
 return fn
