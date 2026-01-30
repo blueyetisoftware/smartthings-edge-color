@@ -4,6 +4,81 @@
 
 local lfs = require 'lfs'  -- LuaFileSystem for directory operations
 
+-- Define the color spaces and their formats (same as in generate_chains.lua)
+local SPACES = {
+    rgb = { formats = {'rgb8', 'rgb16', 'rgb100'} },
+    hsv = { formats = {'hsv', 'hdsv'} },
+    hsl = { formats = {'hsl'} },
+    cct = { formats = {'cct_kelvin', 'cct_mired'} },
+    xyy = { formats = {'xyy'} }
+}
+
+-- Define conversion pairs to generate modules for (same as in generate_chains.lua)
+local CONVERSION_PAIRS = {
+    {'rgb', 'hsv'},
+    {'rgb', 'hsl'},
+    {'rgb', 'cct'},
+    {'rgb', 'xyy'},
+    {'hsv', 'hsl'},
+    {'cct', 'xyy'}
+}
+
+-- Format conversion functions (same as in generate_chains.lua)
+local FORMAT_FUNCTIONS = {
+    rgb8 = { to = 'to_rgb8', from = 'from_rgb8' },
+    rgb16 = { to = 'to_rgb16', from = 'from_rgb16' },
+    rgb100 = { to = 'to_rgb100', from = 'from_rgb100' },
+    hdsv = { to = 'to_hdff', from = 'from_hdff' },
+    cct_mired = { to = 'to_mired', from = 'to_kelvin' },
+    cct_kelvin = { to = 'to_kelvin', from = 'to_mired' }
+}
+
+-- Get conversions for a module
+local function get_module_conversions(module_name)
+    local modules = {}
+
+    for _, pair in ipairs(CONVERSION_PAIRS) do
+        local from_space, to_space = pair[1], pair[2]
+        local name = from_space .. '_' .. to_space
+
+        -- Get all format combinations for this conversion pair
+        local conversions = {}
+        local from_formats = SPACES[from_space].formats
+        local to_formats = SPACES[to_space].formats
+
+        for _, from_fmt in ipairs(from_formats) do
+            for _, to_fmt in ipairs(to_formats) do
+                table.insert(conversions, {
+                    from = from_fmt,
+                    to = to_fmt,
+                    from_space = from_space,
+                    to_space = to_space
+                })
+            end
+        end
+
+        -- Add normalized pass-through functions (only for RGB-centric pairs)
+        if from_space == 'rgb' or to_space == 'rgb' then
+            table.insert(conversions, {
+                from = from_space,
+                to = to_space,
+                from_space = from_space,
+                to_space = to_space
+            })
+            table.insert(conversions, {
+                from = to_space,
+                to = from_space,
+                from_space = to_space,
+                to_space = from_space
+            })
+        end
+
+        modules[name] = conversions
+    end
+
+    return modules[module_name] or {}
+end
+
 -- Define test data for different color spaces
 local TEST_DATA = {
     rgb = {
@@ -106,68 +181,71 @@ local function get_test_data(fmt)
 end
 
 -- Generate test code for a chain conversion
-local function generate_test_code(chain)
-    local from_fmt = chain.from
-    local to_fmt = chain.to
-    local test_data = get_test_data(from_fmt)
+-- Generate test code for a module
+local function generate_test_code(module_name)
+    local conversions = get_module_conversions(module_name)
 
     local lines = {}
 
-    table.insert(lines, string.format("describe('%s_to_%s', function()", from_fmt, to_fmt))
+    table.insert(lines, string.format("describe('%s conversions', function()", module_name:gsub('_', ' ↔ ')))
     table.insert(lines, "")
 
-    -- Generate individual test cases
-    for i, input in ipairs(test_data) do
-        local input_str
-        if type(input) == 'table' then
-            input_str = table.concat(input, ', ')
-        else
-            input_str = tostring(input)
+    -- Generate test cases for each conversion
+    for _, conv in ipairs(conversions) do
+        local from_fmt, to_fmt = conv.from, conv.to
+        local func_name = string.format("%s_to_%s", from_fmt, to_fmt)
+
+        table.insert(lines, string.format("    describe('%s', function()", func_name))
+        table.insert(lines, "")
+
+        -- Get appropriate test data for the input format
+        local test_data = TEST_DATA[conv.from_space]
+        if FORMAT_CONVERTERS[from_fmt] and FORMAT_CONVERTERS[from_fmt].from then
+            -- Convert test data to the specific format
+            test_data = {}
+            for _, input in ipairs(TEST_DATA[conv.from_space]) do
+                if type(input) == 'table' then
+                    table.insert(test_data, {FORMAT_CONVERTERS[from_fmt].to(table.unpack(input))})
+                else
+                    table.insert(test_data, FORMAT_CONVERTERS[from_fmt].to(input))
+                end
+            end
+        elseif from_fmt == conv.from_space then
+            -- This is a normalized function, use raw test data
+            test_data = TEST_DATA[conv.from_space]
         end
 
-        table.insert(lines, string.format("    it('converts test case %d', function()", i))
-    if to_fmt == 'xyy' or to_fmt:match('^rgb') or to_fmt == 'hsv' or to_fmt == 'hdsv' or to_fmt == 'hsl' then
-        table.insert(lines, string.format("        local r, g, b = color.%s_to_%s(%s)", from_fmt, to_fmt, input_str))
-        table.insert(lines, "")
-        table.insert(lines, "        -- Verify results are not nil")
-        table.insert(lines, "        assert.is_not_nil(r)")
-        table.insert(lines, "        assert.is_not_nil(g)")
-        table.insert(lines, "        assert.is_not_nil(b)")
-    elseif to_fmt:match('^cct_') then
-        table.insert(lines, string.format("        local result = color.%s_to_%s(%s)", from_fmt, to_fmt, input_str))
-        table.insert(lines, "")
-        table.insert(lines, "        -- Verify result is not nil")
-        table.insert(lines, "        assert.is_not_nil(result)")
-        table.insert(lines, "        assert.is_number(result)")
-    end
-    table.insert(lines, "    end)")
-        table.insert(lines, "")
-    end
+        -- Generate individual test cases
+        for i, input in ipairs(test_data) do
+            local input_str
+            if type(input) == 'table' then
+                input_str = table.concat(input, ', ')
+            else
+                input_str = tostring(input)
+            end
 
-    -- Add round-trip test if applicable
-    if from_fmt ~= to_fmt and (
-        (from_fmt:match('^rgb') and to_fmt:match('^rgb')) or
-        (from_fmt == 'hsv' and to_fmt == 'hdsv') or
-        (from_fmt == 'hdsv' and to_fmt == 'hsv') or
-        (from_fmt:match('^cct_') and to_fmt:match('^cct_'))
-    ) then
-        table.insert(lines, "    it('round-trip conversion', function()")
-        if from_fmt:match('^rgb') or from_fmt == 'hsv' or from_fmt == 'hdsv' or from_fmt == 'hsl' then
-            table.insert(lines, string.format("        local orig_r, orig_g, orig_b = %s", type(test_data[1]) == 'table' and
-                table.concat(test_data[1], ', ') or tostring(test_data[1])))
-            table.insert(lines, string.format("        local conv_r, conv_g, conv_b = color.%s_to_%s(orig_r, orig_g, orig_b)", from_fmt, to_fmt))
-            table.insert(lines, string.format("        local back_r, back_g, back_b = color.%s_to_%s(conv_r, conv_g, conv_b)", to_fmt, from_fmt))
-            table.insert(lines, "        -- Note: Round-trip may not be exact due to numerical precision")
-            table.insert(lines, "        assert.is_not_nil(back_r)")
-            table.insert(lines, "        assert.is_not_nil(back_g)")
-            table.insert(lines, "        assert.is_not_nil(back_b)")
-        elseif from_fmt:match('^cct_') then
-            table.insert(lines, string.format("        local original = %s", tostring(test_data[1])))
-            table.insert(lines, string.format("        local converted = color.%s_to_%s(original)", from_fmt, to_fmt))
-            table.insert(lines, string.format("        local back = color.%s_to_%s(converted)", to_fmt, from_fmt))
-            table.insert(lines, "        -- Note: Round-trip may not be exact due to numerical precision")
-            table.insert(lines, "        assert.is_not_nil(back)")
+            table.insert(lines, string.format("        it('converts test case %d', function()", i))
+
+            -- Generate the function call and assertions based on output format
+            if to_fmt == 'xyy' or to_fmt:match('^rgb') or to_fmt == 'hsv' or to_fmt == 'hdsv' or to_fmt == 'hsl' then
+                table.insert(lines, string.format("            local result = {conversions.%s(%s)}", func_name, input_str))
+                table.insert(lines, "")
+                table.insert(lines, "            -- Verify results are not nil")
+                table.insert(lines, "            assert.is_not_nil(result[1])")
+                table.insert(lines, "            assert.is_not_nil(result[2])")
+                table.insert(lines, "            assert.is_not_nil(result[3])")
+            elseif to_fmt:match('^cct_') then
+                table.insert(lines, string.format("            local result = conversions.%s(%s)", func_name, input_str))
+                table.insert(lines, "")
+                table.insert(lines, "            -- Verify result is not nil")
+                table.insert(lines, "            assert.is_not_nil(result)")
+                table.insert(lines, "            assert.is_number(result)")
+            end
+
+            table.insert(lines, "        end)")
+            table.insert(lines, "")
         end
+
         table.insert(lines, "    end)")
         table.insert(lines, "")
     end
@@ -178,52 +256,51 @@ local function generate_test_code(chain)
 end
 
 -- Generate the full test file content
-local function generate_test_file(chain)
-    local from_fmt = chain.from
-    local to_fmt = chain.to
-
+local function generate_test_file(module_name)
     local lines = {}
 
     -- Header
-    table.insert(lines, string.format("--- Test specifications for %s_to_%s conversion", from_fmt, to_fmt))
+    table.insert(lines, string.format("--- Test specifications for %s conversion module", module_name:gsub('_', ' ↔ ')))
     table.insert(lines, "")
-    table.insert(lines, "local color = require 'color'")
+    table.insert(lines, "local conversions = require 'color.conversions." .. module_name .. "'")
     table.insert(lines, "")
 
     -- Test code
-    table.insert(lines, generate_test_code(chain))
+    table.insert(lines, generate_test_code(module_name))
 
     return table.concat(lines, '\n')
 end
 
 -- Main generation function
+-- Main generation function
 local function main()
     if arg[1] ~= '--generate' then
         print("Usage: lua generate_tests.lua --generate")
-        print("This will generate test files for all chain conversion functions in the spec/ directory")
+        print("This will generate test files for all grouped conversion modules in the spec/conversions/ directory")
         return
     end
 
-    -- Get all chain functions that exist
-    local chains = {}
-    local color_dir = 'color'
-    for file in lfs.dir(color_dir) do
-        if file:match('_to_') and file:match('%.lua$') then
-            local from_fmt, to_fmt = file:match('^(.-)_to_(.-)%.lua$')
-            if from_fmt and to_fmt then
-                table.insert(chains, {from = from_fmt, to = to_fmt})
+    -- Get all conversion modules that exist
+    local modules = {}
+    local conversions_dir = 'color/conversions'
+    for file in lfs.dir(conversions_dir) do
+        if file:match('%.lua$') then
+            local module_name = file:match('^(.-)%.lua$')
+            if module_name then
+                table.insert(modules, module_name)
             end
         end
     end
 
-    print(string.format("Generating %d test files...", #chains))
+    print(string.format("Generating %d test files for conversion modules...", #modules))
 
-    -- Create spec directory if it doesn't exist
+    -- Create spec directories if they don't exist
     lfs.mkdir('spec')
+    lfs.mkdir('spec/conversions')
 
-    for _, chain in ipairs(chains) do
-        local filename = string.format("spec/%s_to_%s_spec.lua", chain.from, chain.to)
-        local content = generate_test_file(chain)
+    for _, module_name in ipairs(modules) do
+        local filename = string.format("spec/conversions/%s_spec.lua", module_name)
+        local content = generate_test_file(module_name)
 
         local file = io.open(filename, 'w')
         if file then

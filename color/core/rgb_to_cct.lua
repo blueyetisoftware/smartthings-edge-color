@@ -1,6 +1,6 @@
 local st_utils = require 'st.utils'
 local clamp_rgb = require 'color.format.rgb'.clamp_rgb
-local cct_to_rgb = require 'color.cct_to_rgb'
+local cct_to_rgb = require 'color.core.cct_to_rgb'
 
 -- Lookup table for ratio-based CCT approximation (78 entries, ~600 bytes)
 local RATIO_LOOKUP = {}
