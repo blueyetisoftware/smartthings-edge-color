@@ -17,7 +17,7 @@
 --- local x, y, z = scale(100.0, 0.1, 0.2, 0.3) -- returns 10.0, 20.0, 30.0
 local function scale(scalar, a, b, c)
     assert(type(scalar) == "number", "scalar must be a number")
-    assert(a ~= nil and type(a) == "number", "a must be a number")
+    assert(type(a) == "number", "a must be a number")
     assert(b == nil or type(b) == "number", "b must be a number or nil")
     assert(c == nil or type(c) == "number", "c must be a number or nil")
     if c ~= nil then

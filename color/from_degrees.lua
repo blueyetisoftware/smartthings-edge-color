@@ -17,7 +17,7 @@
 ---
 --- @see to_degrees
 local function from_degrees(degrees)
-    assert(degrees ~= nil and type(degrees) == "number", "degrees must be a number")
+    assert(type(degrees) == "number", "degrees must be a number")
     -- Circular wrapping: any real number is valid for degrees
     return (degrees % 360) / 360.0
 end

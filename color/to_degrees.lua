@@ -17,7 +17,7 @@
 ---
 --- @see from_degrees
 local function to_degrees(value)
-    assert(value ~= nil and type(value) == "number", "value must be a number")
+    assert(type(value) == "number", "value must be a number")
     -- Circular wrapping: any real number is valid for normalized values
     return (value % 1) * 360.0
 end
