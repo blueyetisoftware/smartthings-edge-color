@@ -1,5 +1,4 @@
 local Format = require 'color.format'
-local spec_helper = require 'spec.spec_helper'
 
 describe("clampKelvin", function()
   it("clamps values to Kelvin range", function()
