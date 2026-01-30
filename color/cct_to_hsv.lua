@@ -1,4 +1,4 @@
-local clampHFF = require 'color.format.hue'.clampHFF
+local clamp_hff = require 'color.format.hue'.clamp_hff
 local cct_to_xy = require 'color.cct_to_xy'
 local xy_to_hsv = require 'color.xy_to_hsv'
 
@@ -20,7 +20,7 @@ local xy_to_hsv = require 'color.xy_to_hsv'
 --- local h, s, v = cct_to_hsv(6500)  -- Daylight white (D65)
 local function cct_to_hsv(cct)
     assert(type(cct) == "number", "cct must be a number")
-    return clampHFF(xy_to_hsv(cct_to_xy(cct)))
+    return clamp_hff(xy_to_hsv(cct_to_xy(cct)))
 end
 
 return cct_to_hsv

@@ -12,7 +12,7 @@ local st_utils = require 'st.utils'
 ---
 --- @param a number Value to clamp
 --- @return number Clamped Kelvin value compatible with SmartThings
-local function clampKelvin(a)
+local function clamp_kelvin(a)
     return st_utils.clamp_value(a, 1, 30000)
 end
 
@@ -23,7 +23,7 @@ end
 ---
 --- @param a number Value to clamp
 --- @return number Clamped Mired value
-local function clampMired(a)
+local function clamp_mired(a)
     return st_utils.clamp_value(a, 33, 1000000)
 end
 
@@ -38,34 +38,34 @@ end
 --- @return integer Color temperature in Mired, rounded to nearest integer
 ---
 --- @usage
---- local mired = toMired(3000)  -- returns 333 (warm white)
---- local mired = toMired(6500)  -- returns 154 (daylight white)
+--- local mired = to_mired(3000)  -- returns 333 (warm white)
+--- local mired = to_mired(6500)  -- returns 154 (daylight white)
 ---
---- @see toKelvin
-local function toMired(kelvin)
-    return st_utils.round(1000000 / clampKelvin(kelvin))  -- mired = 1,000,000 / kelvin (micro reciprocal degrees)
+--- @see to_kelvin
+local function to_mired(kelvin)
+    return st_utils.round(1000000 / clamp_kelvin(kelvin))  -- mired = 1,000,000 / kelvin (micro reciprocal degrees)
 end
 
 --- Converts color temperature from Mired (micro reciprocal degrees) to Kelvin.
 ---
---- This is the inverse operation of toMired. Mired values are converted
+--- This is the inverse operation of to_mired. Mired values are converted
 --- back to Kelvin by dividing 1,000,000 by the mired value.
 ---
 --- @param mired number Color temperature in Mired
 --- @return integer Color temperature in Kelvin, rounded to nearest integer
 ---
 --- @usage
---- local kelvin = toKelvin(333)  -- returns 3000 (warm white)
---- local kelvin = toKelvin(154)  -- returns 6494 (approximately daylight white)
+--- local kelvin = to_kelvin(333)  -- returns 3000 (warm white)
+--- local kelvin = to_kelvin(154)  -- returns 6494 (approximately daylight white)
 ---
---- @see toMired
-local function toKelvin(mired)
-    return st_utils.round(1000000 / clampMired(mired))  -- kelvin = 1,000,000 / mired (micro reciprocal degrees)
+--- @see to_mired
+local function to_kelvin(mired)
+    return st_utils.round(1000000 / clamp_mired(mired))  -- kelvin = 1,000,000 / mired (micro reciprocal degrees)
 end
 
 return {
-    clampKelvin = clampKelvin,
-    clampMired = clampMired,
-    toMired = toMired,
-    toKelvin = toKelvin
+    clamp_kelvin = clamp_kelvin,
+    clamp_mired = clamp_mired,
+    to_mired = to_mired,
+    to_kelvin = to_kelvin
 }

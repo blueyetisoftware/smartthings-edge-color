@@ -11,32 +11,32 @@ local CCT = require 'color.format.cct'
 
 return {
     -- RGB functions
-    clampRGB8 = RGB.clampRGB8,
-    clampRGB16 = RGB.clampRGB16,
-    clampRGB100 = RGB.clampRGB100,
-    clampRGB = RGB.clampRGB,
-    roundRGB = RGB.roundRGB,
-    toRGB8 = RGB.toRGB8,
-    fromRGB8 = RGB.fromRGB8,
-    toRGB16 = RGB.toRGB16,
-    fromRGB16 = RGB.fromRGB16,
-    toRGB100 = RGB.toRGB100,
-    fromRGB100 = RGB.fromRGB100,
+    clamp_rgb8 = RGB.clamp_rgb8,
+    clamp_rgb16 = RGB.clamp_rgb16,
+    clamp_rgb100 = RGB.clamp_rgb100,
+    clamp_rgb = RGB.clamp_rgb,
+    round_rgb = RGB.round_rgb,
+    to_rgb8 = RGB.to_rgb8,
+    from_rgb8 = RGB.from_rgb8,
+    to_rgb16 = RGB.to_rgb16,
+    from_rgb16 = RGB.from_rgb16,
+    to_rgb100 = RGB.to_rgb100,
+    from_rgb100 = RGB.from_rgb100,
 
     -- xyY functions
-    clampXYY = XYY.clampXYY,
+    clamp_xyy = XYY.clamp_xyy,
 
     -- Hue functions
-    clampHFF = Hue.clampHFF,
-    clampHdFF = Hue.clampHdFF,
-    toHdFF = Hue.toHdFF,
-    fromHdFF = Hue.fromHdFF,
+    clamp_hff = Hue.clamp_hff,
+    clamp_hdff = Hue.clamp_hdff,
+    to_hdff = Hue.to_hdff,
+    from_hdff = Hue.from_hdff,
 
     -- Kelvin functions
-    clampKelvin = CCT.clampKelvin,
-    clampMired = CCT.clampMired,
-    toMired = CCT.toMired,
-    toKelvin = CCT.toKelvin,
+    clamp_kelvin = CCT.clamp_kelvin,
+    clamp_mired = CCT.clamp_mired,
+    to_mired = CCT.to_mired,
+    to_kelvin = CCT.to_kelvin,
 
     -- Generic scaling functions
     to8 = function(a, b, c)

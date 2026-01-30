@@ -10,7 +10,7 @@ local st_utils = require 'st.utils'
 --- @param s number Saturation/value/lightness (0-1)
 --- @param v number Value/lightness (0-1)
 --- @return number,number,number Wrapped/clamped values
-local function clampHFF(h, s, v)
+local function clamp_hff(h, s, v)
     return h % 1,
            st_utils.clamp_value(s, 0, 1),
            st_utils.clamp_value(v, 0, 1)
@@ -22,7 +22,7 @@ end
 --- @param s number Saturation/value/lightness (0-1)
 --- @param v number Value/lightness (0-1)
 --- @return number,number,number Wrapped/clamped values
-local function clampHdFF(h, s, v)
+local function clamp_hdff(h, s, v)
     return h % 360,
            st_utils.clamp_value(s, 0, 1),
            st_utils.clamp_value(v, 0, 1)
@@ -34,8 +34,8 @@ end
 --- @param s number Saturation/value/lightness [0,1]
 --- @param v number Value/lightness [0,1]
 --- @return number,number,number Degrees-based HSL/HSV values
-local function toHdFF(h, s, v)
-    return clampHdFF(h * 360, s, v)
+local function to_hdff(h, s, v)
+    return clamp_hdff(h * 360, s, v)
 end
 
 --- Converts degrees-based HSL/HSV to normalized HSL/HSV.
@@ -44,13 +44,13 @@ end
 --- @param s number Saturation/value/lightness [0,1]
 --- @param v number Value/lightness [0,1]
 --- @return number,number,number Normalized HSL/HSV values
-local function fromHdFF(h, s, v)
-    return clampHFF(h / 360, s, v)
+local function from_hdff(h, s, v)
+    return clamp_hff(h / 360, s, v)
 end
 
 return {
-    clampHFF = clampHFF,
-    clampHdFF = clampHdFF,
-    toHdFF = toHdFF,
-    fromHdFF = fromHdFF
+    clamp_hff = clamp_hff,
+    clamp_hdff = clamp_hdff,
+    to_hdff = to_hdff,
+    from_hdff = from_hdff
 }
