@@ -5,44 +5,44 @@ describe("rgb_to_cct", function()
   describe("fast approximation (default)", function()
     it("converts RGB (1.0, 0.7, 0.4) to approx 2906K with tolerance", function()
       local cct = rgb_to_cct(1.0, 0.7, 0.4)  -- Warm color
-      spec_helper.assert_near(2906, cct, 100)
+      spec_helper.assert_near(2906, cct, 100, "Fast approximation for RGB (1.0, 0.7, 0.4) should be near 2906K")
     end)
 
     it("converts RGB (0.8, 0.9, 1.0) to approx 9985K with tolerance", function()
       local cct = rgb_to_cct(0.8, 0.9, 1.0)  -- Cool color
-      spec_helper.assert_near(9985, cct, 500)
+      spec_helper.assert_near(9985, cct, 500, "Fast approximation for RGB (0.8, 0.9, 1.0) should be near 9985K")
     end)
 
     it("converts RGB (1.0, 1.0, 1.0) to approx 6524K with tolerance", function()
       local cct = rgb_to_cct(1.0, 1.0, 1.0)  -- Pure white
-      spec_helper.assert_near(6524, cct, 200)
+      spec_helper.assert_near(6524, cct, 200, "Fast approximation for RGB (1.0, 1.0, 1.0) should be near 6524K")
     end)
 
     it("converts RGB (1.0, 0.5, 0.0) to approx 1K with tolerance", function()
       local cct = rgb_to_cct(1.0, 0.5, 0.0)  -- Deep red/orange
-      spec_helper.assert_near(1, cct, 100)
+      spec_helper.assert_near(1, cct, 100, "Fast approximation for RGB (1.0, 0.5, 0.0) should be near 1K")
     end)
   end)
 
   describe("accurate algorithm", function()
     it("converts RGB (1.0, 0.7, 0.4) to approx 2913K with tolerance", function()
       local cct = rgb_to_cct(1.0, 0.7, 0.4, true)  -- Warm color
-      spec_helper.assert_near(2913, cct, 100)
+      spec_helper.assert_near(2913, cct, 100, "Accurate algorithm for RGB (1.0, 0.7, 0.4) should be near 2913K")
     end)
 
     it("converts RGB (0.8, 0.9, 1.0) to approx 9463K with tolerance", function()
       local cct = rgb_to_cct(0.8, 0.9, 1.0, true)  -- Cool color
-      spec_helper.assert_near(9463, cct, 500)
+      spec_helper.assert_near(9463, cct, 500, "Accurate algorithm for RGB (0.8, 0.9, 1.0) should be near 9463K")
     end)
 
     it("converts RGB (1.0, 1.0, 1.0) to approx 6600K with tolerance", function()
       local cct = rgb_to_cct(1.0, 1.0, 1.0, true)  -- Pure white
-      spec_helper.assert_near(6600, cct, 200)
+      spec_helper.assert_near(6600, cct, 200, "Accurate algorithm for RGB (1.0, 1.0, 1.0) should be near 6600K")
     end)
 
     it("converts RGB (1.0, 0.5, 0.0) to approx 1803K with tolerance", function()
       local cct = rgb_to_cct(1.0, 0.5, 0.0, true)  -- Deep red/orange
-      spec_helper.assert_near(1803, cct, 200)
+      spec_helper.assert_near(1803, cct, 100, "Accurate algorithm for RGB (1.0, 0.5, 0.0) should be near 1803K")
     end)
   end)
 
@@ -138,6 +138,92 @@ describe("rgb_to_cct", function()
       spec_helper.assert_near(30000, cct_fast, 100)
       -- Accurate algorithm should be exact
       spec_helper.assert_near(30000, cct_accurate, 1)
+    end)
+
+    describe("real bulb simulation tests", function()
+      it("matches Philips Hue White Ambiance bulb", function()
+        -- Philips Hue White Ambiance bulb approximation (warm white)
+        local r, g, b = 1.0, 0.7, 0.4
+        local cct_fast = rgb_to_cct(r, g, b, false)
+        local cct_accurate = rgb_to_cct(r, g, b, true)
+
+        spec_helper.assert_near(2900, cct_fast, 200)
+        spec_helper.assert_near(2900, cct_accurate, 200)
+      end)
+
+      it("matches LIFX A19 Soft White bulb", function()
+        -- LIFX A19 Soft White bulb approximation (warm white)
+        local r, g, b = 1.0, 0.75, 0.55
+        local cct_fast = rgb_to_cct(r, g, b, false)
+        local cct_accurate = rgb_to_cct(r, g, b, true)
+
+        spec_helper.assert_near(3500, cct_fast, 200)
+        spec_helper.assert_near(3500, cct_accurate, 200)
+      end)
+
+      it("matches typical LED daylight bulb", function()
+        -- Typical LED daylight bulb approximation (cool white)
+        local r, g, b = 0.95, 0.98, 1.0
+        local cct_fast = rgb_to_cct(r, g, b, false)
+        local cct_accurate = rgb_to_cct(r, g, b, true)
+
+        -- LED bulbs have manufacturing variations, test within 300K of ~7000K
+        spec_helper.assert_near(7000, cct_fast, 300)
+        spec_helper.assert_near(7000, cct_accurate, 300)
+      end)
+    end)
+
+    describe("fuzz testing", function()
+      it("handles random RGB inputs without crashing", function()
+        -- Test 100 random RGB combinations
+        for i = 1, 100 do
+          local r = math.random()
+          local g = math.random()
+          local b = math.random()
+
+          -- Should not crash or return NaN
+          local cct_fast = rgb_to_cct(r, g, b, false)
+          local cct_accurate = rgb_to_cct(r, g, b, true)
+
+          -- Should be valid numbers within expected range
+          assert.is_true(type(cct_fast) == "number")
+          assert.is_true(type(cct_accurate) == "number")
+          assert.is_true(cct_fast >= 1 and cct_fast <= 30000)
+          assert.is_true(cct_accurate >= 1 and cct_accurate <= 30000)
+          assert.is_true(cct_fast == cct_fast)  -- Not NaN
+          assert.is_true(cct_accurate == cct_accurate)  -- Not NaN
+        end
+      end)
+
+      it("handles edge case RGB combinations", function()
+        local edge_cases = {
+          {1, 1, 1},       -- Pure white
+          {0, 0, 0},       -- Black
+          {1, 0, 0},       -- Pure red
+          {0, 1, 0},       -- Pure green
+          {0, 0, 1},       -- Pure blue
+          {1, 1, 0},       -- Yellow
+          {1, 0, 1},       -- Magenta
+          {0, 1, 1},       -- Cyan
+          {0.5, 0.5, 0.5}, -- Gray
+          {1e-6, 1e-6, 1e-6}, -- Near black
+          {0.999, 0.999, 0.999}, -- Near white
+        }
+
+        for _, rgb in ipairs(edge_cases) do
+          local r, g, b = rgb[1], rgb[2], rgb[3]
+          local cct_fast = rgb_to_cct(r, g, b, false)
+          local cct_accurate = rgb_to_cct(r, g, b, true)
+
+          -- Should be valid numbers within range
+          assert.is_true(type(cct_fast) == "number")
+          assert.is_true(type(cct_accurate) == "number")
+          assert.is_true(cct_fast >= 1 and cct_fast <= 30000)
+          assert.is_true(cct_accurate >= 1 and cct_accurate <= 30000)
+          assert.is_true(cct_fast == cct_fast)  -- Not NaN
+          assert.is_true(cct_accurate == cct_accurate)  -- Not NaN
+        end
+      end)
     end)
   end)
 end)
