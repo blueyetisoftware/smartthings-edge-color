@@ -4,7 +4,7 @@ local cct_to_rgb = require 'color.cct_to_rgb'
 
 --- Fast approximation using blue/red ratio (ignores green for performance)
 --- Based on Neil Bartlett's 2015 blackbody approximation algorithm
-local function rgb_to_cct_fast(r, g, b)
+local function rgb_to_cct_ratio(r, _g, b)
     local ratio = b / r
     local cct
     local epsilon = 0.4  -- convergence threshold for binary search
@@ -25,12 +25,12 @@ local function rgb_to_cct_fast(r, g, b)
 end
 
 --- Accurate algorithm using full RGB distance comparison
-local function rgb_to_cct_accurate(r, g, b)
-    local epsilon = 0.001  -- RGB distance threshold for convergence
+local function rgb_to_cct_distance(r, g, b)
     local min = 1000
     local max = 40000
     local best_cct = 1000
     local best_distance = math.huge
+    local epsilon = 0.1  -- convergence threshold for ternary search
 
     -- First, do a coarse search to find the approximate range
     for temp = min, max, 100 do
@@ -46,7 +46,7 @@ local function rgb_to_cct_accurate(r, g, b)
     min = math.max(1000, best_cct - 200)
     max = math.min(40000, best_cct + 200)
 
-    while max - min > 1 do
+    while max - min > epsilon do
         local cct1 = min + (max - min) / 3
         local cct2 = max - (max - min) / 3
 
@@ -77,7 +77,7 @@ end
 --- @param g number Green component in range [0,1]
 --- @param b number Blue component in range [0,1]
 --- @param accurate boolean|nil If true, uses the accurate algorithm with full RGB
----     distance comparison. If false or nil, uses the fast approximation (default).
+---     distance comparison. If false or nil, uses the fast ratio approximation (default).
 --- @return number Color temperature in Kelvin, rounded to nearest integer
 ---
 --- @raise error if r, g, or b are not numbers
@@ -93,9 +93,9 @@ local function rgb_to_cct(r, g, b, accurate)
     r, g, b = Format.clampRGB(r, g, b)
 
     if accurate == true then
-        return rgb_to_cct_accurate(r, g, b)
+        return rgb_to_cct_distance(r, g, b)
     else
-        return rgb_to_cct_fast(r, g, b)
+        return rgb_to_cct_ratio(r, g, b)
     end
 end
 
