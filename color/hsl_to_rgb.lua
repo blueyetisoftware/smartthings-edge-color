@@ -1,4 +1,4 @@
-local Format = require 'color.format'
+local clampHFF = require 'color.format.hue'.clampHFF
 
 --- Converts HSL (Hue/Saturation/Lightness) color values to RGB color values.
 ---
@@ -26,7 +26,7 @@ local function fn(hue, saturation, lightness)
     assert(type(hue) == "number", "hue must be a number")
     assert(type(saturation) == "number", "saturation must be a number")
     assert(lightness == nil or type(lightness) == "number", "lightness must be a number or nil")
-    hue, saturation, lightness = Format.clampHFF(hue, saturation, lightness or 0.5)
+    hue, saturation, lightness = clampHFF(hue, saturation, lightness or 0.5)
     -- Handle grayscale case
     if saturation <= 0 then
         return lightness, lightness, lightness
