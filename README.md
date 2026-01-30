@@ -117,6 +117,99 @@ local color = require 'color'
 local kelvin = color.rgb_to_cct(r, g, b, true)  -- Already in [1, 30000] range
 ```
 
+## Edge Driver Integration Guide
+
+### 🚀 Performance Optimization for Drivers
+
+**Use the fast algorithm by default** - it's ~200x faster and suitable for most driver use cases:
+
+```lua
+local color = require 'color'
+
+-- ✅ RECOMMENDED: Fast algorithm for hot paths (fade effects, frequent updates)
+local cct = color.rgb_to_cct(r, g, b)  -- Default is fast
+
+-- ⚠️  Use accurate only when precision is critical
+local cct = color.rgb_to_cct(r, g, b, true)  -- 200x slower
+```
+
+### 🎯 Driver Integration Points
+
+**setColorTemperature Command:**
+```lua
+function driver_handler.setColorTemperature(driver, device, command)
+  local kelvin = command.args.temperature
+  local r, g, b = color.cct_to_rgb(kelvin)
+  -- Convert to device-specific format and send command
+end
+```
+
+**setColor Command:**
+```lua
+function driver_handler.setColor(driver, device, command)
+  local args = command.args
+  local r, g, b
+
+  if args.colorMode == "RGB" then
+    -- Convert from 8-bit RGB [0,255] to normalized [0,1]
+    r, g, b = color.from_rgb8(args.color.r, args.color.g, args.color.b)
+  elseif args.colorMode == "HSV" then
+    -- Convert from HSV to RGB
+    r, g, b = color.hsv_to_rgb(args.color.hue/100, args.color.saturation/100, args.color.value/100)
+  end
+
+  -- Update colorTemperature attribute if bulb supports both modes
+  local cct = color.rgb_to_cct(r, g, b)  -- Fast algorithm
+  device:emit_event(capabilities.colorTemperature.colorTemperature(cct))
+
+  -- Send device command in appropriate format
+end
+```
+
+**Color Mode Handling:**
+```lua
+-- Check supportedColorModes capability
+local supported_modes = device:get_field("supportedColorModes") or {}
+
+if utils.table_contains(supported_modes, "RGB") then
+  -- Use RGB mode
+  local r8, g8, b8 = color.to_rgb8(r, g, b)
+  -- Send RGB command
+elseif utils.table_contains(supported_modes, "CT") then
+  -- Use color temperature mode
+  local cct = color.rgb_to_cct(r, g, b)
+  -- Send CCT command
+end
+```
+
+### 🔍 Debug Logging for Production
+
+Add optional debug logging for significant value clamping:
+
+```lua
+local function setColorTemperature(driver, device, command)
+  local kelvin = command.args.temperature
+
+  -- Check for significant clamping
+  local clamped_kelvin = color.clampKelvin(kelvin)
+  if math.abs(kelvin - clamped_kelvin) > 500 then
+    driver:debug(string.format("Color temperature clamped: %dK -> %dK", kelvin, clamped_kelvin))
+  end
+
+  -- Continue with clamped value...
+end
+```
+
+### 🧠 Memory Considerations
+
+- **No temporary table allocation** in hot paths - all algorithms use scalar operations
+- **Pre-computed lookup tables** loaded at module initialization
+- **GC-friendly** - suitable for resource-constrained Edge hubs
+
+### 🔧 Floating-Point Determinism
+
+The library uses standard Lua math operations that are deterministic across platforms. No platform-specific floating-point differences expected with LuaJIT.
+
 ### RGB to Color Temperature Conversion
 
 The `rgb_to_cct()` function provides two algorithms optimized for different use cases:
@@ -144,7 +237,7 @@ This library includes comprehensive test coverage using the [busted](https://lun
 busted
 ```
 
-All 214+ tests should pass, covering:
+All 220+ tests should pass, covering:
 - **Round-trip conversion accuracy** with exact equality assertions
 - **Industry standard benchmarks** against CIE illuminants (A, D50, D65, 30000K)
 - **Dual-algorithm validation** for RGB to CCT (fast approximation vs accurate distance-based)
@@ -157,7 +250,7 @@ All 214+ tests should pass, covering:
 This library implements professional color mathematics standards with rigorous validation:
 
 ### 🧪 Comprehensive Test Suite
-- **215+ automated tests** covering all conversion functions and edge cases
+- **220+ automated tests** covering all conversion functions and edge cases
 - **Industry standard benchmarks** against CIE standard illuminants (A, D50, D65, 30000K)
 - **SmartThings platform validation** ensuring full compatibility with Edge driver requirements
 
