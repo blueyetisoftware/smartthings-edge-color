@@ -1,6 +1,6 @@
 # smartthings-edge-color
 
-A comprehensive color space conversion library for SmartThings Edge lighting drivers, providing consistent APIs, robust validation, and **industry-validated accuracy** with **215+ automated tests**.
+A comprehensive color space conversion library for SmartThings Edge lighting drivers, providing consistent APIs, robust validation, and **industry-validated accuracy** with **460+ automated tests**.
 
 ## Value Proposition over SmartThings Edge st_utils
 
@@ -22,23 +22,63 @@ While SmartThings Edge provides basic color conversion functions through `st.uti
 - **Accurate Documentation**: Comments accurately describe what each function does, rather than making incorrect claims about "standard algorithms" when st_utils is actually used
 - **Comprehensive Testing**: 220+ automated tests ensure correctness and prevent regressions, including industry standard benchmarks against CIE illuminants
 
-### 📊 Supported Color Spaces and Conversions
+### � SmartThings Edge API Differences
 
-| Color Space | Description | Range |
-|-------------|-------------|-------|
-| RGB | Red, Green, Blue | [0,1] |
-| HSL | Hue, Saturation, Lightness | H: [0,1], S: [0,1], L: [0,1] |
-| HSV | Hue, Saturation, Value | H: [0,1], S: [0,1], V: [0,1] |
-| xyY | CIE 1931 chromaticity coordinates | x: [0,1], y: [0,1], Y: [0,1] |
-| CCT | Correlated Color Temperature | 1K - 30000K |
+This library intentionally diverges from SmartThings Edge `st_utils` APIs to provide a better developer experience. All differences are documented here:
+
+#### Color Space Naming
+- **Library**: Uses `xyy_to_rgb()` and `rgb_to_xyy()` for CIE 1931 xyY color space conversions
+- **st_utils**: Uses misleading `xy_to_rgb()` and `rgb_to_xy()` names that suggest only xy chromaticity coordinates
+- **Rationale**: xyY functions return 3 values (x, y, Y), not 2. The `xyy` naming accurately represents the full color space operations.
+
+#### Input Range Normalization
+- **Library**: All color components use normalized [0,1] ranges for consistency
+- **st_utils**: Inconsistent ranges:
+  - HSL: Hue/Saturation/Lightness in [0,100] (percentages)
+  - RGB: Red/Green/Blue in [0,255] (8-bit values)
+  - xyY: x/y/Y in [0,1] (normalized)
+- **Rationale**: Normalized ranges eliminate confusion and match standard color APIs. Use `color.to_rgb100()`, `color.from_rgb8()`, etc. for conversions.
+
+#### Function Behavior
+- **Library**: Robust input validation with automatic clamping and clear error messages
+- **st_utils**: Limited validation, may crash on invalid inputs or produce undefined results
+- **Rationale**: Production-ready drivers need defensive programming to handle edge cases gracefully.
+
+### �📊 Supported Color Spaces and Formats
+
+| Color Space | Description | Range | Format Variants |
+|-------------|-------------|-------|-----------------|
+| RGB | Red, Green, Blue | [0,1] | `RGB`, `RGB8`, `HEX24`, `RGB100` |
+| HSL | Hue, Saturation, Lightness | H: [0,1], S: [0,1], L: [0,1] | `HSL`, `HSL360`, `HSL100` |
+| HSV | Hue, Saturation, Value | H: [0,1], S: [0,1], V: [0,1] | `HSV`, `HSV360`, `HSV100` |
+| xyY | CIE 1931 chromaticity coordinates | x: [0,1], y: [0,1], Y: [0,1] | `XYY` |
+| CCT | Correlated Color Temperature | 1K - 30000K | `CCTK`, `CCTM` |
+
+#### Format Naming Convention
+
+| Format | Meaning | Example Values |
+|--------|---------|----------------|
+| **RGB** | Normalized RGB (0-1) | `1.0, 0.5, 0.0` |
+| **RGB8** | 8-bit RGB (0-255) | `255, 128, 0` |
+| **HEX24** | 24-bit hex integer | `0xFF8000` |
+| **RGB100** | Percentage RGB (0-100%) | `100, 50, 0` |
+| **HSV** | Normalized HSV | `0.1, 0.8, 1.0` |
+| **HSV360** | HSV with hue in degrees | `36, 0.8, 1.0` |
+| **HSV100** | HSV with percentage values | `10, 80, 100` |
+| **HSL** | Normalized HSL | `0.1, 0.8, 0.5` |
+| **HSL360** | HSL with hue in degrees | `36, 0.8, 0.5` |
+| **HSL100** | HSL with percentage values | `10, 80, 50` |
+| **XYY** | CIE xyY coordinates | `0.5, 0.4, 1.0` |
+| **CCTK** | CCT in Kelvin | `6500` |
+| **CCTM** | CCT in Mired | `153` |
 
 ### 🔄 Available Conversions
 
 - `rgb_to_hsl()` - RGB to HSL
 - `hsl_to_rgb()` - HSL to RGB
 - `rgb_to_hsv()` - RGB to HSV (via st_utils)
-- `rgb_to_xy()` - RGB to CIE xyY (via st_utils)
-- `xy_to_rgb()` - CIE xyY to RGB (via st_utils)
+- `rgb_to_xyy()` - RGB to CIE xyY (via st_utils)
+- `xyy_to_rgb()` - CIE xyY to RGB (via st_utils)
 - `cct_to_rgb()` - Color temperature to RGB
 - `rgb_to_cct()` - RGB to color temperature (dual-algorithm: fast approximation + accurate distance-based)
 - `clampKelvin(k)` - Clamp Kelvin to SmartThings [1,30000] range
@@ -49,11 +89,13 @@ While SmartThings Edge provides basic color conversion functions through `st.uti
 ### 🧮 Utility Functions
 
 - `to_rgb8(r, g, b)` / `from_rgb8(r8, g8, b8)` - Convert between [0,1] and [0,255] RGB
-- `to_rgb16(r, g, b)` / `from_rgb16(r16, g16, b16)` - Convert between [0,1] and [0,65535] RGB
+- `to_rgb_hex_int(r, g, b)` / `from_rgb_hex(hex)` - Convert between [0,1] RGB and 24-bit hex integers (0xRRGGBB)
 - `to_rgb100(r, g, b)` / `from_rgb100(r100, g100, b100)` - Convert between [0,1] and [0,100] RGB
-- `clampRGB8(r, g, b)` / `clampRGB16(r, g, b)` / `clampRGB100(r, g, b)` - Clamp RGB values to integer ranges
-- `roundRGB(r, g, b)` - Round RGB values to integers (no scaling)
-- `to_degrees()` / `from_degrees()` - Convert between [0,1] and [0,360] (for hue)
+- `clamp_rgb8(r, g, b)` / `clamp_rgb100(r, g, b)` - Clamp RGB values to valid ranges
+- `round_rgb(r, g, b)` - Round RGB values to integers (no scaling)
+- `to_hsv360()` / `from_hsv360()` - Convert HSV between normalized [0,1] and degrees [0,360]
+- `to_hsl360()` / `from_hsl360()` - Convert HSL between normalized [0,1] and degrees [0,360]
+- `to_kelvin(mired)` / `to_mired(kelvin)` - Convert between CCT units
 
 ## Installation
 
@@ -63,41 +105,154 @@ Copy the `color/` directory to your SmartThings Edge driver project.
 local color = require 'color'
 ```
 
-### 📦 Bundle Size Optimization
+### � Directory Structure
+
+The library is organized for optimal tree-shaking and maintainability:
+
+```
+color/
+├── init.lua              # Main module (loads all submodules)
+├── core/                 # Core conversion implementations
+│   ├── rgb_to_hsv.lua    # RGB → HSV conversion
+│   ├── hsv_to_rgb.lua    # HSV → RGB conversion
+│   ├── rgb_to_hsl.lua    # RGB → HSL conversion
+│   ├── hsl_to_rgb.lua    # HSL → RGB conversion
+│   ├── rgb_to_cct.lua    # RGB → CCT conversion
+│   ├── cct_to_rgb.lua    # CCT → RGB conversion
+│   ├── rgb_to_xyy.lua    # RGB → xyY conversion
+│   └── xyy_to_rgb.lua    # xyY → RGB conversion
+├── conversions/          # Generated grouped conversion modules (run generate_chains.lua)
+│   ├── rgb_hsv.lua       # All RGB ↔ HSV format variants
+│   ├── rgb_hsl.lua       # All RGB ↔ HSL format variants
+│   ├── rgb_cct.lua       # All RGB ↔ CCT format variants
+│   ├── rgb_xyy.lua       # All RGB ↔ xyY format variants
+│   ├── hsv_hsl.lua       # HSV ↔ HSL conversions
+│   └── cct_xyy.lua       # CCT ↔ xyY conversions
+└── format/               # Format conversion utilities
+    ├── rgb.lua           # RGB format conversions (8-bit, hex, 100-scale)
+    ├── hsv.lua           # HSV format conversions (degrees, normalized)
+    ├── hsl.lua           # HSL format conversions (degrees, normalized)
+    ├── cct.lua           # CCT format conversions (Kelvin ↔ Mired)
+    └── xyy.lua           # xyY format utilities
+```
+
+**Core Implementation**: Conversion algorithms are implemented in `color/core/` and use normalized [0,1] ranges for consistency.
+
+### 🏗️ Architectural Design Rationale
+
+This library follows **optimal color space conversion architecture** that balances performance, maintainability, and mathematical correctness:
+
+#### **RGB-Centric Core Conversions**
+All fundamental conversions route through RGB as the **display-referred foundation**:
+- **RGB ↔ HSV/HSL**: Core perceptual color space conversions
+- **RGB ↔ CCT**: Color temperature calculations from RGB primaries  
+- **RGB ↔ xyY**: CIE chromaticity and luminance from RGB
+
+**Rationale**: RGB is the universal display color space. All other spaces are derived from RGB primaries, making this the mathematically sound foundation for conversions.
+
+#### **Direct Cross-Space Conversions (Selective)**
+Only **mathematically simple relationships** get direct implementations:
+- **HSV ↔ HSL**: H/S are identical, V/L have simple relationship (`L = V × (1 - S/2)`, `V = L + S × min(L, 1-L)`)
+- **No other direct conversions**: CCT↔xyY formulas exist but are niche and complex
+
+**Rationale**: Most cross-space conversions require RGB intermediates. Direct conversions are only implemented when they provide clear performance benefits without compromising accuracy.
+
+#### **Generated Grouped Modules**
+Conversion modules in `color/conversions/` are **generated on-demand** to:
+- Enable maximum tree-shaking for Edge driver bundle optimization
+- Maintain consistency across format variants
+- Keep the repository clean while supporting all use cases
+
+**Rationale**: Manual maintenance of format variants would be error-prone. Generation ensures consistency while allowing selective imports for minimal bundle sizes.
+
+**Generated Modules**: Grouped conversion modules in `color/conversions/` are generated on-demand to enable tree-shaking while keeping the repository clean.
+
+### �📦 Bundle Size Optimization
 
 This library is designed for **selective imports** to minimize bundle size in Edge drivers. Use granular requires instead of the top-level `color` module to enable tree-shaking. The library internals also use selective imports from leaf modules (e.g., `color.format.rgb.clampRGB`) rather than top-level format modules, enabling maximum tree-shaking efficiency.
 
 ```lua
 -- ✅ RECOMMENDED: Selective imports for minimal bundles
-local cct = require 'color.format.cct'  -- Only CCT utilities
-local rgb = require 'color.format.rgb'  -- Only RGB utilities
+local rgb_hsv = require 'color.conversions.rgb_hsv'  -- Only RGB↔HSV conversions
+local rgb_cct = require 'color.conversions.rgb_cct'  -- Only RGB↔CCT conversions
 
 -- ⚠️  AVOID: Top-level import loads everything
 -- local color = require 'color'  -- Loads all modules
 ```
 
 **Common Driver Scenarios:**
-- **Tunable White Only**: `require 'color.format.cct'`
-- **Full Color Control**: `require 'color.format.rgb'`, `require 'color.format.hue'`, `require 'color.format.cct'`
-- **xy-based Bulbs**: `require 'color.format.xyy'`, `require 'color.format.cct'`
+- **Tunable White Only**: `require 'color.conversions.rgb_cct'`
+- **Full Color Control**: `require 'color.conversions.rgb_hsv'`, `require 'color.conversions.rgb_hsl'`, `require 'color.conversions.rgb_cct'`
+- **xy-based Bulbs**: `require 'color.conversions.rgb_xyy'`, `require 'color.conversions.cct_xyy'`
+
+### 🔀 Grouped Conversion Modules
+
+For maximum tree-shaking efficiency, the library provides **grouped conversion modules** that contain all format variants for related color space conversions. These modules are **generated** and located in `color/conversions/` and enable selective loading of conversion families.
+
+**To generate the conversion modules:**
+```bash
+lua generate_chains.lua --generate
+lua generate_tests.lua --generate
+```
+
+Example usage after generation:
+```lua
+-- Load all RGB ↔ HSV conversions (includes normalized pass-throughs)
+local rgb_hsv = require 'color.conversions.rgb_hsv'
+local h, s, v = rgb_hsv.rgb8_to_hsv(255, 128, 0)  -- Convert 8-bit RGB to HSV
+local r, g, b = rgb_hsv.hsv_to_rgb8(0.1, 0.8, 1)  -- Convert HSV to 8-bit RGB
+local hex = rgb_hsv.hsv_to_hex24(0.1, 0.8, 1)     -- Convert HSV to 24-bit hex
+local h, s, v = rgb_hsv.hex24_to_hsv(0xFF8000)     -- Convert 24-bit hex to HSV
+local h, s, v = rgb_hsv.rgb_to_hsv(1, 0.5, 0)     -- Normalized RGB to HSV
+local r, g, b = rgb_hsv.hsv_to_rgb(0.1, 0.8, 1)   -- Normalized HSV to RGB
+
+-- Load all RGB ↔ HSL conversions
+local rgb_hsl = require 'color.conversions.rgb_hsl'
+local h, s, l = rgb_hsl.rgb100_to_hsl(100, 50, 0)  -- Convert 0-100 RGB to HSL
+local r, g, b = rgb_hsl.hsl_to_rgb(0.1, 0.8, 0.5)  -- Normalized HSL to RGB
+
+-- Load all RGB ↔ CCT conversions
+local rgb_cct = require 'color.conversions.rgb_cct'
+local kelvin = rgb_cct.rgb_to_cctk(1, 0.5, 0.2)    -- RGB to Kelvin
+local r, g, b = rgb_cct.cctm_to_rgb(250, 200, 150) -- Mired to RGB
+
+-- Cross-space conversions (through RGB)
+local hsv_hsl = require 'color.conversions.hsv_hsl'
+local h, s, l = hsv_hsl.hsv360_to_hsl(120, 0.8, 0.9) -- Degrees-based HSV to HSL
+
+local cct_xyy = require 'color.conversions.cct_xyy'
+local x, y, Y = cct_xyy.cct_kelvin_to_xyy(6500)  -- Color temperature to xyY
+```
+
+Available grouped modules (after generation):
+- `color.conversions.rgb_hsv` - RGB ↔ HSV (6 format combinations + 2 normalized)
+- `color.conversions.rgb_hsl` - RGB ↔ HSL (3 format combinations + 2 normalized)  
+- `color.conversions.rgb_cct` - RGB ↔ CCT (6 format combinations + 2 normalized)
+- `color.conversions.rgb_xyy` - RGB ↔ xyY (3 format combinations + 2 normalized)
+- `color.conversions.hsv_hsl` - HSV ↔ HSL (2 format combinations, through RGB)
+- `color.conversions.cct_xyy` - CCT ↔ xyY (2 format combinations, through RGB)
+
+**Test Structure**: Conversion module tests are generated in `spec/conversions/` to mirror the library structure.
 
 ## Usage Examples
 
 ### Basic Color Conversion
 ```lua
 -- Import only the modules you need for minimal bundle size
-local rgb_to_hsl = require 'color.rgb_to_hsl'
-local hsl_to_rgb = require 'color.hsl_to_rgb'
-local cct_to_rgb = require 'color.cct_to_rgb'
+local rgb_hsv = require 'color.conversions.rgb_hsv'
+local rgb_hsl = require 'color.conversions.rgb_hsl'
+
+-- Convert RGB to HSV
+local h, s, v = rgb_hsv.rgb_to_hsv(1, 0, 0)  -- Pure red: 0, 1, 1
+
+-- Convert HSV to RGB
+local r, g, b = rgb_hsv.hsv_to_rgb(0, 1, 0.5)  -- Red: 1, 0, 0
 
 -- Convert RGB to HSL
-local h, s, l = rgb_to_hsl(1, 0, 0)  -- Pure red: 0, 1, 1
+local h, s, l = rgb_hsl.rgb_to_hsl(1, 0, 0)  -- Pure red: 0, 1, 0.5
 
 -- Convert HSL to RGB
-local r, g, b = hsl_to_rgb(0, 1, 0.5)  -- Red: 1, 0, 0
-
--- Convert color temperature to RGB
-local r, g, b = cct_to_rgb(3000)  -- Warm white
+local r, g, b = rgb_hsl.hsl_to_rgb(0, 1, 0.5)  -- Red: 1, 0, 0
 ```
 
 ### Working with Different Ranges
@@ -116,10 +271,10 @@ local r8, g8, b8 = color.to_8bit(1, 0.5, 0)  -- 255, 128, 0
 local color = require 'color'
 
 -- Convert RGB to CIE xyY chromaticity
-local x, y, Y = color.rgb_to_xy(1, 0, 0)  -- Red chromaticity coordinates
+local x, y, Y = color.rgb_to_xyy(1, 0, 0)  -- Red chromaticity coordinates
 
 -- Convert back to RGB
-local r, g, b = color.xy_to_rgb(x, y, Y)
+local r, g, b = color.xyy_to_rgb(x, y, Y)
 ```
 
 ### SmartThings Edge Compatibility
@@ -155,6 +310,20 @@ local cct = color.rgb_to_cct(r, g, b)  -- Default is fast
 
 -- ⚠️  Use accurate only when precision is critical
 local cct = color.rgb_to_cct(r, g, b, true)  -- 200x slower
+```
+
+**Direct HSV↔HSL conversions** eliminate unnecessary RGB intermediate steps for better performance:
+
+```lua
+local color = require 'color'
+
+-- ✅ RECOMMENDED: Direct conversion (more efficient)
+local h, s, l = color.hsv_to_hsl(hue, saturation, value)
+local h, s, v = color.hsl_to_hsv(hue, saturation, lightness)
+
+-- ⚠️  Avoid: Indirect conversion through RGB (slower)
+local r, g, b = color.hsv_to_rgb(hue, saturation, value)
+local h, s, l = color.rgb_to_hsl(r, g, b)
 ```
 
 ### 🎯 Driver Integration Points
@@ -278,7 +447,7 @@ All 220+ tests should pass, covering:
 This library implements professional color mathematics standards with rigorous validation:
 
 ### 🧪 Comprehensive Test Suite
-- **220+ automated tests** covering all conversion functions and edge cases
+- **460+ automated tests** covering all conversion functions and edge cases
 - **Industry standard benchmarks** against CIE standard illuminants (A, D50, D65, 30000K)
 - **SmartThings platform validation** ensuring full compatibility with Edge driver requirements
 
@@ -302,7 +471,7 @@ This library implements professional color mathematics standards with rigorous v
 
 ## API Reference
 
-See the individual function files in the `color/` directory for detailed documentation and parameter descriptions.
+See the individual function files in the `color/core/` directory for detailed documentation and parameter descriptions of core conversion functions. Format utilities are documented in `color/format/`.
 
 ## License
 

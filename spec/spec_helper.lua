@@ -100,4 +100,98 @@ function M.assert_is_nan(value, message)
   assert(is_nan, message or string.format("Expected NaN but got %s", tostring(value)))
 end
 
+--- Range assertion helpers for different color formats
+
+--- Assert RGB8 values are in range [0, 255]
+--- @param r number Red component
+--- @param g number Green component
+--- @param b number Blue component
+function M.assert_rgb8_range(r, g, b)
+  assert(r >= 0 and r <= 255, string.format("r out of range: %f", r))
+  assert(g >= 0 and g <= 255, string.format("g out of range: %f", g))
+  assert(b >= 0 and b <= 255, string.format("b out of range: %f", b))
+end
+
+--- Assert RGB16 values are in range [0, 65535]
+--- @param r number Red component
+--- @param g number Green component
+--- @param b number Blue component
+function M.assert_rgb16_range(r, g, b)
+  assert(r >= 0 and r <= 65535, string.format("r out of range: %f", r))
+  assert(g >= 0 and g <= 65535, string.format("g out of range: %f", g))
+  assert(b >= 0 and b <= 65535, string.format("b out of range: %f", b))
+end
+
+--- Assert RGB100 values are in range [0, 100]
+--- @param r number Red component
+--- @param g number Green component
+--- @param b number Blue component
+function M.assert_rgb100_range(r, g, b)
+  assert(r >= 0 and r <= 100, string.format("r out of range: %f", r))
+  assert(g >= 0 and g <= 100, string.format("g out of range: %f", g))
+  assert(b >= 0 and b <= 100, string.format("b out of range: %f", b))
+end
+
+--- Assert HSV values are in range h[0,1], s[0,1], v[0,1]
+--- @param h number Hue component
+--- @param s number Saturation component
+--- @param v number Value component
+function M.assert_hsv_range(h, s, v)
+  assert(h >= 0 and h <= 1, string.format("h out of range: %f", h))
+  assert(s >= 0 and s <= 1, string.format("s out of range: %f", s))
+  assert(v >= 0 and v <= 1, string.format("v out of range: %f", v))
+end
+
+--- Assert HDSV values are in range h[0,360), s[0,1], v[0,1]
+--- @param h number Hue component in degrees
+--- @param s number Saturation component
+--- @param v number Value component
+function M.assert_hdsv_range(h, s, v)
+  assert(h >= 0 and h < 360, string.format("h out of range: %f", h))
+  assert(s >= 0 and s <= 1, string.format("s out of range: %f", s))
+  assert(v >= 0 and v <= 1, string.format("v out of range: %f", v))
+end
+
+--- Assert HSL values are in range h[0,1], s[0,1], l[0,1]
+--- @param h number Hue component
+--- @param s number Saturation component
+--- @param l number Lightness component
+function M.assert_hsl_range(h, s, l)
+  assert(h >= 0 and h <= 1, string.format("h out of range: %f", h))
+  assert(s >= 0 and s <= 1, string.format("s out of range: %f", s))
+  assert(l >= 0 and l <= 1, string.format("l out of range: %f", l))
+end
+
+--- Assert CCT Kelvin values are in range [1000, 40000]
+--- @param cct number CCT in Kelvin
+function M.assert_cct_kelvin_range(cct)
+  assert(cct >= 1000 and cct <= 40000, string.format("cct out of range: %f", cct))
+end
+
+--- Assert CCT Mired values are in range [1/40000, 1/1000] ≈ [0.000025, 0.001]
+--- @param cct number CCT in Mired
+function M.assert_cct_mired_range(cct)
+  assert(cct >= 1/40000 and cct <= 1/1000, string.format("cct out of range: %f", cct))
+end
+
+--- Assert xyY values are in range x[0,1], y[0,1], Y[0,1]
+--- @param x number x component
+--- @param y number y component
+--- @param Y number Y component
+function M.assert_xyy_range(x, y, Y)
+  assert(x >= 0 and x <= 1, string.format("x out of range: %f", x))
+  assert(y >= 0 and y <= 1, string.format("y out of range: %f", y))
+  assert(Y >= 0 and Y <= 1, string.format("Y out of range: %f", Y))
+end
+
+--- Assert RGB values are in range [0,1]
+--- @param r number Red component
+--- @param g number Green component
+--- @param b number Blue component
+function M.assert_rgb_range(r, g, b)
+  assert(r >= 0 and r <= 1, string.format("r out of range: %f", r))
+  assert(g >= 0 and g <= 1, string.format("g out of range: %f", g))
+  assert(b >= 0 and b <= 1, string.format("b out of range: %f", b))
+end
+
 return M
