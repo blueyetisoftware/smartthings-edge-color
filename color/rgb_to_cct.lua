@@ -11,52 +11,6 @@ do
     end
 end
 
---- Fast approximation using blue/red ratio with lookup table interpolation
---- Based on Neil Bartlett's 2015 blackbody approximation algorithm
-local function rgb_to_cct_ratio(r, _g, b)
-    local ratio = b / r
-
-    -- Handle edge cases
-    if ratio <= RATIO_LOOKUP[1].ratio then
-        return 1000  -- Minimum CCT
-    elseif ratio >= RATIO_LOOKUP[#RATIO_LOOKUP].ratio then
-        return 40000  -- Maximum CCT
-    end
-
-    -- Find bracketing entries in lookup table
-    for i = 1, #RATIO_LOOKUP - 1 do
-        if ratio >= RATIO_LOOKUP[i].ratio and ratio <= RATIO_LOOKUP[i + 1].ratio then
-            local lower, upper = RATIO_LOOKUP[i], RATIO_LOOKUP[i + 1]
-            
-            -- Linear interpolation between bracketing points
-            local ratio_range = upper.ratio - lower.ratio
-            local cct_range = upper.cct - lower.cct
-            local ratio_pos = (ratio - lower.ratio) / ratio_range
-            local interpolated_cct = lower.cct + ratio_pos * cct_range
-
-            return st_utils.round(interpolated_cct)
-        end
-    end
-
-    -- Fallback to binary search (should not reach here)
-    local cct
-    local epsilon = 0.4
-    local min = 1000
-    local max = 40000
-
-    while max - min > epsilon do
-        cct = (max + min) / 2
-        local r_temp, _, b_temp = cct_to_rgb(cct)
-        if b_temp / r_temp >= ratio then
-            max = cct
-        else
-            min = cct
-        end
-    end
-
-    return st_utils.round(cct)
-end
-
 --- Accurate algorithm using full RGB distance comparison with golden section search
 local function rgb_to_cct_distance(r, g, b)
     local min = 1000
@@ -99,6 +53,62 @@ local function rgb_to_cct_distance(r, g, b)
     end
 
     return st_utils.round((min + max) / 2)
+end
+
+--- Fast approximation using blue/red ratio with lookup table interpolation
+--- Based on Neil Bartlett's 2015 blackbody approximation algorithm
+local function rgb_to_cct_ratio(r, _g, b)
+    -- Handle edge case where red component is zero (ratio undefined)
+    -- Use reasonable defaults based on color characteristics
+    if r == 0 then
+        if b > 0 then
+            return 40000  -- Colors with no red but some blue are very cool
+        else
+            return 2251   -- Pure green approximation (closest Planckian point)
+        end
+    end
+
+    local ratio = b / r
+
+    -- Handle remaining edge cases
+    if ratio <= RATIO_LOOKUP[1].ratio then
+        return 1000  -- Minimum CCT
+    elseif ratio >= RATIO_LOOKUP[#RATIO_LOOKUP].ratio then
+        return 40000  -- Maximum CCT
+    end
+
+    -- Find bracketing entries in lookup table
+    for i = 1, #RATIO_LOOKUP - 1 do
+        if ratio >= RATIO_LOOKUP[i].ratio and ratio <= RATIO_LOOKUP[i + 1].ratio then
+            local lower, upper = RATIO_LOOKUP[i], RATIO_LOOKUP[i + 1]
+            
+            -- Linear interpolation between bracketing points
+            local ratio_range = upper.ratio - lower.ratio
+            local cct_range = upper.cct - lower.cct
+            local ratio_pos = (ratio - lower.ratio) / ratio_range
+            local interpolated_cct = lower.cct + ratio_pos * cct_range
+
+            return st_utils.round(interpolated_cct)
+        end
+    end
+
+    -- Fallback to binary search (handles any remaining edge cases)
+    local cct
+    local epsilon = 0.4
+    local min = 1000
+    local max = 40000
+
+    while max - min > epsilon do
+        cct = (max + min) / 2
+        local r_temp, _, b_temp = cct_to_rgb(cct)
+        if b_temp / r_temp >= ratio then
+            max = cct
+        else
+            min = cct
+        end
+    end
+
+    return st_utils.round(cct)
 end
 
 --- Converts RGB color values to correlated color temperature (CCT) in Kelvin.
