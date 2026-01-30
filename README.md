@@ -63,20 +63,41 @@ Copy the `color/` directory to your SmartThings Edge driver project.
 local color = require 'color'
 ```
 
+### 📦 Bundle Size Optimization
+
+This library is designed for **selective imports** to minimize bundle size in Edge drivers. Use granular requires instead of the top-level `color` module to enable tree-shaking:
+
+```lua
+-- ✅ RECOMMENDED: Selective imports for minimal bundles
+local cct = require 'color.format.cct'  -- Only CCT utilities
+local rgb = require 'color.format.rgb'  -- Only RGB utilities
+
+-- ⚠️  AVOID: Top-level import loads everything
+-- local color = require 'color'  -- Loads all modules
+```
+
+**Common Driver Scenarios:**
+- **Tunable White Only**: `require 'color.format.cct'`
+- **Full Color Control**: `require 'color.format.rgb'`, `require 'color.format.hue'`, `require 'color.format.cct'`
+- **xy-based Bulbs**: `require 'color.format.xyy'`, `require 'color.format.cct'`
+
 ## Usage Examples
 
 ### Basic Color Conversion
 ```lua
-local color = require 'color'
+-- Import only the modules you need for minimal bundle size
+local rgb_to_hsl = require 'color.rgb_to_hsl'
+local hsl_to_rgb = require 'color.hsl_to_rgb'
+local cct_to_rgb = require 'color.cct_to_rgb'
 
 -- Convert RGB to HSL
-local h, s, l = color.rgb_to_hsl(1, 0, 0)  -- Pure red: 0, 1, 1
+local h, s, l = rgb_to_hsl(1, 0, 0)  -- Pure red: 0, 1, 1
 
 -- Convert HSL to RGB
-local r, g, b = color.hsl_to_rgb(0, 1, 0.5)  -- Red: 1, 0, 0
+local r, g, b = hsl_to_rgb(0, 1, 0.5)  -- Red: 1, 0, 0
 
 -- Convert color temperature to RGB
-local r, g, b = color.cct_to_rgb(3000)  -- Warm white
+local r, g, b = cct_to_rgb(3000)  -- Warm white
 ```
 
 ### Working with Different Ranges
@@ -111,10 +132,13 @@ This library is designed for SmartThings Edge drivers and maintains full compati
 - **No schema violations**: Compatible with developer.smartthings.com capability definitions
 
 ```lua
-local color = require 'color'
+-- Import only what you need for minimal bundle size
+local rgb_to_cct = require 'color.rgb_to_cct'
+local clampKelvin = require 'color.format.cct'
 
 -- Kelvin values are automatically clamped to SmartThings range
-local kelvin = color.rgb_to_cct(r, g, b, true)  -- Already in [1, 30000] range
+local kelvin = rgb_to_cct(r, g, b, true)  -- Already in [1, 30000] range
+local clamped = clampKelvin(kelvin)      -- Extra safety if needed
 ```
 
 ## Edge Driver Integration Guide
