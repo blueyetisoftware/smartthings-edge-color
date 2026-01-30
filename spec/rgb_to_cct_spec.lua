@@ -2,33 +2,65 @@ local rgb_to_cct = require 'color.rgb_to_cct'
 local spec_helper = require 'spec.spec_helper'
 
 describe("rgb_to_cct", function()
-  it("converts RGB (255,180,108) back to approx 3000K with tolerance", function()
-    local cct = rgb_to_cct(255, 180, 108)
-    spec_helper.assert_near(6524, cct, 500)
+  describe("fast approximation (default)", function()
+    it("converts RGB (1.0, 0.7, 0.4) to approx 2906K with tolerance", function()
+      local cct = rgb_to_cct(1.0, 0.7, 0.4)  -- Warm color
+      spec_helper.assert_near(2906, cct, 100)
+    end)
+
+    it("converts RGB (0.8, 0.9, 1.0) to approx 9985K with tolerance", function()
+      local cct = rgb_to_cct(0.8, 0.9, 1.0)  -- Cool color
+      spec_helper.assert_near(9985, cct, 500)
+    end)
+
+    it("converts RGB (1.0, 1.0, 1.0) to approx 6524K with tolerance", function()
+      local cct = rgb_to_cct(1.0, 1.0, 1.0)  -- Pure white
+      spec_helper.assert_near(6524, cct, 200)
+    end)
+
+    it("converts RGB (1.0, 0.5, 0.0) to approx 1000K with tolerance", function()
+      local cct = rgb_to_cct(1.0, 0.5, 0.0)  -- Deep red/orange
+      spec_helper.assert_near(1000, cct, 100)
+    end)
   end)
 
-  it("converts RGB (204,220,255) back to approx 10000K with tolerance", function()
-    local cct = rgb_to_cct(204, 220, 255)
-    spec_helper.assert_near(6524, cct, 500)
+  describe("accurate algorithm", function()
+    it("converts RGB (1.0, 0.7, 0.4) to approx 2913K with tolerance", function()
+      local cct = rgb_to_cct(1.0, 0.7, 0.4, true)  -- Warm color
+      spec_helper.assert_near(2913, cct, 100)
+    end)
+
+    it("converts RGB (0.8, 0.9, 1.0) to approx 9463K with tolerance", function()
+      local cct = rgb_to_cct(0.8, 0.9, 1.0, true)  -- Cool color
+      spec_helper.assert_near(9463, cct, 500)
+    end)
+
+    it("converts RGB (1.0, 1.0, 1.0) to approx 6600K with tolerance", function()
+      local cct = rgb_to_cct(1.0, 1.0, 1.0, true)  -- Pure white
+      spec_helper.assert_near(6600, cct, 200)
+    end)
+
+    it("converts RGB (1.0, 0.5, 0.0) to approx 1803K with tolerance", function()
+      local cct = rgb_to_cct(1.0, 0.5, 0.0, true)  -- Deep red/orange
+      spec_helper.assert_near(1803, cct, 200)
+    end)
   end)
 
-  it("converts RGB (255,107,0) back to approx 1500K with tolerance", function()
-    local cct = rgb_to_cct(255, 107, 0)
-    spec_helper.assert_near(1500, cct, 500)
+  it("handles boundary values", function()
+    local cct_min = rgb_to_cct(1.0, 0.0, 0.0)  -- Pure red
+    local cct_max = rgb_to_cct(0.0, 0.0, 1.0)  -- Pure blue
+    assert.is_true(cct_min >= 1000 and cct_min <= 40000)
+    assert.is_true(cct_max >= 1000 and cct_max <= 40000)
   end)
 
-  it("handles pure white RGB (255,255,255)", function()
-    local cct = rgb_to_cct(255, 255, 255)
+  it("clamps input values", function()
+    local cct = rgb_to_cct(-0.1, 1.5, 0.5)
     assert.is_true(cct >= 1000 and cct <= 40000)
   end)
 
-  it("handles pure red RGB (255,0,0)", function()
-    local cct = rgb_to_cct(255, 0, 0)
-    assert.is_true(cct >= 1000 and cct <= 40000)
-  end)
-
-  it("handles pure blue RGB (0,0,255)", function()
-    local cct = rgb_to_cct(0, 0, 255)
-    assert.is_true(cct >= 1000 and cct <= 40000)
+  it("raises error for invalid input types", function()
+    assert.has_error(function() rgb_to_cct("red", 0.5, 0.5) end)
+    assert.has_error(function() rgb_to_cct(0.5, "green", 0.5) end)
+    assert.has_error(function() rgb_to_cct(0.5, 0.5, "blue") end)
   end)
 end)
