@@ -487,6 +487,8 @@ This library implements professional color mathematics standards with rigorous v
 
 ## API Reference
 
+**Note**: Use the `color.convert.*` modules for public APIs. The `color.core.*` functions are internal and may change without notice—avoid direct imports.
+
 See the individual function files in the `color/core/` directory for detailed documentation and parameter descriptions of core conversion functions. Format utilities are documented in `color/format/`.
 
 ## License
