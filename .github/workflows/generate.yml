@@ -1,0 +1,39 @@
+name: Generate Color Convert on PR
+
+on:
+  pull_request:
+    branches: [ main ]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+
+jobs:
+  generate-and-commit:
+    runs-on: ubuntu-latest
+    container: ghcr.io/blueyetisoftware/smartthings-edge-sdk-runtime:16.0.59-51ac4bd
+
+    steps:
+    - name: Checkout the PR branch
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.head_ref }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        persist-credentials: true
+
+    - name: Generate files
+      run: |
+        lua generate_chains.lua --generate
+        lua generate_tests.lua --generate
+
+    - name: Check for out-of-date generated files
+      run: |
+        if git diff --quiet color/convert/ spec/convert/; then
+          echo "Generated files are up to date."
+        else
+          echo "Generated files are out of date. Run 'lua generate_chains.lua --generate && lua generate_tests.lua --generate' locally, review changes, and commit."
+          exit 1
+        fi
+
+    - name: Run tests
+      run: busted spec/convert/

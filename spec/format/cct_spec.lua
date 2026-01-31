@@ -39,81 +39,81 @@ describe("clamp_mired", function()
   end)
 end)
 
-describe("to_mired", function()
+describe("cctk_to_cctm", function()
   it("converts 1000K to 1000 mired exactly", function()
-    local mired = CCT.to_mired(1000)
+    local mired = CCT.cctk_to_cctm(1000)
     assert.equals(1000, mired)
   end)
 
   it("converts 3000K to 333 mired exactly", function()
-    local mired = CCT.to_mired(3000)
+    local mired = CCT.cctk_to_cctm(3000)
     assert.equals(333, mired)
   end)
 
   it("converts 10000K to 100 mired exactly", function()
-    local mired = CCT.to_mired(10000)
+    local mired = CCT.cctk_to_cctm(10000)
     assert.equals(100, mired)
   end)
 
   it("handles minimum kelvin (1000K)", function()
-    local mired = CCT.to_mired(1000)
+    local mired = CCT.cctk_to_cctm(1000)
     assert.is_true(mired >= 100 and mired <= 1000)
   end)
 
   it("handles high kelvin (10000K)", function()
-    local mired = CCT.to_mired(10000)
+    local mired = CCT.cctk_to_cctm(10000)
     assert.is_true(mired >= 100 and mired <= 1000)
   end)
 
   it("handles valid kelvin values", function()
-    local mired = CCT.to_mired(500)  -- Valid value
+    local mired = CCT.cctk_to_cctm(500)  -- Valid value
     assert.equals(2000, mired)  -- 1000000 / 500 = 2000
   end)
 
   it("clamps low kelvin values to 1K", function()
-    local mired = CCT.to_mired(0)  -- Below minimum
+    local mired = CCT.cctk_to_cctm(0)  -- Below minimum
     assert.equals(1000000, mired)  -- 1000000 / 1 = 1000000
   end)
 
   it("clamps high kelvin values to 30000K", function()
-    local mired = CCT.to_mired(40000)  -- Above maximum
+    local mired = CCT.cctk_to_cctm(40000)  -- Above maximum
     assert.equals(33, mired)  -- 1000000 / 30000 ≈ 33
   end)
 end)
 
-describe("to_kelvin", function()
+describe("cctm_to_cctk", function()
   it("converts 100 mired to 10000K exactly", function()
-    local kelvin = CCT.to_kelvin(100)
+    local kelvin = CCT.cctm_to_cctk(100)
     assert.equals(10000, kelvin)
   end)
 
   it("converts 333 mired to 3003K exactly", function()
-    local kelvin = CCT.to_kelvin(333)
+    local kelvin = CCT.cctm_to_cctk(333)
     assert.equals(3003, kelvin)
   end)
 
   it("converts 1000 mired to 1000K exactly", function()
-    local kelvin = CCT.to_kelvin(1000)
+    local kelvin = CCT.cctm_to_cctk(1000)
     assert.equals(1000, kelvin)
   end)
 
   it("handles minimum mired (100)", function()
-    local kelvin = CCT.to_kelvin(100)
+    local kelvin = CCT.cctm_to_cctk(100)
     assert.is_true(kelvin >= 1000 and kelvin <= 10000)
   end)
 
   it("handles maximum mired (1000)", function()
-    local kelvin = CCT.to_kelvin(1000)
+    local kelvin = CCT.cctm_to_cctk(1000)
     assert.is_true(kelvin >= 1 and kelvin <= 30000)
   end)
 
   it("clamps low mired values to 33", function()
-    local kelvin = CCT.to_kelvin(10)  -- Below minimum
+    local kelvin = CCT.cctm_to_cctk(10)  -- Below minimum
     assert.equals(30303, kelvin)  -- 1000000 / 33 ≈ 30303
   end)
 
   it("clamps high mired values to 1000000", function()
-    local kelvin = CCT.to_kelvin(1200000)  -- Above maximum
+    local kelvin = CCT.cctm_to_cctk(1200000)  -- Above maximum
     assert.equals(1, kelvin)  -- 1000000 / 1000000 = 1
   end)
 end)

@@ -34,7 +34,7 @@ end
 --- @param s number Saturation [0,1]
 --- @param v number Value [0,1]
 --- @return number,number,number Degrees-based HSV values
-local function to_hsv360(h, s, v)
+local function hsv_to_hsv360(h, s, v)
     return clamp_hsv360(h * 360, s, v)
 end
 
@@ -44,13 +44,13 @@ end
 --- @param s number Saturation [0,1]
 --- @param v number Value [0,1]
 --- @return number,number,number Normalized HSV values
-local function from_hsv360(h, s, v)
+local function hsv360_to_hsv(h, s, v)
     return clamp_hsv(h / 360, s, v)
 end
 
 return {
     clamp_hsv = clamp_hsv,
     clamp_hsv360 = clamp_hsv360,
-    to_hsv360 = to_hsv360,
-    from_hsv360 = from_hsv360
+    hsv_to_hsv360 = hsv_to_hsv360,
+    hsv360_to_hsv = hsv360_to_hsv
 }
