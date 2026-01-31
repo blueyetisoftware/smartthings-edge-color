@@ -50,13 +50,11 @@ local function xyy_to_rgb(x, y, Y)
     local b = X * M[3][1] + Y * M[3][2] + Z * M[3][3]
 
     -- Clamp to [0,1] for gamut
-    r = r < 0 and 0 or r > 1 and 1 or r
-    g = g < 0 and 0 or g > 1 and 1 or g
-    b = b < 0 and 0 or b > 1 and 1 or b
+    r, g, b = clamp_rgb(r, g, b)
 
     -- Fix: Check for max_rgb == 0 to avoid division by zero (ST bug)
     local max_rgb = math.max(r, g, b)
-    if max_rgb == 0 then
+    if max_rgb < 1e-10 then  -- Use epsilon for floating-point safety
         return 0, 0, 0
     end
 
