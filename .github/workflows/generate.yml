@@ -52,41 +52,17 @@ jobs:
       uses: actions/download-artifact@v4
       with:
         name: color-conversions
-        path: color
+        path: .
     
     - name: Download Generated Test Files
       uses: actions/download-artifact@v4
       with:
         name: spec-conversions
-        path: spec
-    
-    - name: Debug File Status
-      run: |
-        echo "=== Current directory ==="
-        pwd
-        ls -la
-        echo "=== Color conversions ==="
-        ls -la color/conversions/
-        echo "=== Spec conversions ==="
-        ls -la spec/conversions/
-        echo "=== Git status ==="
-        git status --porcelain
+        path: .
     
     - name: Commit Generated Files
-      run: |
-        echo "=== Checking for changes ==="
-        git status --porcelain
-        echo "=== Adding files ==="
-        git add -f color/conversions/ spec/conversions/
-        echo "=== Checking staged changes ==="
-        git diff --cached --name-only
-        if ! git diff --cached --quiet; then
-          echo "=== Committing changes ==="
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git commit -m "Update generated color conversion modules and tests"
-          git push origin ${{ github.head_ref }}
-          echo "=== Commit successful ==="
-        else
-          echo "=== No changes to commit ==="
-        fi  # Force add ignored files
+      uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message: 'Update generated color conversion modules and tests'
+        file_pattern: 'color/conversions/ spec/conversions/'
+        add_options: '-f'  # Force add ignored files
