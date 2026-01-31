@@ -62,10 +62,23 @@ jobs:
     
     - name: Verify Downloaded Files
       run: |
-        echo "=== Checking downloaded files ==="
-        ls -la color/conversions/ || echo "color/conversions/ not found"
-        ls -la spec/conversions/ || echo "spec/conversions/ not found"
-        find . -name "*.lua" | head -10
+        echo "=== Directory structure ==="
+        find . -type f -name "*.lua" | head -20
+        echo "=== Checking specific directories ==="
+        ls -la color/ || echo "color/ not found"
+        ls -la spec/ || echo "spec/ not found"
+        if [ -d "color/conversions" ]; then
+          echo "color/conversions exists:"
+          ls -la color/conversions/
+        else
+          echo "color/conversions does not exist"
+        fi
+        if [ -d "spec/conversions" ]; then
+          echo "spec/conversions exists:"
+          ls -la spec/conversions/
+        else
+          echo "spec/conversions does not exist"
+        fi
     
     - name: Commit Generated Files
       uses: stefanzweifel/git-auto-commit-action@v5
