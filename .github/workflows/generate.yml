@@ -22,34 +22,11 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
-          fetch-depth: 0          # Critical: full clone to avoid incomplete working tree
-          clean: true             # Ensures no leftover files
+          fetch-depth: 0
+          clean: true
 
       - name: Install git
         run: apk add --no-cache git
-
-      # Diagnostic - keep for 1-2 runs to confirm fix, then remove or comment out
-      - name: Show state before generation
-        run: |
-          echo "=== Git status on checkout ==="
-          git status --short color/convert/ spec/convert/ || true
-
-          echo ""
-          echo "=== Directory listing ==="
-          du -sh color/convert/ spec/convert/ 2>/dev/null || true
-          ls -la color/convert/ spec/convert/ 2>/dev/null | head -n 20 || true
-
-          echo ""
-          echo "=== Sample file contents ==="
-          for file in color/convert/rgb_cct.lua spec/convert/rgb_cct_spec.lua; do
-            echo "→ $file"
-            head -n 8 "$file" 2>/dev/null || echo "  (not found)"
-            echo ""
-          done
-
-          echo ""
-          echo "=== Committed files count in these dirs ==="
-          git ls-tree -r HEAD --name-only color/convert/ spec/convert/ | wc -l || echo "ls-tree failed"
 
       - name: Regenerate files and verify
         run: |
@@ -57,50 +34,41 @@ jobs:
           lua generate_chains.lua --generate
           lua generate_tests.lua --generate
 
-          echo "=== Lua version in CI ==="
-          lua -v || echo "lua -v failed"
+          echo ""
+          echo "Post-regeneration file check:"
+          echo " - color/convert/ contents:"
+          ls -la color/convert/ | head -n 15 || true
+          echo ""
+          echo " - spec/convert/ contents:"
+          ls -la spec/convert/ | head -n 15 || true
 
           echo ""
-          echo "=== First 20 lines of a regenerated file in CI ==="
-          head -n 20 spec/convert/rgb_cct_spec.lua || true
+          echo "Sample regenerated file size (rgb_cct_spec.lua):"
+          wc -c spec/convert/rgb_cct_spec.lua || true
 
           echo ""
-          echo "=== Byte count of regenerated rgb_cct_spec.lua ==="
-          wc -c spec/convert/rgb_cct_spec.lua || true 
-          echo ""
+          echo "Checking for differences (ignoring whitespace/line endings)..."
 
-          echo "=== Comparing byte-for-byte ==="
-          echo "Committed file size (from git):"
-          git show HEAD:spec/convert/rgb_cct_spec.lua | wc -c || echo "git show failed"
-
-          echo ""
-          echo "Regenerated file size:"
-          wc -c spec/convert/rgb_cct_spec.lua
-          echo ""
-          echo "=== Diff ignoring whitespace/line endings ==="
-          git diff --ignore-all-space --ignore-cr-at-eol --ignore-space-change -- spec/convert/rgb_cct_spec.lua || echo "No diff ignoring whitespace"
-
-          echo ""
-          echo "=== First differing line (if any) ==="
-          git diff -- spec/convert/rgb_cct_spec.lua | head -n 30 || true
-
-          echo "Checking diff..."
-
-          if git diff --quiet -- color/convert/ spec/convert/; then
-            echo "Generated files match committed versions exactly ✓"
-          elif git diff --quiet --ignore-cr-at-eol --ignore-space-at-eol --ignore-all-space -- color/convert/ spec/convert/; then
-            echo "Files match (ignoring whitespace/line endings) → up-to-date"
+          if git diff --quiet --ignore-all-space --ignore-cr-at-eol --ignore-space-change --ignore-space-at-eol -- color/convert/ spec/convert/; then
+            echo "Generated files are up-to-date ✓"
+            echo "(Any visible differences are only harmless whitespace or line-ending variations)"
           else
             echo ""
             echo "╔═══════════════════════════════════════════════════════════════╗"
-            echo "║          GENERATED FILES OUT OF DATE                          ║"
+            echo "║     GENERATED FILES HAVE REAL (non-whitespace) DIFFERENCES    ║"
             echo "╚═══════════════════════════════════════════════════════════════╝"
             echo ""
-            echo "Files affected:"
+            echo "Even ignoring whitespace, line endings, and space changes, differences exist."
+            echo "Likely causes: different Lua version output, float formatting, or logic variation."
+            echo ""
+            echo "Files with changes:"
             git diff --name-only -- color/convert/ spec/convert/ || true
             echo ""
-            echo "Change summary:"
-            git diff --stat -- color/convert/ spec/convert/
+            echo "Strict diff summary:"
+            git diff --stat -- color/convert/ spec/convert/ || true
+            echo ""
+            echo "Whitespace-ignoring summary (for debugging):"
+            git diff --ignore-all-space --ignore-cr-at-eol --stat -- color/convert/ spec/convert/ || echo "No meaningful diff when ignoring whitespace"
             exit 1
           fi
 
