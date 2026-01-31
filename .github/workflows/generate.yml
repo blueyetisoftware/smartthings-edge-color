@@ -1,42 +1,88 @@
-name: Ensure Updated Color Conversions are Generated
+name: Verify Generated Color Conversions
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
+    paths:
+      - 'generate_chains.lua'
+      - 'generate_tests.lua'
+      - 'color/core/**'        # ← actual input sources
+      - 'color/format/**'      # ← actual input sources
     types: [opened, synchronize, reopened]
 
-permissions:
-  contents: write
+permissions: {}  # No writes needed
 
 jobs:
-  generate-and-commit:
+  check-generated:
     runs-on: ubuntu-latest
     container: ghcr.io/blueyetisoftware/smartthings-edge-sdk-runtime:16.0.59-51ac4bd
 
     steps:
-    - name: Checkout the PR branch
-      uses: actions/checkout@v4
-      with:
-        ref: ${{ github.head_ref }}
-        fetch-depth: 0
-        token: ${{ secrets.GITHUB_TOKEN }}
-        persist-credentials: true
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 1
 
-    - name: Check for Outdated Generated Files
-      run: |
-        apk add --no-cache git
-        
-        # Check if generation would change anything
-        lua generate_chains.lua --generate
-        lua generate_tests.lua --generate
-        
-        if git diff --quiet -- color/convert/ spec/convert/; then
-          echo "Generated files are up to date."
-        else
-          echo "Generated files are out of date. Run 'lua generate_chains.lua --generate && lua generate_tests.lua --generate' locally, review changes, and commit."
-          git diff --name-only -- color/convert/ spec/convert/
-          exit 1
-        fi
+      - name: Install git
+        run: apk add --no-cache git
 
-    - name: Run tests
-      run: busted spec/convert/
+      - name: Show state before generation (diagnostic)
+        run: |
+          echo "=== Git status on checkout ==="
+          git status --short color/ color/convert/ spec/convert/ || true
+          
+          echo ""
+          echo "=== Directory listing (size check) ==="
+          du -sh color/convert/ spec/convert/ 2>/dev/null || echo "Directories missing or empty"
+          ls -la color/convert/ spec/convert/ 2>/dev/null | head -n 15 || echo "No files visible"
+          
+          echo ""
+          echo "=== Sample file contents (first 8 lines) ==="
+          for file in color/convert/rgb_cct.lua spec/convert/rgb_cct_spec.lua; do
+            echo "→ $file"
+            head -n 8 "$file" 2>/dev/null || echo "  (file not found or empty)"
+            echo ""
+          done
+
+      - name: Regenerate files and verify
+        run: |
+          echo "Running generators..."
+          lua generate_chains.lua --generate
+          lua generate_tests.lua --generate
+
+          echo ""
+          echo "Checking diff..."
+
+          if git diff --quiet -- color/convert/ spec/convert/; then
+            echo "Generated files match committed versions exactly ✓"
+          elif git diff --quiet --ignore-cr-at-eol --ignore-space-at-eol --ignore-all-space -- color/convert/ spec/convert/; then
+            echo "Files match (ignoring line endings & whitespace) → treated as up-to-date"
+            echo "Tip: Normalize line endings in repo with .gitattributes"
+          else
+            echo ""
+            echo "╔═══════════════════════════════════════════════════════════════╗"
+            echo "║          GENERATED FILES OUT OF DATE / NOT COMMITTED         ║"
+            echo "╚═══════════════════════════════════════════════════════════════╝"
+            echo ""
+            echo "After regeneration, git sees major differences (likely files missing from commit)."
+            echo "Common fix:"
+            echo "  1. Locally run:"
+            echo "     lua generate_chains.lua --generate"
+            echo "     lua generate_tests.lua --generate"
+            echo "  2. git add color/convert/ spec/convert/"
+            echo "  3. git commit -m 'chore: update generated color files'"
+            echo "  4. git push"
+            echo ""
+            echo "Files affected:"
+            git diff --name-only --diff-filter=AM -- color/convert/ spec/convert/ | grep -v '^/dev/null$' || true
+            echo ""
+            echo "Full change summary:"
+            git diff --stat -- color/convert/ spec/convert/
+            echo ""
+            echo "If files show as deleted + recreated → they were probably not committed."
+            exit 1
+          fi
+
+      - name: Run conversion tests
+        run: busted spec/convert/
