@@ -6,11 +6,11 @@ on:
     paths:
       - 'generate_chains.lua'
       - 'generate_tests.lua'
-      - 'color/core/**'        # ← actual input sources
-      - 'color/format/**'      # ← actual input sources
+      - 'color/core/**'
+      - 'color/format/**'
     types: [opened, synchronize, reopened]
 
-permissions: {}  # No writes needed
+permissions: {}
 
 jobs:
   check-generated:
@@ -18,32 +18,38 @@ jobs:
     container: ghcr.io/blueyetisoftware/smartthings-edge-sdk-runtime:16.0.59-51ac4bd
 
     steps:
-      - name: Checkout PR branch
+      - name: Checkout PR branch (full history)
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
-          fetch-depth: 1
+          fetch-depth: 0          # Critical: full clone to avoid incomplete working tree
+          clean: true             # Ensures no leftover files
 
       - name: Install git
         run: apk add --no-cache git
 
-      - name: Show state before generation (diagnostic)
+      # Diagnostic - keep for 1-2 runs to confirm fix, then remove or comment out
+      - name: Show state before generation
         run: |
           echo "=== Git status on checkout ==="
-          git status --short color/ color/convert/ spec/convert/ || true
-          
+          git status --short color/convert/ spec/convert/ || true
+
           echo ""
-          echo "=== Directory listing (size check) ==="
-          du -sh color/convert/ spec/convert/ 2>/dev/null || echo "Directories missing or empty"
-          ls -la color/convert/ spec/convert/ 2>/dev/null | head -n 15 || echo "No files visible"
-          
+          echo "=== Directory listing ==="
+          du -sh color/convert/ spec/convert/ 2>/dev/null || true
+          ls -la color/convert/ spec/convert/ 2>/dev/null | head -n 20 || true
+
           echo ""
-          echo "=== Sample file contents (first 8 lines) ==="
+          echo "=== Sample file contents ==="
           for file in color/convert/rgb_cct.lua spec/convert/rgb_cct_spec.lua; do
             echo "→ $file"
-            head -n 8 "$file" 2>/dev/null || echo "  (file not found or empty)"
+            head -n 8 "$file" 2>/dev/null || echo "  (not found)"
             echo ""
           done
+
+          echo ""
+          echo "=== Committed files count in these dirs ==="
+          git ls-tree -r HEAD --name-only color/convert/ spec/convert/ | wc -l || echo "ls-tree failed"
 
       - name: Regenerate files and verify
         run: |
@@ -57,30 +63,18 @@ jobs:
           if git diff --quiet -- color/convert/ spec/convert/; then
             echo "Generated files match committed versions exactly ✓"
           elif git diff --quiet --ignore-cr-at-eol --ignore-space-at-eol --ignore-all-space -- color/convert/ spec/convert/; then
-            echo "Files match (ignoring line endings & whitespace) → treated as up-to-date"
-            echo "Tip: Normalize line endings in repo with .gitattributes"
+            echo "Files match (ignoring whitespace/line endings) → up-to-date"
           else
             echo ""
             echo "╔═══════════════════════════════════════════════════════════════╗"
-            echo "║          GENERATED FILES OUT OF DATE / NOT COMMITTED         ║"
+            echo "║          GENERATED FILES OUT OF DATE                          ║"
             echo "╚═══════════════════════════════════════════════════════════════╝"
             echo ""
-            echo "After regeneration, git sees major differences (likely files missing from commit)."
-            echo "Common fix:"
-            echo "  1. Locally run:"
-            echo "     lua generate_chains.lua --generate"
-            echo "     lua generate_tests.lua --generate"
-            echo "  2. git add color/convert/ spec/convert/"
-            echo "  3. git commit -m 'chore: update generated color files'"
-            echo "  4. git push"
-            echo ""
             echo "Files affected:"
-            git diff --name-only --diff-filter=AM -- color/convert/ spec/convert/ | grep -v '^/dev/null$' || true
+            git diff --name-only -- color/convert/ spec/convert/ || true
             echo ""
-            echo "Full change summary:"
+            echo "Change summary:"
             git diff --stat -- color/convert/ spec/convert/
-            echo ""
-            echo "If files show as deleted + recreated → they were probably not committed."
             exit 1
           fi
 
