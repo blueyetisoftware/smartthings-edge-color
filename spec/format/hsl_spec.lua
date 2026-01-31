@@ -1,5 +1,4 @@
 local HSL = require 'color.format.hsl'
-local spec_helper = require 'spec.spec_helper'
 
 describe("clamp_hsl", function()
   it("wraps hue modulo 1 and clamps other values", function()

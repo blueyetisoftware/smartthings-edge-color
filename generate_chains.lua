@@ -20,7 +20,8 @@ local CONVERSION_PAIRS = {
     {'rgb', 'hsl'},
     {'rgb', 'cct'},
     {'rgb', 'xyy'},
-    {'hsv', 'hsl'}
+    {'hsv', 'hsl'},
+    {'cct', 'xyy'}
 }
 
 -- Format conversion functions
@@ -92,7 +93,6 @@ local function generate_module_code(module_name, convert)
     table.insert(lines, "---")
     table.insert(lines, "--- This module provides industry-standard color space conversions following")
     table.insert(lines, "--- established algorithms and best practices for computer graphics.")
-    
     -- Add specific documentation based on conversion type
     if module_name == "rgb_cct" then
         table.insert(lines, "---")
@@ -139,7 +139,6 @@ local function generate_module_code(module_name, convert)
         table.insert(lines, "--- Standards: CIE daylight illuminants, Planckian locus approximation")
         table.insert(lines, "--- Algorithm: Polynomial approximation of daylight chromaticity")
     end
-    
     table.insert(lines, "")
 
     -- Requires
@@ -212,7 +211,7 @@ local function generate_module_code(module_name, convert)
             elseif conv.from:match('^cct') then
                 fmt_module = 'cct'
             end
-            local fmt_key = string.format("from_%s", conv.from)
+            local fmt_key = FORMAT_FUNCTIONS[conv.from].from
             if not core_conversions[fmt_key] then
                 table.insert(requires, string.format("local %s = require 'color.format.%s'.%s",
                     fmt_key, fmt_module, FORMAT_FUNCTIONS[conv.from].from))
@@ -231,7 +230,7 @@ local function generate_module_code(module_name, convert)
             elseif conv.to:match('^cct') then
                 fmt_module = 'cct'
             end
-            local fmt_key = string.format("to_%s", conv.to)
+            local fmt_key = FORMAT_FUNCTIONS[conv.to].to
             if not core_conversions[fmt_key] then
                 table.insert(requires, string.format("local %s = require 'color.format.%s'.%s",
                     fmt_key, fmt_module, FORMAT_FUNCTIONS[conv.to].to))
@@ -274,6 +273,12 @@ local function generate_module_code(module_name, convert)
             table.insert(params, "hue, saturation, lightness")
         elseif conv.from == 'hsl360' then
             table.insert(params, "hue_degrees, saturation, lightness")
+        elseif conv.from == 'hex24' then
+            table.insert(params, "hex")
+        elseif conv.from == 'rgb8' then
+            table.insert(params, "red, green, blue")
+        elseif conv.from == 'rgb100' then
+            table.insert(params, "red, green, blue")
         else
             table.insert(params, "red, green, blue")
         end
@@ -286,7 +291,9 @@ local function generate_module_code(module_name, convert)
 
         -- Input format conversion
         if FORMAT_FUNCTIONS[conv.from] then
-            table.insert(call_chain, string.format("from_%s(%s)", conv.from, table.concat(params, ', ')))
+            local format_func = FORMAT_FUNCTIONS[conv.from].from
+            local param_str = table.concat(params, ', ')
+            table.insert(call_chain, string.format("%s(%s)", format_func, param_str))
         else
             table.insert(call_chain, table.concat(params, ', '))
         end
@@ -303,19 +310,20 @@ local function generate_module_code(module_name, convert)
             if from_space ~= 'rgb' then
                 -- Convert from source space to RGB
                 local from_to_rgb = string.format("%s_to_rgb", from_space)
+                if from_space == 'cct' then from_to_rgb = 'cctk_to_rgb' end
                 table.insert(call_chain, string.format("%s(%s)", from_to_rgb, call_chain[#call_chain]))
             end
-            
             if to_space ~= 'rgb' then
                 -- Convert from RGB to target space
                 local rgb_to_to = string.format("rgb_to_%s", to_space)
+                if to_space == 'cct' then rgb_to_to = 'rgb_to_cctk' end
                 table.insert(call_chain, string.format("%s(%s)", rgb_to_to, call_chain[#call_chain]))
             end
         end
 
         -- Output format conversion
         if FORMAT_FUNCTIONS[conv.to] then
-            table.insert(call_chain, string.format("to_%s(%s)", conv.to, call_chain[#call_chain]))
+            table.insert(call_chain, string.format("%s(%s)", FORMAT_FUNCTIONS[conv.to].to, call_chain[#call_chain]))
         end
 
         table.insert(lines, string.format("    return %s", call_chain[#call_chain]))
@@ -328,8 +336,8 @@ local function generate_module_code(module_name, convert)
     if from_space == 'rgb' or to_space == 'rgb' then
         local adjusted_from = from_space == 'cct' and 'cctk' or from_space
         local adjusted_to = to_space == 'cct' and 'cctk' or to_space
-        table.insert(lines, string.format("-- %s to %s (normalized pass-through)", from_space, to_space))
-        table.insert(lines, string.format("function M.%s_to_%s(", from_space, to_space))
+        table.insert(lines, string.format("-- %s to %s (normalized pass-through)", adjusted_from, adjusted_to))
+        table.insert(lines, string.format("function M.%s_to_%s(", adjusted_from, adjusted_to))
         if from_space == 'rgb' then
             table.insert(lines, "    red, green, blue")
         elseif from_space == 'hsv' then
@@ -342,7 +350,7 @@ local function generate_module_code(module_name, convert)
             table.insert(lines, "    x, y, Y")
         end
         table.insert(lines, ")")
-        table.insert(lines, string.format("    return %s_to_%s(%s)", adjusted_from, adjusted_to, 
+        table.insert(lines, string.format("    return %s_to_%s(%s)", adjusted_from, adjusted_to,
             from_space == 'rgb' and "red, green, blue" or
             from_space == 'hsv' and "hue, saturation, value" or
             from_space == 'hsl' and "hue, saturation, lightness" or
@@ -351,8 +359,8 @@ local function generate_module_code(module_name, convert)
         table.insert(lines, "end")
         table.insert(lines, "")
 
-        table.insert(lines, string.format("-- %s to %s (normalized pass-through)", to_space, from_space))
-        table.insert(lines, string.format("function M.%s_to_%s(", to_space, from_space))
+        table.insert(lines, string.format("-- %s to %s (normalized pass-through)", adjusted_to, adjusted_from))
+        table.insert(lines, string.format("function M.%s_to_%s(", adjusted_to, adjusted_from))
         if to_space == 'rgb' then
             table.insert(lines, "    red, green, blue")
         elseif to_space == 'hsv' then
@@ -395,14 +403,22 @@ local function main()
     lfs.mkdir('color/convert')
 
     local total_conversions = 0
-    for module_name, conversions in pairs(modules) do
+    for _, conversions in pairs(modules) do
         total_conversions = total_conversions + #conversions
     end
 
     print(string.format("Generating %d grouped conversion modules with %d total conversions...",
         #CONVERSION_PAIRS, total_conversions))
 
-    for module_name, conversions in pairs(modules) do
+    -- Sort module names for deterministic output order
+    local module_names = {}
+    for name in pairs(modules) do
+        table.insert(module_names, name)
+    end
+    table.sort(module_names)
+
+    for _, module_name in ipairs(module_names) do
+        local conversions = modules[module_name]
         local filename = string.format("color/convert/%s.lua", module_name)
         local code = generate_module_code(module_name, conversions)
 

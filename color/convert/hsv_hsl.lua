@@ -11,11 +11,11 @@
 --- Algorithm: Direct component transformation (H identical, S/V adjusted)
 
 local hsv_to_hsl = require 'color.core.hsv_to_hsl'
-local to_hsl360 = require 'color.format.hsl'.hsl_to_hsl360
-local from_hsv360 = require 'color.format.hsv'.hsv360_to_hsv
+local hsl_to_hsl360 = require 'color.format.hsl'.hsl_to_hsl360
+local hsv360_to_hsv = require 'color.format.hsv'.hsv360_to_hsv
 local hsl_to_hsv = require 'color.core.hsl_to_hsv'
-local to_hsv360 = require 'color.format.hsv'.hsv_to_hsv360
-local from_hsl360 = require 'color.format.hsl'.hsl360_to_hsl
+local hsv_to_hsv360 = require 'color.format.hsv'.hsv_to_hsv360
+local hsl360_to_hsl = require 'color.format.hsl'.hsl360_to_hsl
 
 local M = {}
 
@@ -30,21 +30,21 @@ end
 function M.hsv_to_hsl360(
     hue, saturation, value
 )
-    return to_hsl360(hsv_to_hsl(hue, saturation, value))
+    return hsl_to_hsl360(hsv_to_hsl(hue, saturation, value))
 end
 
 -- hsv360 to hsl
 function M.hsv360_to_hsl(
     hue_degrees, saturation, value
 )
-    return hsv_to_hsl(from_hsv360(hue_degrees, saturation, value))
+    return hsv_to_hsl(hsv360_to_hsv(hue_degrees, saturation, value))
 end
 
 -- hsv360 to hsl360
 function M.hsv360_to_hsl360(
     hue_degrees, saturation, value
 )
-    return to_hsl360(hsv_to_hsl(from_hsv360(hue_degrees, saturation, value)))
+    return hsl_to_hsl360(hsv_to_hsl(hsv360_to_hsv(hue_degrees, saturation, value)))
 end
 
 -- hsl to hsv
@@ -58,21 +58,21 @@ end
 function M.hsl_to_hsv360(
     hue, saturation, lightness
 )
-    return to_hsv360(hsl_to_hsv(hue, saturation, lightness))
+    return hsv_to_hsv360(hsl_to_hsv(hue, saturation, lightness))
 end
 
 -- hsl360 to hsv
 function M.hsl360_to_hsv(
     hue_degrees, saturation, lightness
 )
-    return hsl_to_hsv(from_hsl360(hue_degrees, saturation, lightness))
+    return hsl_to_hsv(hsl360_to_hsl(hue_degrees, saturation, lightness))
 end
 
 -- hsl360 to hsv360
 function M.hsl360_to_hsv360(
     hue_degrees, saturation, lightness
 )
-    return to_hsv360(hsl_to_hsv(from_hsl360(hue_degrees, saturation, lightness)))
+    return hsv_to_hsv360(hsl_to_hsv(hsl360_to_hsl(hue_degrees, saturation, lightness)))
 end
 
 return M
