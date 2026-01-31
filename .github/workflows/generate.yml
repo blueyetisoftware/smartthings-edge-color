@@ -26,24 +26,14 @@ jobs:
         lua generate_chains.lua --generate
         lua generate_tests.lua --generate
 
+    - name: Check for out-of-date generated files
+      run: |
+        if git diff --quiet color/convert/ spec/convert/; then
+          echo "Generated files are up to date."
+        else
+          echo "Generated files are out of date. Run 'lua generate_chains.lua --generate && lua generate_tests.lua --generate' locally, review changes, and commit."
+          exit 1
+        fi
+
     - name: Run tests
       run: busted spec/convert/
-
-    - name: Install git, configure, and commit/push if changed
-      if: success()                      # only run if tests passed
-      run: |
-        apk add --no-cache git
-        
-        git config --global --add safe.directory "$GITHUB_WORKSPACE"
-        git config user.name  "github-actions[bot]"
-        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-        git add color/convert/ spec/convert/
-
-        if git diff --cached --quiet; then
-          echo "No changes detected - nothing to commit"
-        else
-          git commit -m "chore: update generated color convert modules & tests"
-          git push
-          echo "Generated files updated and pushed to branch"
-        fi
