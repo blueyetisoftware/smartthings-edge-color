@@ -1,0 +1,64 @@
+--- Test specifications for xyy_to_rgb conversion
+
+local xyy_to_rgb = require 'color.core.xyy_to_rgb'
+local spec_helper = require 'spec.spec_helper'
+
+describe('xyy_to_rgb', function()
+
+    it('converts red xyY to RGB', function()
+        local r, g, b = xyy_to_rgb(0.64, 0.33, 0.21)
+        spec_helper.assert_near(r, 1, 1e-1)
+        spec_helper.assert_near(g, 0, 1e-1)
+        spec_helper.assert_near(b, 0, 1e-1)
+    end)
+
+    it('converts green xyY to RGB', function()
+        local r, g, b = xyy_to_rgb(0.30, 0.60, 0.72)
+        spec_helper.assert_near(r, 0, 1e-1)
+        spec_helper.assert_near(g, 1, 1e-1)
+        spec_helper.assert_near(b, 0, 1e-1)
+    end)
+
+    it('converts blue xyY to RGB', function()
+        local r, g, b = xyy_to_rgb(0.15, 0.06, 0.07)
+        spec_helper.assert_near(r, 0, 1e-1)
+        spec_helper.assert_near(g, 0, 1e-1)
+        spec_helper.assert_near(b, 1, 1e-1)
+    end)
+
+    it('converts white D65 xyY to RGB', function()
+        local r, g, b = xyy_to_rgb(0.3127, 0.3290, 1)
+        spec_helper.assert_near(r, 1, 1e-2)
+        spec_helper.assert_near(g, 1, 1e-2)
+        spec_helper.assert_near(b, 1, 1e-2)
+    end)
+
+    it('defaults Y to 1.0 when omitted', function()
+        local r1, g1, b1 = xyy_to_rgb(0.3127, 0.3290, 1)
+        local r2, g2, b2 = xyy_to_rgb(0.3127, 0.3290)
+        spec_helper.assert_near(r1, r2, 1e-10)
+        spec_helper.assert_near(g1, g2, 1e-10)
+        spec_helper.assert_near(b1, b2, 1e-10)
+    end)
+
+    it('converts cyan xyY to RGB', function()
+        local r, g, b = xyy_to_rgb(0.225, 0.329, 0.79)
+        spec_helper.assert_near(r, 0, 1e-1)
+        spec_helper.assert_near(g, 1, 1e-1)
+        spec_helper.assert_near(b, 1, 1e-1)
+    end)
+
+    it('converts magenta xyY to RGB', function()
+        local r, g, b = xyy_to_rgb(0.40, 0.20, 0.28)
+        spec_helper.assert_near(r, 1, 0.25)
+        spec_helper.assert_near(g, 0, 0.25)
+        spec_helper.assert_near(b, 1, 0.25)
+    end)
+
+    it('converts yellow xyY to RGB', function()
+        local r, g, b = xyy_to_rgb(0.43, 0.50, 0.88)
+        spec_helper.assert_near(r, 1, 1e-1)
+        spec_helper.assert_near(g, 1, 1e-1)
+        spec_helper.assert_near(b, 0, 1e-1)
+    end)
+end)

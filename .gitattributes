@@ -1,0 +1,4 @@
+*.lua             text eol=lf
+color/convert/*   text eol=lf
+spec/convert/*    text eol=lf
+generate_*.lua    text eol=lf
