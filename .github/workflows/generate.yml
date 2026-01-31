@@ -5,13 +5,16 @@ on:
     branches: [ main ]
     types: [opened, synchronize, reopened]
 
+permissions:
+  contents: write          # Required for the commit job to push
+
 jobs:
   generate-and-test:
     runs-on: ubuntu-latest
     container: ghcr.io/blueyetisoftware/smartthings-edge-sdk-runtime:16.0.59-51ac4bd
     
     steps:
-    - name: Checkout
+    - name: Checkout the PR branch
       uses: actions/checkout@v4
       with:
         ref: ${{ github.head_ref }}
@@ -25,53 +28,52 @@ jobs:
       run: |
         busted spec/conversions/
     
-    - name: Upload Generated Files
+    - name: Upload generated conversions
       uses: actions/upload-artifact@v4
       with:
-        name: color-conversions
+        name: generated-conversions
         path: color/conversions
+        if-no-files-found: error   # fail if generation didn't produce anything
     
-    - name: Upload Generated Test Files
+    - name: Upload generated spec files
       uses: actions/upload-artifact@v4
       with:
-        name: spec-conversions
+        name: generated-spec
         path: spec/conversions
+        if-no-files-found: error
 
   commit-generated:
     needs: generate-and-test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest       # ← has git built-in
+    # No container here — we want stock git
     
     steps:
-    - name: Checkout
+    - name: Checkout the PR branch (with credentials for push)
       uses: actions/checkout@v4
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
         ref: ${{ github.head_ref }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        persist-credentials: true
     
-    - name: Configure Git
-      run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-    
-    - name: Download Generated Files
+    - name: Download generated conversions
       uses: actions/download-artifact@v4
       with:
-        name: color-conversions
+        name: generated-conversions
         path: color/conversions
     
-    - name: Download Generated Test Files
+    - name: Download generated spec files
       uses: actions/download-artifact@v4
       with:
-        name: spec-conversions
+        name: generated-spec
         path: spec/conversions
     
-    - name: Verify Downloaded Files
-      run: |
-        echo "=== Complete directory structure ==="
-        find . -type f | sort
-    
-    - name: Commit Generated Files
-      run: |
-        git add color/conversions/ spec/conversions/
-        git commit -m "Update generated color conversion modules and tests" || echo "No changes to commit"
-        git push  # Force add ignored files
+    - name: Commit & push if files changed
+      uses: stefanzweifel/git-auto-commit-action@v5   # or @v7 if you prefer latest
+      with:
+        commit_message: "chore: update generated color conversion modules & tests"
+        file_pattern: |
+          color/conversions/**
+          spec/conversions/**
+        branch: ${{ github.head_ref }}
+        commit_user_name: github-actions[bot]
+        commit_user_email: 41898282+github-actions[bot]@users.noreply.github.com  # Force add ignored files
