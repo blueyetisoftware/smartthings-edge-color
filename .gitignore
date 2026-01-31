@@ -40,6 +40,6 @@ luac.out
 *.hex
 
 # Generated conversion modules and tests
-color/conversions/
-spec/conversions/
+# color/conversions/
+# spec/conversions/
 
