@@ -38,34 +38,34 @@ end
 --- @return integer Color temperature in Mired, rounded to nearest integer
 ---
 --- @usage
---- local mired = to_mired(3000)  -- returns 333 (warm white)
---- local mired = to_mired(6500)  -- returns 154 (daylight white)
+--- local mired = cctk_to_cctm(3000)  -- returns 333 (warm white)
+--- local mired = cctk_to_cctm(6500)  -- returns 154 (daylight white)
 ---
---- @see to_kelvin
-local function to_mired(kelvin)
+--- @see cctm_to_cctk
+local function cctk_to_cctm(kelvin)
     return st_utils.round(1000000 / clamp_kelvin(kelvin))  -- mired = 1,000,000 / kelvin (micro reciprocal degrees)
 end
 
 --- Converts color temperature from Mired (micro reciprocal degrees) to Kelvin.
 ---
---- This is the inverse operation of to_mired. Mired values are converted
+--- This is the inverse operation of cctk_to_cctm. Mired values are converted
 --- back to Kelvin by dividing 1,000,000 by the mired value.
 ---
 --- @param mired number Color temperature in Mired
 --- @return integer Color temperature in Kelvin, rounded to nearest integer
 ---
 --- @usage
---- local kelvin = to_kelvin(333)  -- returns 3000 (warm white)
---- local kelvin = to_kelvin(154)  -- returns 6494 (approximately daylight white)
+--- local kelvin = cctm_to_cctk(333)  -- returns 3000 (warm white)
+--- local kelvin = cctm_to_cctk(154)  -- returns 6494 (approximately daylight white)
 ---
---- @see to_mired
-local function to_kelvin(mired)
+--- @see cctk_to_cctm
+local function cctm_to_cctk(mired)
     return st_utils.round(1000000 / clamp_mired(mired))  -- kelvin = 1,000,000 / mired (micro reciprocal degrees)
 end
 
 return {
     clamp_kelvin = clamp_kelvin,
     clamp_mired = clamp_mired,
-    to_mired = to_mired,
-    to_kelvin = to_kelvin
+    cctk_to_cctm = cctk_to_cctm,
+    cctm_to_cctk = cctm_to_cctk
 }

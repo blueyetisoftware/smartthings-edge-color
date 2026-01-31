@@ -19,8 +19,7 @@ local CONVERSION_PAIRS = {
     {'rgb', 'hsl'},
     {'rgb', 'cct'},
     {'rgb', 'xyy'},
-    {'hsv', 'hsl'},
-    {'cct', 'xyy'}
+    {'hsv', 'hsl'}
 }
 
 -- Format conversion functions (same as in generate_chains.lua)
@@ -263,7 +262,7 @@ local function generate_test_file(module_name)
     -- Header
     table.insert(lines, string.format("--- Test specifications for %s conversion module", module_name:gsub('_', ' ↔ ')))
     table.insert(lines, "")
-    table.insert(lines, "local conversions = require 'color.conversions." .. module_name .. "'")
+    table.insert(lines, "local convert = require 'color.convert." .. module_name .. "'")
     table.insert(lines, "")
 
     -- Test code
@@ -277,7 +276,7 @@ end
 local function main()
     if arg[1] ~= '--generate' then
         print("Usage: lua generate_tests.lua --generate")
-        print("This will generate test files for all grouped conversion modules in the spec/conversions/ directory")
+        print("This will generate test files for all grouped conversion modules in the spec/convert/ directory")
         return
     end
 
@@ -297,10 +296,10 @@ local function main()
 
     -- Create spec directories if they don't exist
     lfs.mkdir('spec')
-    lfs.mkdir('spec/conversions')
+    lfs.mkdir('spec/convert')
 
     for _, module_name in ipairs(modules) do
-        local filename = string.format("spec/conversions/%s_spec.lua", module_name)
+        local filename = string.format("spec/convert/%s_spec.lua", module_name)
         local content = generate_test_file(module_name)
 
         local file = io.open(filename, 'w')

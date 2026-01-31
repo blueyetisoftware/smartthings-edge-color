@@ -20,8 +20,7 @@ local CONVERSION_PAIRS = {
     {'rgb', 'hsl'},
     {'rgb', 'cct'},
     {'rgb', 'xyy'},
-    {'hsv', 'hsl'},
-    {'cct', 'xyy'}
+    {'hsv', 'hsl'}
 }
 
 -- Format conversion functions
@@ -43,16 +42,16 @@ local function generate_conversion_modules()
         local from_space, to_space = pair[1], pair[2]
         local module_name = from_space .. '_' .. to_space
 
-        -- Get all format combinations for this conversion pair
-        local conversions = {}
+        -- Get all format combinations for this convert pair
+        local convert = {}
         local from_formats = SPACES[from_space].formats
         local to_formats = SPACES[to_space].formats
 
-        -- Generate conversions from first space formats to second space formats
+        -- Generate convert from first space formats to second space formats
         for _, from_fmt in ipairs(from_formats) do
             for _, to_fmt in ipairs(to_formats) do
-                if from_fmt ~= to_fmt then  -- Skip identity conversions
-                    table.insert(conversions, {
+                if from_fmt ~= to_fmt then  -- Skip identity convert
+                    table.insert(convert, {
                         from = from_fmt,
                         to = to_fmt,
                         from_space = from_space,
@@ -62,11 +61,11 @@ local function generate_conversion_modules()
             end
         end
 
-        -- Generate conversions from second space formats to first space formats
+        -- Generate convert from second space formats to first space formats
         for _, from_fmt in ipairs(to_formats) do
             for _, to_fmt in ipairs(from_formats) do
-                if from_fmt ~= to_fmt then  -- Skip identity conversions
-                    table.insert(conversions, {
+                if from_fmt ~= to_fmt then  -- Skip identity convert
+                    table.insert(convert, {
                         from = from_fmt,
                         to = to_fmt,
                         from_space = to_space,
@@ -76,14 +75,14 @@ local function generate_conversion_modules()
             end
         end
 
-        modules[module_name] = conversions
+        modules[module_name] = convert
     end
 
     return modules
 end
 
 -- Generate the Lua code for a grouped conversion module
-local function generate_module_code(module_name, conversions)
+local function generate_module_code(module_name, convert)
     local lines = {}
 
     -- Header with detailed documentation
@@ -379,7 +378,7 @@ end
 local function main()
     if arg[1] ~= '--generate' then
         print("Usage: lua generate_chains.lua --generate")
-        print("This will generate grouped conversion modules in the color/conversions/ directory")
+        print("This will generate grouped conversion modules in the color/convert/ directory")
         return
     end
 
@@ -387,7 +386,7 @@ local function main()
 
     -- Create directories
     lfs.mkdir('color')
-    lfs.mkdir('color/conversions')
+    lfs.mkdir('color/convert')
 
     local total_conversions = 0
     for module_name, conversions in pairs(modules) do
@@ -398,7 +397,7 @@ local function main()
         #CONVERSION_PAIRS, total_conversions))
 
     for module_name, conversions in pairs(modules) do
-        local filename = string.format("color/conversions/%s.lua", module_name)
+        local filename = string.format("color/convert/%s.lua", module_name)
         local code = generate_module_code(module_name, conversions)
 
         local file = io.open(filename, 'w')
