@@ -1,4 +1,4 @@
-name: Verify Generated Color Conversions
+name: Verify Generated Files
 
 on:
   pull_request:
@@ -10,97 +10,41 @@ on:
       - 'color/format/**'
     types: [opened, synchronize, reopened]
 
-permissions: {}
-
 jobs:
-  check-generated:
+  check:
     runs-on: ubuntu-latest
     container: ghcr.io/blueyetisoftware/smartthings-edge-sdk-runtime:16.0.59-51ac4bd
 
     steps:
-      - name: Checkout PR branch
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
           clean: true
 
-      - name: Regenerate and verify (BusyBox-compatible diff)
-        run: |
-          echo "=== Backup committed versions ==="
-          mkdir -p /tmp/original/color/convert /tmp/original/spec/convert
+      - run: |
+          # Backup originals
+          mkdir -p /tmp/orig
+          cp -r color/convert/* /tmp/orig/ 2>/dev/null || true
+          cp -r spec/convert/*   /tmp/orig/   2>/dev/null || true
 
-          cp -r color/convert/* /tmp/original/color/convert/ 2>/dev/null || true
-          cp -r spec/convert/*   /tmp/original/spec/convert/   2>/dev/null || true
-
-          echo "Backup done. Original files:"
-          ls -la /tmp/original/color/convert/ | head -n 10
-          ls -la /tmp/original/spec/convert/   | head -n 10
-
-          echo ""
-          echo "=== Run generators ==="
+          # Regenerate
           lua generate_chains.lua --generate
           lua generate_tests.lua --generate
 
-          echo ""
-          echo "=== Normalize whitespace on both sides ==="
           # Trim trailing whitespace + ensure EOF newline
-          trim_ws() {
-            find "$1" -type f -name "*.lua" -exec sed -i 's/[ \t]*$//' {} \; \
-              -exec sed -i '$a\' {} \; || true
-          }
+          find color/convert spec/convert /tmp/orig -type f -name "*.lua" -exec \
+            sed -i 's/[ \t]*$//' {} \; -exec sed -i '$a\' {} \; || true
 
-          trim_ws color/convert
-          trim_ws spec/convert
-          trim_ws /tmp/original/color/convert
-          trim_ws /tmp/original/spec/convert
+          # Compare
+          fail=false
+          for f in /tmp/orig/*.lua; do
+            [ -f "$f" ] || continue
+            base=$(basename "$f")
+            regen=""
+            [[ $f == /tmp/orig/color* ]] && regen="color/convert/$base" || regen="spec/convert/$base"
+            [ -f "$regen" ] || { fail=true; echo "Missing $regen"; continue; }
+            cmp -s "$f" "$regen" || { fail=true; echo "Diff in $base"; }
+          done
 
-          echo ""
-          echo "=== Compare original vs regenerated (BusyBox diff -w -B -b -q) ==="
-
-          DIFF_FOUND=false
-
-          check_files() {
-            local orig_dir="$1"
-            local regen_dir="$2"
-            local label="$3"
-
-            for orig in "$orig_dir"/*.lua; do
-              if [ -f "$orig" ]; then
-                base=$(basename "$orig")
-                regen="$regen_dir/$base"
-
-                if [ -f "$regen" ]; then
-                  if ! diff -w -B -b -q "$orig" "$regen" >/dev/null 2>&1; then
-                    echo "→ Difference in $label/$base (even after normalization)"
-                    DIFF_FOUND=true
-                    echo "Brief diff:"
-                    diff -w -B -b -u "$orig" "$regen" | head -n 30 || true
-                    echo ""
-                  fi
-                else
-                  echo "→ Missing regenerated: $regen"
-                  DIFF_FOUND=true
-                fi
-              fi
-            done
-          }
-
-          check_files /tmp/original/color/convert color/convert "color/convert"
-          check_files /tmp/original/spec/convert spec/convert "spec/convert"
-
-          if [ "$DIFF_FOUND" = true ]; then
-            echo ""
-            echo "╔═══════════════════════════════════════════════════════════════╗"
-            echo "║               REAL CONTENT DIFFERENCES DETECTED               ║"
-            echo "╚═══════════════════════════════════════════════════════════════╝"
-            echo ""
-            echo "Files differ beyond whitespace/blank lines."
-            echo "Regenerate locally using the same container (docker run) and commit the output."
-            exit 1
-          else
-            echo "All files match ✓ (ignoring whitespace, space changes, blank lines)"
-          fi
-
-      - name: Run conversion tests
-        run: busted spec/convert/
+          [ "$fail" = true ] && { echo "Files differ after normalization"; exit 1; } || echo "OK ✓"
