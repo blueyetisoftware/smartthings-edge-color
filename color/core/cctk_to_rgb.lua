@@ -1,6 +1,6 @@
 local clamp_kelvin = require 'color.format.cct'.clamp_kelvin
 local clamp_rgb8 = require 'color.format.rgb'.clamp_rgb8
-local from_rgb8 = require 'color.format.rgb'.from_rgb8
+local from_rgb8 = require 'color.format.rgb'.rgb8_to_rgb
 
 --- Converts correlated color temperature (CCT) in Kelvin to RGB color values.
 ---
@@ -22,13 +22,13 @@ local from_rgb8 = require 'color.format.rgb'.from_rgb8
 --- @raise error if cct is not a number
 ---
 --- @usage
---- local r, g, b = cct_to_rgb(3000)  -- Warm white light
---- local r, g, b = cct_to_rgb(6500)  -- Daylight white
+--- local r, g, b = cctk_to_rgb(3000)  -- Warm white light
+--- local r, g, b = cctk_to_rgb(6500)  -- Daylight white
 ---
 --- @see https://github.com/neilbartlett/color-temperature
 --- @see https://tannerhelland.com/2012/09/18/convert-temperature-rgb-algorithm-code.html
 --- @see https://en.wikipedia.org/wiki/Color_temperature
-local function cct_to_rgb(cct)
+local function cctk_to_rgb(cct)
     assert(type(cct) == "number", "cct must be a number")
     cct = clamp_kelvin(cct)
 
@@ -69,4 +69,4 @@ local function cct_to_rgb(cct)
     return from_rgb8(clamp_rgb8(red, green, blue))
 end
 
-return cct_to_rgb
+return cctk_to_rgb

@@ -11,11 +11,11 @@
 --- Algorithm: Direct component transformation (H identical, S/V adjusted)
 
 local hsv_to_hsl = require 'color.core.hsv_to_hsl'
-local to_hsl360 = require 'color.format.hsl'.to_hsl360
-local from_hsv360 = require 'color.format.hsv'.from_hsv360
+local to_hsl360 = require 'color.format.hsl'.hsl_to_hsl360
+local from_hsv360 = require 'color.format.hsv'.hsv360_to_hsv
 local hsl_to_hsv = require 'color.core.hsl_to_hsv'
-local to_hsv360 = require 'color.format.hsv'.to_hsv360
-local from_hsl360 = require 'color.format.hsl'.from_hsl360
+local to_hsv360 = require 'color.format.hsv'.hsv_to_hsv360
+local from_hsl360 = require 'color.format.hsl'.hsl360_to_hsl
 
 local M = {}
 

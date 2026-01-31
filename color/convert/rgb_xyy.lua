@@ -12,12 +12,12 @@
 
 local rgb_to_xyy = require 'color.core.rgb_to_xyy'
 local xyy_to_rgb = require 'color.core.xyy_to_rgb'
-local from_rgb8 = require 'color.format.rgb'.from_rgb8
-local from_hex24 = require 'color.format.rgb'.from_hex24
-local from_rgb100 = require 'color.format.rgb'.from_rgb100
-local to_rgb8 = require 'color.format.rgb'.to_rgb8
-local to_hex24 = require 'color.format.rgb'.to_hex24
-local to_rgb100 = require 'color.format.rgb'.to_rgb100
+local from_rgb8 = require 'color.format.rgb'.rgb8_to_rgb
+local from_hex24 = require 'color.format.rgb'.hex24_to_rgb
+local from_rgb100 = require 'color.format.rgb'.rgb100_to_rgb
+local to_rgb8 = require 'color.format.rgb'.rgb_to_rgb8
+local to_hex24 = require 'color.format.rgb'.rgb_to_hex24
+local to_rgb100 = require 'color.format.rgb'.rgb_to_rgb100
 
 local M = {}
 

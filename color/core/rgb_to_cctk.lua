@@ -1,12 +1,12 @@
 local st_utils = require 'st.utils'
 local clamp_rgb = require 'color.format.rgb'.clamp_rgb
-local cct_to_rgb = require 'color.core.cct_to_rgb'
+local cctk_to_rgb = require 'color.core.cctk_to_rgb'
 
 -- Lookup table for ratio-based CCT approximation (78 entries, ~600 bytes)
 local RATIO_LOOKUP = {}
 do
     for cct = 1000, 30000, 400 do  -- Adjusted step size for new range
-        local r, _, b = cct_to_rgb(cct)
+        local r, _, b = cctk_to_rgb(cct)
         RATIO_LOOKUP[#RATIO_LOOKUP + 1] = {ratio = b / r, cct = cct}
     end
 end
@@ -21,7 +21,7 @@ local function rgb_to_cct_distance(r, g, b)
 
     -- Coarse search with larger step size (151 iterations vs 301)
     for temp = min, max, 200 do
-        local r_temp, g_temp, b_temp = cct_to_rgb(temp)
+        local r_temp, g_temp, b_temp = cctk_to_rgb(temp)
         local distance = (r - r_temp)^2 + (g - g_temp)^2 + (b - b_temp)^2  -- squared distance, avoid sqrt
         if distance < best_distance then
             best_distance = distance
@@ -39,8 +39,8 @@ local function rgb_to_cct_distance(r, g, b)
         local cct1 = max - golden_ratio * (max - min)
         local cct2 = min + golden_ratio * (max - min)
 
-        local r1, g1, b1 = cct_to_rgb(cct1)
-        local r2, g2, b2 = cct_to_rgb(cct2)
+        local r1, g1, b1 = cctk_to_rgb(cct1)
+        local r2, g2, b2 = cctk_to_rgb(cct2)
 
         local dist1 = (r - r1)^2 + (g - g1)^2 + (b - b1)^2
         local dist2 = (r - r2)^2 + (g - g2)^2 + (b - b2)^2
@@ -99,7 +99,7 @@ local function rgb_to_cct_ratio(r, _g, b)
 
     while max - min > epsilon do
         cct = (max + min) / 2
-        local r_temp, _, b_temp = cct_to_rgb(cct)
+        local r_temp, _, b_temp = cctk_to_rgb(cct)
         if b_temp / r_temp >= ratio then
             max = cct
         else
@@ -133,11 +133,11 @@ end
 ---
 --- @usage
 --- -- ✅ RECOMMENDED: Fast approximation (default, ~200x faster)
---- local cct = rgb_to_cct(1.0, 0.7, 0.4)  -- Approximately 2906K
+--- local cct = rgb_to_cctk(1.0, 0.7, 0.4)  -- Approximately 2906K
 ---
 --- -- ⚠️  Use accurate only when precision is critical
---- local cct = rgb_to_cct(1.0, 0.7, 0.4, true)  -- Approximately 2913K (200x slower)
-local function rgb_to_cct(r, g, b, accurate)
+--- local cct = rgb_to_cctk(1.0, 0.7, 0.4, true)  -- Approximately 2913K (200x slower)
+local function rgb_to_cctk(r, g, b, accurate)
     assert(type(r) == "number" and type(g) == "number" and type(b) == "number", "r, g, b must be numbers")
     r, g, b = clamp_rgb(r, g, b)
 
@@ -148,4 +148,4 @@ local function rgb_to_cct(r, g, b, accurate)
     end
 end
 
-return rgb_to_cct
+return rgb_to_cctk

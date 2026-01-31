@@ -12,18 +12,18 @@
 --- Algorithm: Lookup table interpolation + golden section search
 --- Accuracy: < 10K error across standard illuminant range
 
-local rgb_to_cct = require 'color.core.rgb_to_cct'
-local cct_to_rgb = require 'color.core.cct_to_rgb'
-local from_rgb8 = require 'color.format.rgb'.from_rgb8
-local to_cctk = require 'color.format.cct'.to_kelvin
-local to_cctm = require 'color.format.cct'.to_mired
-local from_hex24 = require 'color.format.rgb'.from_hex24
-local from_rgb100 = require 'color.format.rgb'.from_rgb100
-local from_cctk = require 'color.format.cct'.to_mired
-local to_rgb8 = require 'color.format.rgb'.to_rgb8
-local to_hex24 = require 'color.format.rgb'.to_hex24
-local to_rgb100 = require 'color.format.rgb'.to_rgb100
-local from_cctm = require 'color.format.cct'.to_kelvin
+local rgb_to_cctk = require 'color.core.rgb_to_cctk'
+local cctk_to_rgb = require 'color.core.cctk_to_rgb'
+local from_rgb8 = require 'color.format.rgb'.rgb8_to_rgb
+local to_cctk = require 'color.format.cct'.cctk_to_cctm
+local to_cctm = require 'color.format.cct'.cctm_to_cctk
+local from_hex24 = require 'color.format.rgb'.hex24_to_rgb
+local from_rgb100 = require 'color.format.rgb'.rgb100_to_rgb
+local from_cctk = require 'color.format.cct'.cctm_to_cctk
+local to_rgb8 = require 'color.format.rgb'.rgb_to_rgb8
+local to_hex24 = require 'color.format.rgb'.rgb_to_hex24
+local to_rgb100 = require 'color.format.rgb'.rgb_to_rgb100
+local from_cctm = require 'color.format.cct'.cctk_to_cctm
 
 local M = {}
 
@@ -115,14 +115,14 @@ end
 function M.rgb_to_cct(
     red, green, blue
 )
-    return rgb_to_cct(red, green, blue)
+    return rgb_to_cctk(red, green, blue)
 end
 
 -- cct to rgb (normalized pass-through)
 function M.cct_to_rgb(
     kelvin
 )
-    return cct_to_rgb(kelvin)
+    return cctk_to_rgb(kelvin)
 end
 
 return M

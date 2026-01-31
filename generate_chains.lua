@@ -7,11 +7,11 @@ local lfs = require 'lfs'  -- LuaFileSystem for directory operations
 
 -- Define the color spaces and their formats
 local SPACES = {
-    rgb = { formats = {'rgb8', 'hex24', 'rgb100'} },
-    hsv = { formats = {'hsv', 'hsv360'} },
-    hsl = { formats = {'hsl', 'hsl360'} },
-    cct = { formats = {'cctk', 'cctm'} },
-    xyy = { formats = {'xyy'} }
+    rgb = { formats = {'rgb8', 'hex24', 'rgb100'}, normalized = 'rgb' },
+    hsv = { formats = {'hsv', 'hsv360'}, normalized = 'hsv' },
+    hsl = { formats = {'hsl', 'hsl360'}, normalized = 'hsl' },
+    cct = { formats = {'cctk', 'cctm'}, normalized = 'cctk' },
+    xyy = { formats = {'xyy'}, normalized = 'xyy' }
 }
 
 -- Define conversion pairs to generate modules for
@@ -25,13 +25,13 @@ local CONVERSION_PAIRS = {
 
 -- Format conversion functions
 local FORMAT_FUNCTIONS = {
-    rgb8 = { to = 'to_rgb8', from = 'from_rgb8' },
-    hex24 = { to = 'to_hex24', from = 'from_hex24' },
-    rgb100 = { to = 'to_rgb100', from = 'from_rgb100' },
-    hsv360 = { to = 'to_hsv360', from = 'from_hsv360' },
-    hsl360 = { to = 'to_hsl360', from = 'from_hsl360' },
-    cctk = { to = 'to_kelvin', from = 'to_mired' },
-    cctm = { to = 'to_mired', from = 'to_kelvin' }
+    rgb8 = { to = 'rgb_to_rgb8', from = 'rgb8_to_rgb' },
+    hex24 = { to = 'rgb_to_hex24', from = 'hex24_to_rgb' },
+    rgb100 = { to = 'rgb_to_rgb100', from = 'rgb100_to_rgb' },
+    hsv360 = { to = 'hsv_to_hsv360', from = 'hsv360_to_hsv' },
+    hsl360 = { to = 'hsl_to_hsl360', from = 'hsl360_to_hsl' },
+    cctk = { to = 'cctk_to_cctm', from = 'cctm_to_cctk' },
+    cctm = { to = 'cctm_to_cctk', from = 'cctk_to_cctm' }
 }
 
 -- Generate grouped conversion modules
@@ -146,7 +146,7 @@ local function generate_module_code(module_name, convert)
     local requires = {}
     local core_conversions = {}
 
-    for _, conv in ipairs(conversions) do
+    for _, conv in ipairs(convert) do
         local from_space, to_space = conv.from_space, conv.to_space
 
         -- Add core conversion requires
@@ -168,6 +168,7 @@ local function generate_module_code(module_name, convert)
             -- Standard conversion through RGB
             if from_space ~= 'rgb' then
                 local core_key = string.format("%s_to_rgb", from_space)
+                if from_space == 'cct' then core_key = 'cctk_to_rgb' end
                 if not core_conversions[core_key] then
                     table.insert(requires, string.format("local %s = require 'color.core.%s'", core_key, core_key))
                     core_conversions[core_key] = true
@@ -175,6 +176,7 @@ local function generate_module_code(module_name, convert)
             end
             if to_space ~= 'rgb' then
                 local core_key = string.format("rgb_to_%s", to_space)
+                if to_space == 'cct' then core_key = 'rgb_to_cctk' end
                 if not core_conversions[core_key] then
                     table.insert(requires, string.format("local %s = require 'color.core.%s'", core_key, core_key))
                     core_conversions[core_key] = true
@@ -184,12 +186,14 @@ local function generate_module_code(module_name, convert)
 
         -- Add pass-through requires for normalized conversions (only for RGB-centric pairs)
         if from_space == 'rgb' or to_space == 'rgb' then
-            local from_to_to = string.format("%s_to_%s", from_space, to_space)
+            local adjusted_from = from_space == 'cct' and 'cctk' or from_space
+            local adjusted_to = to_space == 'cct' and 'cctk' or to_space
+            local from_to_to = string.format("%s_to_%s", adjusted_from, adjusted_to)
             if not core_conversions[from_to_to] then
                 table.insert(requires, string.format("local %s = require 'color.core.%s'", from_to_to, from_to_to))
                 core_conversions[from_to_to] = true
             end
-            local to_to_from = string.format("%s_to_%s", to_space, from_space)
+            local to_to_from = string.format("%s_to_%s", adjusted_to, adjusted_from)
             if not core_conversions[to_to_from] then
                 table.insert(requires, string.format("local %s = require 'color.core.%s'", to_to_from, to_to_from))
                 core_conversions[to_to_from] = true
@@ -247,7 +251,7 @@ local function generate_module_code(module_name, convert)
     table.insert(lines, "")
 
     -- Generate functions for each conversion
-    for _, conv in ipairs(conversions) do
+    for _, conv in ipairs(convert) do
         local func_name = string.format("%s_to_%s", conv.from, conv.to)
         local from_space, to_space = conv.from_space, conv.to_space
 
@@ -322,6 +326,8 @@ local function generate_module_code(module_name, convert)
     -- Add normalized pass-through functions for discoverability (only for RGB-centric pairs)
     local from_space, to_space = module_name:match('^([^_]+)_(.+)$')
     if from_space == 'rgb' or to_space == 'rgb' then
+        local adjusted_from = from_space == 'cct' and 'cctk' or from_space
+        local adjusted_to = to_space == 'cct' and 'cctk' or to_space
         table.insert(lines, string.format("-- %s to %s (normalized pass-through)", from_space, to_space))
         table.insert(lines, string.format("function M.%s_to_%s(", from_space, to_space))
         if from_space == 'rgb' then
@@ -336,7 +342,7 @@ local function generate_module_code(module_name, convert)
             table.insert(lines, "    x, y, Y")
         end
         table.insert(lines, ")")
-        table.insert(lines, string.format("    return %s_to_%s(%s)", from_space, to_space, 
+        table.insert(lines, string.format("    return %s_to_%s(%s)", adjusted_from, adjusted_to, 
             from_space == 'rgb' and "red, green, blue" or
             from_space == 'hsv' and "hue, saturation, value" or
             from_space == 'hsl' and "hue, saturation, lightness" or
@@ -359,7 +365,7 @@ local function generate_module_code(module_name, convert)
             table.insert(lines, "    x, y, Y")
         end
         table.insert(lines, ")")
-        table.insert(lines, string.format("    return %s_to_%s(%s)", to_space, from_space,
+        table.insert(lines, string.format("    return %s_to_%s(%s)", adjusted_to, adjusted_from,
             to_space == 'rgb' and "red, green, blue" or
             to_space == 'hsv' and "hue, saturation, value" or
             to_space == 'hsl' and "hue, saturation, lightness" or
