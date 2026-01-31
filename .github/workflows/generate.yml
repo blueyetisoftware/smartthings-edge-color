@@ -28,10 +28,14 @@ jobs:
     - name: Upload Generated Files
       uses: actions/upload-artifact@v4
       with:
-        name: generated-color-code
-        path: |
-          color/conversions/
-          spec/conversions/
+        name: color-conversions
+        path: color/conversions/
+    
+    - name: Upload Generated Test Files
+      uses: actions/upload-artifact@v4
+      with:
+        name: spec-conversions
+        path: spec/conversions/
 
   commit-generated:
     needs: generate-and-test
@@ -47,20 +51,18 @@ jobs:
     - name: Download Generated Files
       uses: actions/download-artifact@v4
       with:
-        name: generated-color-code
-        path: .
+        name: color-conversions
+        path: color
+    
+    - name: Download Generated Test Files
+      uses: actions/download-artifact@v4
+      with:
+        name: spec-conversions
+        path: spec
     
     - name: Commit Generated Files
-      run: |
-        # Move generated files to correct locations
-        mv generated-color-code/color/conversions/* color/conversions/ 2>/dev/null || true
-        mv generated-color-code/spec/conversions/* spec/conversions/ 2>/dev/null || true
-        git add color/conversions/ spec/conversions/
-        if ! git diff --cached --quiet; then
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git commit -m "Update generated color conversion modules and tests"
-          git push origin ${{ github.head_ref }}
-        else
-          echo "No changes in generated code - skipping commit"
-        fi
+      uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message: 'Update generated color conversion modules and tests'
+        file_pattern: 'color/conversions/ spec/conversions/'
+        add_options: '-f'  # Force add ignored files
