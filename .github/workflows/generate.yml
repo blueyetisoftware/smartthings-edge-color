@@ -6,7 +6,7 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  generate-and-commit:
+  generate-and-test:
     runs-on: ubuntu-latest
     container: ghcr.io/blueyetisoftware/smartthings-edge-sdk-runtime:16.0.59-51ac4bd
     
@@ -14,9 +14,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
       with:
-        token: ${{ secrets.GITHUB_TOKEN }}
         ref: ${{ github.head_ref }}
-        fetch-depth: 0  # Fetch full history for proper git operations
     
     - name: Generate Conversion Modules
       run: |
@@ -27,12 +25,36 @@ jobs:
       run: |
         busted spec/conversions/
     
+    - name: Upload Generated Files
+      uses: actions/upload-artifact@v4
+      with:
+        name: generated-color-code
+        path: |
+          color/conversions/
+          spec/conversions/
+
+  commit-generated:
+    needs: generate-and-test
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        ref: ${{ github.head_ref }}
+    
+    - name: Download Generated Files
+      uses: actions/download-artifact@v4
+      with:
+        name: generated-color-code
+        path: .
+    
     - name: Commit Generated Files
       run: |
-        pwd
-        ls -la
-        apk update && apk add --no-cache git
-        git status
+        # Move generated files to correct locations
+        mv generated-color-code/color/conversions/* color/conversions/ 2>/dev/null || true
+        mv generated-color-code/spec/conversions/* spec/conversions/ 2>/dev/null || true
         git add color/conversions/ spec/conversions/
         if ! git diff --cached --quiet; then
           git config --local user.email "action@github.com"
