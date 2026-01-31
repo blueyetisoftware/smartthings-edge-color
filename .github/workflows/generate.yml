@@ -21,14 +21,14 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         persist-credentials: true
 
-    - name: Generate files
-      run: |
-        lua generate_chains.lua --generate
-        lua generate_tests.lua --generate
-
-    - name: Check for Outdated Files
+    - name: Check for Outdated Generated Files
       run: |
         apk add --no-cache git
+
+        # Generate files temporarily to check if they're up to date
+        lua generate_chains.lua --generate
+        lua generate_tests.lua --generate
+        
         if git diff --quiet color/convert/ spec/convert/; then
           echo "Generated files are up to date."
         else
