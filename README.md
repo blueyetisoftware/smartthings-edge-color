@@ -121,7 +121,7 @@ color/
 │   ├── cct_to_rgb.lua    # CCT → RGB conversion
 │   ├── rgb_to_xyy.lua    # RGB → xyY conversion
 │   └── xyy_to_rgb.lua    # xyY → RGB conversion
-├── conversions/          # Generated grouped conversion modules (run generate_chains.lua)
+├── convert/          # Generated grouped conversion modules (run generate_chains.lua)
 │   ├── rgb_hsv.lua       # All RGB ↔ HSV format variants
 │   ├── rgb_hsl.lua       # All RGB ↔ HSL format variants
 │   ├── rgb_cct.lua       # All RGB ↔ CCT format variants
@@ -158,14 +158,14 @@ Only **mathematically simple relationships** get direct implementations:
 **Rationale**: Most cross-space conversions require RGB intermediates. Direct conversions are only implemented when they provide clear performance benefits without compromising accuracy.
 
 #### **Generated Grouped Modules**
-Conversion modules in `color/conversions/` are **generated on-demand** to:
+Convert modules in `color/convert/` are **generated on-demand** to:
 - Enable maximum tree-shaking for Edge driver bundle optimization
 - Maintain consistency across format variants
 - Keep the repository clean while supporting all use cases
 
 **Rationale**: Manual maintenance of format variants would be error-prone. Generation ensures consistency while allowing selective imports for minimal bundle sizes.
 
-**Generated Modules**: Grouped conversion modules in `color/conversions/` are generated on-demand to enable tree-shaking while keeping the repository clean.
+**Generated Modules**: Grouped convert modules in `color/convert/` are generated on-demand to enable tree-shaking while keeping the repository clean.
 
 ### �📦 Bundle Size Optimization
 
@@ -173,21 +173,21 @@ This library is designed for **selective imports** to minimize bundle size in Ed
 
 ```lua
 -- ✅ RECOMMENDED: Selective imports for minimal bundles
-local rgb_hsv = require 'color.conversions.rgb_hsv'  -- Only RGB↔HSV conversions
-local rgb_cct = require 'color.conversions.rgb_cct'  -- Only RGB↔CCT conversions
+local rgb_hsv = require 'color.convert.rgb_hsv'  -- Only RGB↔HSV conversions
+local rgb_cct = require 'color.convert.rgb_cct'  -- Only RGB↔CCT conversions
 
 -- ⚠️  AVOID: Top-level import loads everything
 -- local color = require 'color'  -- Loads all modules
 ```
 
 **Common Driver Scenarios:**
-- **Tunable White Only**: `require 'color.conversions.rgb_cct'`
-- **Full Color Control**: `require 'color.conversions.rgb_hsv'`, `require 'color.conversions.rgb_hsl'`, `require 'color.conversions.rgb_cct'`
-- **xy-based Bulbs**: `require 'color.conversions.rgb_xyy'`, `require 'color.conversions.cct_xyy'`
+- **Tunable White Only**: `require 'color.convert.rgb_cct'`
+- **Full Color Control**: `require 'color.convert.rgb_hsv'`, `require 'color.convert.rgb_hsl'`, `require 'color.convert.rgb_cct'`
+- **xy-based Bulbs**: `require 'color.convert.rgb_xyy'`, `require 'color.convert.cct_xyy'`
 
 ### 🔀 Grouped Conversion Modules
 
-For maximum tree-shaking efficiency, the library provides **grouped conversion modules** that contain all format variants for related color space conversions. These modules are **generated** and located in `color/conversions/` and enable selective loading of conversion families.
+For maximum tree-shaking efficiency, the library provides **grouped conversion modules** that contain all format variants for related color space conversions. These modules are **generated** and located in `color/convert/` and enable selective loading of conversion families.
 
 **To generate the conversion modules:**
 ```bash
@@ -198,7 +198,7 @@ lua generate_tests.lua --generate
 Example usage after generation:
 ```lua
 -- Load all RGB ↔ HSV conversions (includes normalized pass-throughs)
-local rgb_hsv = require 'color.conversions.rgb_hsv'
+local rgb_hsv = require 'color.convert.rgb_hsv'
 local h, s, v = rgb_hsv.rgb8_to_hsv(255, 128, 0)  -- Convert 8-bit RGB to HSV
 local r, g, b = rgb_hsv.hsv_to_rgb8(0.1, 0.8, 1)  -- Convert HSV to 8-bit RGB
 local hex = rgb_hsv.hsv_to_hex24(0.1, 0.8, 1)     -- Convert HSV to 24-bit hex
@@ -207,40 +207,40 @@ local h, s, v = rgb_hsv.rgb_to_hsv(1, 0.5, 0)     -- Normalized RGB to HSV
 local r, g, b = rgb_hsv.hsv_to_rgb(0.1, 0.8, 1)   -- Normalized HSV to RGB
 
 -- Load all RGB ↔ HSL conversions
-local rgb_hsl = require 'color.conversions.rgb_hsl'
+local rgb_hsl = require 'color.convert.rgb_hsl'
 local h, s, l = rgb_hsl.rgb100_to_hsl(100, 50, 0)  -- Convert 0-100 RGB to HSL
 local r, g, b = rgb_hsl.hsl_to_rgb(0.1, 0.8, 0.5)  -- Normalized HSL to RGB
 
 -- Load all RGB ↔ CCT conversions
-local rgb_cct = require 'color.conversions.rgb_cct'
+local rgb_cct = require 'color.convert.rgb_cct'
 local kelvin = rgb_cct.rgb_to_cctk(1, 0.5, 0.2)    -- RGB to Kelvin
 local r, g, b = rgb_cct.cctm_to_rgb(250, 200, 150) -- Mired to RGB
 
 -- Cross-space conversions (through RGB)
-local hsv_hsl = require 'color.conversions.hsv_hsl'
+local hsv_hsl = require 'color.convert.hsv_hsl'
 local h, s, l = hsv_hsl.hsv360_to_hsl(120, 0.8, 0.9) -- Degrees-based HSV to HSL
 
-local cct_xyy = require 'color.conversions.cct_xyy'
+local cct_xyy = require 'color.convert.cct_xyy'
 local x, y, Y = cct_xyy.cct_kelvin_to_xyy(6500)  -- Color temperature to xyY
 ```
 
 Available grouped modules (after generation):
-- `color.conversions.rgb_hsv` - RGB ↔ HSV (6 format combinations + 2 normalized)
-- `color.conversions.rgb_hsl` - RGB ↔ HSL (3 format combinations + 2 normalized)  
-- `color.conversions.rgb_cct` - RGB ↔ CCT (6 format combinations + 2 normalized)
-- `color.conversions.rgb_xyy` - RGB ↔ xyY (3 format combinations + 2 normalized)
-- `color.conversions.hsv_hsl` - HSV ↔ HSL (2 format combinations, through RGB)
-- `color.conversions.cct_xyy` - CCT ↔ xyY (2 format combinations, through RGB)
+- `color.convert.rgb_hsv` - RGB ↔ HSV (6 format combinations + 2 normalized)
+- `color.convert.rgb_hsl` - RGB ↔ HSL (3 format combinations + 2 normalized)  
+- `color.convert.rgb_cct` - RGB ↔ CCT (6 format combinations + 2 normalized)
+- `color.convert.rgb_xyy` - RGB ↔ xyY (3 format combinations + 2 normalized)
+- `color.convert.hsv_hsl` - HSV ↔ HSL (2 format combinations, through RGB)
+- `color.convert.cct_xyy` - CCT ↔ xyY (2 format combinations, through RGB)
 
-**Test Structure**: Conversion module tests are generated in `spec/conversions/` to mirror the library structure.
+**Test Structure**: Convert module tests are generated in `spec/convert/` to mirror the library structure.
 
 ## Usage Examples
 
 ### Basic Color Conversion
 ```lua
 -- Import only the modules you need for minimal bundle size
-local rgb_hsv = require 'color.conversions.rgb_hsv'
-local rgb_hsl = require 'color.conversions.rgb_hsl'
+local rgb_hsv = require 'color.convert.rgb_hsv'
+local rgb_hsl = require 'color.convert.rgb_hsl'
 
 -- Convert RGB to HSV
 local h, s, v = rgb_hsv.rgb_to_hsv(1, 0, 0)  -- Pure red: 0, 1, 1
@@ -446,7 +446,7 @@ All 220+ tests should pass, covering:
 
 This library uses **code generation** to create conversion modules and comprehensive tests. GitHub Actions automatically:
 
-- **Generates conversion modules** (`color/conversions/`) and tests (`spec/conversions/`) on pull requests
+- **Generates convert modules** (`color/convert/`) and tests (`spec/convert/`) on pull requests
 - **Commits generated code** only when changes are detected (avoids empty commits)
 - **Runs full test suite** (460+ tests) on generated code to ensure accuracy
 - **Validates PR changes** before merging to maintain quality
