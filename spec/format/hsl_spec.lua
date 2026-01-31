@@ -61,32 +61,32 @@ describe("clamp_hsl360", function()
   end)
 end)
 
-describe("to_hsl360", function()
+describe("hsl_to_hsl360", function()
   it("converts normalized HSL to degrees", function()
-    local h, s, l = HSL.to_hsl360(0.25, 0.8, 0.6)  -- 0.25 * 360 = 90
+    local h, s, l = HSL.hsl_to_hsl360(0.25, 0.8, 0.6)  -- 0.25 * 360 = 90
     assert.are.equal(90, h)
     assert.are.equal(0.8, s)
     assert.are.equal(0.6, l)
   end)
 
   it("wraps hue values", function()
-    local h, s, l = HSL.to_hsl360(1.25, 0.5, 0.7)  -- 1.25 * 360 = 450, 450 % 360 = 90
+    local h, s, l = HSL.hsl_to_hsl360(1.25, 0.5, 0.7)  -- 1.25 * 360 = 450, 450 % 360 = 90
     assert.are.equal(90, h)
     assert.are.equal(0.5, s)
     assert.are.equal(0.7, l)
   end)
 end)
 
-describe("from_hsl360", function()
+describe("hsl360_to_hsl", function()
   it("converts degrees HSL to normalized", function()
-    local h, s, l = HSL.from_hsl360(90, 0.8, 0.6)  -- 90 / 360 = 0.25
+    local h, s, l = HSL.hsl360_to_hsl(90, 0.8, 0.6)  -- 90 / 360 = 0.25
     assert.are.equal(0.25, h)
     assert.are.equal(0.8, s)
     assert.are.equal(0.6, l)
   end)
 
   it("wraps hue values", function()
-    local h, s, l = HSL.from_hsl360(450, 0.5, 0.7)  -- 450 % 360 = 90, 90 / 360 = 0.25
+    local h, s, l = HSL.hsl360_to_hsl(450, 0.5, 0.7)  -- 450 % 360 = 90, 90 / 360 = 0.25
     assert.are.equal(0.25, h)
     assert.are.equal(0.5, s)
     assert.are.equal(0.7, l)

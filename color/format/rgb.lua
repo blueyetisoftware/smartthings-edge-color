@@ -58,7 +58,7 @@ end
 --- @param g number Green value to convert (0-1)
 --- @param b number Blue value to convert (0-1)
 --- @return integer,integer,integer Converted 8-bit RGB integer values
-local function to_rgb8(r, g, b)
+local function rgb_to_rgb8(r, g, b)
     return round_rgb(clamp_rgb8(r * 255, g * 255, b * 255))
 end
 
@@ -68,7 +68,7 @@ end
 --- @param g8 number Green value to convert (0-255)
 --- @param b8 number Blue value to convert (0-255)
 --- @return number,number,number Converted normalized RGB values
-local function from_rgb8(r8, g8, b8)
+local function rgb8_to_rgb(r8, g8, b8)
     return clamp_rgb(r8 / 255, g8 / 255, b8 / 255)
 end
 
@@ -78,7 +78,7 @@ end
 --- @param g number Green value to convert (0-1)
 --- @param b number Blue value to convert (0-1)
 --- @return number,number,number Converted percentage RGB values
-local function to_rgb100(r, g, b)
+local function rgb_to_rgb100(r, g, b)
     return clamp_rgb100(r * 100, g * 100, b * 100)
 end
 
@@ -88,7 +88,7 @@ end
 --- @param g100 number Green value to convert (0-100)
 --- @param b100 number Blue value to convert (0-100)
 --- @return number,number,number Converted normalized RGB values
-local function from_rgb100(r100, g100, b100)
+local function rgb100_to_rgb(r100, g100, b100)
     return clamp_rgb(r100 / 100, g100 / 100, b100 / 100)
 end
 
@@ -98,8 +98,8 @@ end
 --- @param g number Green value to convert (0-1)
 --- @param b number Blue value to convert (0-1)
 --- @return integer Hex color integer in format 0xRRGGBB
-local function to_hex24(r, g, b)
-    local r8, g8, b8 = to_rgb8(r, g, b)
+local function rgb_to_hex24(r, g, b)
+    local r8, g8, b8 = rgb_to_rgb8(r, g, b)
     return (r8 << 16) | (g8 << 8) | b8
 end
 
@@ -107,7 +107,7 @@ end
 ---
 --- @param hex integer Hex color as integer (0xRRGGBB)
 --- @return number,number,number Converted normalized RGB values
-local function from_hex24(hex)
+local function hex24_to_rgb(hex)
     assert(type(hex) == "number", "hex must be a number")
     
     -- Round float to integer if necessary
@@ -121,7 +121,7 @@ local function from_hex24(hex)
     local g8 = (hex >> 8) & 0xFF
     local b8 = hex & 0xFF
     
-    return from_rgb8(r8, g8, b8)
+    return rgb8_to_rgb(r8, g8, b8)
 end
 
 return {
@@ -129,10 +129,10 @@ return {
     clamp_rgb100 = clamp_rgb100,
     clamp_rgb = clamp_rgb,
     round_rgb = round_rgb,
-    to_rgb8 = to_rgb8,
-    from_rgb8 = from_rgb8,
-    to_rgb100 = to_rgb100,
-    from_rgb100 = from_rgb100,
-    to_hex24 = to_hex24,
-    from_hex24 = from_hex24
+    rgb_to_rgb8 = rgb_to_rgb8,
+    rgb8_to_rgb = rgb8_to_rgb,
+    rgb_to_rgb100 = rgb_to_rgb100,
+    rgb100_to_rgb = rgb100_to_rgb,
+    rgb_to_hex24 = rgb_to_hex24,
+    hex24_to_rgb = hex24_to_rgb
 }

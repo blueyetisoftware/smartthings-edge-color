@@ -34,7 +34,7 @@ end
 --- @param s number Saturation [0,1]
 --- @param l number Lightness [0,1]
 --- @return number,number,number Degrees-based HSL values
-local function to_hsl360(h, s, l)
+local function hsl_to_hsl360(h, s, l)
     return clamp_hsl360(h * 360, s, l)
 end
 
@@ -44,13 +44,13 @@ end
 --- @param s number Saturation [0,1]
 --- @param l number Lightness [0,1]
 --- @return number,number,number Normalized HSL values
-local function from_hsl360(h, s, l)
+local function hsl360_to_hsl(h, s, l)
     return clamp_hsl(h / 360, s, l)
 end
 
 return {
     clamp_hsl = clamp_hsl,
     clamp_hsl360 = clamp_hsl360,
-    to_hsl360 = to_hsl360,
-    from_hsl360 = from_hsl360
+    hsl_to_hsl360 = hsl_to_hsl360,
+    hsl360_to_hsl = hsl360_to_hsl
 }
