@@ -54,7 +54,7 @@ local function rgb_to_xyy(red, green, blue)
 
     -- Fix: Check for X + Y + Z == 0 to avoid division by zero (ST bug)
     local sum = X + Y + Z
-    if sum == 0 then
+    if sum < 1e-10 then  -- Use epsilon for floating-point safety
         return 0, 0, 0
     end
 
