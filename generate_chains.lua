@@ -20,8 +20,7 @@ local CONVERSION_PAIRS = {
     {'rgb', 'hsl'},
     {'rgb', 'cct'},
     {'rgb', 'xyy'},
-    {'hsv', 'hsl'},
-    {'cct', 'xyy'}
+    {'hsv', 'hsl'}
 }
 
 -- Format conversion functions
