@@ -1,4 +1,4 @@
-name: Generate Color Convert on PR
+name: Ensure Updated Color Conversions are Generated
 
 on:
   pull_request:
@@ -26,8 +26,9 @@ jobs:
         lua generate_chains.lua --generate
         lua generate_tests.lua --generate
 
-    - name: Check for out-of-date generated files
+    - name: Check for Outdated Files
       run: |
+        apk add --no-cache git
         if git diff --quiet color/convert/ spec/convert/; then
           echo "Generated files are up to date."
         else
