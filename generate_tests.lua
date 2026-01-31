@@ -6,11 +6,11 @@ local lfs = require 'lfs'  -- LuaFileSystem for directory operations
 
 -- Define the color spaces and their formats (same as in generate_chains.lua)
 local SPACES = {
-    rgb = { formats = {'rgb8', 'hex24', 'rgb100'} },
-    hsv = { formats = {'hsv', 'hsv360'} },
-    hsl = { formats = {'hsl', 'hsl360'} },
-    cct = { formats = {'cctk', 'cctm'} },
-    xyy = { formats = {'xyy'} }
+    rgb = { formats = {'rgb8', 'hex24', 'rgb100'}, normalized = 'rgb' },
+    hsv = { formats = {'hsv', 'hsv360'}, normalized = 'hsv' },
+    hsl = { formats = {'hsl', 'hsl360'}, normalized = 'hsl' },
+    cct = { formats = {'cctk', 'cctm'}, normalized = 'cctk' },
+    xyy = { formats = {'xyy'}, normalized = 'xyy' }
 }
 
 -- Define conversion pairs to generate modules for (same as in generate_chains.lua)
@@ -24,13 +24,13 @@ local CONVERSION_PAIRS = {
 
 -- Format conversion functions (same as in generate_chains.lua)
 local FORMAT_FUNCTIONS = {
-    rgb8 = { to = 'to_rgb8', from = 'from_rgb8' },
-    hex24 = { to = 'to_rgb_hex_int', from = 'from_rgb_hex' },
-    rgb100 = { to = 'to_rgb100', from = 'from_rgb100' },
-    hsv360 = { to = 'to_hsv360', from = 'from_hsv360' },
-    hsl360 = { to = 'to_hsl360', from = 'from_hsl360' },
-    cctk = { to = 'to_kelvin', from = 'to_mired' },
-    cctm = { to = 'to_mired', from = 'to_kelvin' }
+    rgb8 = { to = 'rgb_to_rgb8', from = 'rgb8_to_rgb' },
+    hex24 = { to = 'rgb_to_hex24', from = 'hex24_to_rgb' },
+    rgb100 = { to = 'rgb_to_rgb100', from = 'rgb100_to_rgb' },
+    hsv360 = { to = 'hsv_to_hsv360', from = 'hsv360_to_hsv' },
+    hsl360 = { to = 'hsl_to_hsl360', from = 'hsl360_to_hsl' },
+    cctk = { to = 'cctk_to_cctm', from = 'cctm_to_cctk' },
+    cctm = { to = 'cctm_to_cctk', from = 'cctk_to_cctm' }
 }
 
 -- Get conversions for a module
@@ -188,6 +188,7 @@ local function generate_test_code(module_name)
     local lines = {}
 
     table.insert(lines, string.format("describe('%s conversions', function()", module_name:gsub('_', ' ↔ ')))
+    table.insert(lines, string.format("local conversions = require 'color.convert.%s'", module_name))
     table.insert(lines, "")
 
     -- Generate test cases for each conversion
@@ -282,7 +283,7 @@ local function main()
 
     -- Get all conversion modules that exist
     local modules = {}
-    local conversions_dir = 'color/conversions'
+    local conversions_dir = 'color/convert'
     for file in lfs.dir(conversions_dir) do
         if file:match('%.lua$') then
             local module_name = file:match('^(.-)%.lua$')
