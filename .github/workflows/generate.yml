@@ -17,10 +17,6 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         ref: ${{ github.head_ref }}
     
-    - name: Install Git
-      run: |
-        apk update && apk add --no-cache git
-    
     - name: Generate Conversion Modules
       run: |
         lua generate_chains.lua --generate
@@ -31,7 +27,14 @@ jobs:
         busted spec/conversions/
     
     - name: Commit Generated Files
-      uses: stefanzweifel/git-auto-commit-action@v5
-      with:
-        commit_message: 'Update generated color conversion modules and tests'
-        file_pattern: 'color/conversions/ spec/conversions/'
+      run: |
+        apk update && apk add --no-cache git
+        git add color/conversions/ spec/conversions/
+        if ! git diff --cached --quiet; then
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -m "Update generated color conversion modules and tests"
+          git push origin ${{ github.head_ref }}
+        else
+          echo "No changes in generated code - skipping commit"
+        fi
