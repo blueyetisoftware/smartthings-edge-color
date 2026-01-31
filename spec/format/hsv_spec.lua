@@ -1,5 +1,4 @@
 local HSV = require 'color.format.hsv'
-local spec_helper = require 'spec.spec_helper'
 
 describe("clamp_hsv", function()
   it("wraps hue modulo 1 and clamps other values", function()

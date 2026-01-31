@@ -19,18 +19,8 @@ local CONVERSION_PAIRS = {
     {'rgb', 'hsl'},
     {'rgb', 'cct'},
     {'rgb', 'xyy'},
-    {'hsv', 'hsl'}
-}
-
--- Format conversion functions (same as in generate_chains.lua)
-local FORMAT_FUNCTIONS = {
-    rgb8 = { to = 'rgb_to_rgb8', from = 'rgb8_to_rgb' },
-    hex24 = { to = 'rgb_to_hex24', from = 'hex24_to_rgb' },
-    rgb100 = { to = 'rgb_to_rgb100', from = 'rgb100_to_rgb' },
-    hsv360 = { to = 'hsv_to_hsv360', from = 'hsv360_to_hsv' },
-    hsl360 = { to = 'hsl_to_hsl360', from = 'hsl360_to_hsl' },
-    cctk = { to = 'cctk_to_cctm', from = 'cctm_to_cctk' },
-    cctm = { to = 'cctm_to_cctk', from = 'cctk_to_cctm' }
+    {'hsv', 'hsl'},
+    {'cct', 'xyy'}
 }
 
 -- Get conversions for a module
@@ -60,14 +50,14 @@ local function get_module_conversions(module_name)
         -- Add normalized pass-through functions (only for RGB-centric pairs)
         if from_space == 'rgb' or to_space == 'rgb' then
             table.insert(conversions, {
-                from = from_space,
-                to = to_space,
+                from = SPACES[from_space].normalized,
+                to = SPACES[to_space].normalized,
                 from_space = from_space,
                 to_space = to_space
             })
             table.insert(conversions, {
-                from = to_space,
-                to = from_space,
+                from = SPACES[to_space].normalized,
+                to = SPACES[from_space].normalized,
                 from_space = to_space,
                 to_space = from_space
             })
@@ -137,16 +127,33 @@ local TEST_DATA = {
 -- Format conversion functions for test data
 local FORMAT_CONVERTERS = {
     rgb8 = {
-        to = function(r, g, b) return math.floor(r * 255 + 0.5), math.floor(g * 255 + 0.5), math.floor(b * 255 + 0.5) end,
+        to = function(r, g, b)
+            return math.floor(r * 255 + 0.5), math.floor(g * 255 + 0.5), math.floor(b * 255 + 0.5)
+        end,
         from = function(r, g, b) return r / 255, g / 255, b / 255 end
     },
     rgb16 = {
-        to = function(r, g, b) return math.floor(r * 65535 + 0.5), math.floor(g * 65535 + 0.5), math.floor(b * 65535 + 0.5) end,
+        to = function(r, g, b)
+            return math.floor(r * 65535 + 0.5), math.floor(g * 65535 + 0.5), math.floor(b * 65535 + 0.5)
+        end,
         from = function(r, g, b) return r / 65535, g / 65535, b / 65535 end
     },
     rgb100 = {
-        to = function(r, g, b) return math.floor(r * 100 + 0.5), math.floor(g * 100 + 0.5), math.floor(b * 100 + 0.5) end,
+        to = function(r, g, b)
+            return math.floor(r * 100 + 0.5), math.floor(g * 100 + 0.5), math.floor(b * 100 + 0.5)
+        end,
         from = function(r, g, b) return r / 100, g / 100, b / 100 end
+    },
+    hex24 = {
+        to = function(r, g, b)
+            return (math.floor(r * 255 + 0.5) << 16) | (math.floor(g * 255 + 0.5) << 8) | math.floor(b * 255 + 0.5)
+        end,
+        from = function(hex)
+            local r = (hex >> 16) & 0xFF
+            local g = (hex >> 8) & 0xFF
+            local b = hex & 0xFF
+            return r / 255, g / 255, b / 255
+        end
     },
     hdsv = {
         to = function(h, s, v) return h * 360, s, v end,
@@ -158,28 +165,6 @@ local FORMAT_CONVERTERS = {
     }
 }
 
--- Get test data for a format
-local function get_test_data(fmt)
-    local space = fmt:match('^([^0-9]+)')
-    local data = TEST_DATA[space]
-    if not data then return {} end
-
-    -- Convert to the specific format if needed
-    if FORMAT_CONVERTERS[fmt] then
-        local converted = {}
-        for _, item in ipairs(data) do
-            if type(item) == 'table' then
-                table.insert(converted, {FORMAT_CONVERTERS[fmt].to(table.unpack(item))})
-            else
-                table.insert(converted, FORMAT_CONVERTERS[fmt].to(item))
-            end
-        end
-        return converted
-    end
-
-    return data
-end
-
 -- Generate test code for a chain conversion
 -- Generate test code for a module
 local function generate_test_code(module_name)
@@ -188,7 +173,6 @@ local function generate_test_code(module_name)
     local lines = {}
 
     table.insert(lines, string.format("describe('%s conversions', function()", module_name:gsub('_', ' ↔ ')))
-    table.insert(lines, string.format("local conversions = require 'color.convert.%s'", module_name))
     table.insert(lines, "")
 
     -- Generate test cases for each conversion
@@ -228,15 +212,20 @@ local function generate_test_code(module_name)
             table.insert(lines, string.format("        it('converts test case %d', function()", i))
 
             -- Generate the function call and assertions based on output format
-            if to_fmt == 'xyy' or to_fmt:match('^rgb') or to_fmt == 'hsv' or to_fmt == 'hdsv' or to_fmt == 'hsl' then
-                table.insert(lines, string.format("            local result = {conversions.%s(%s)}", func_name, input_str))
+            local multi_output = to_fmt == 'xyy' or to_fmt:match('^rgb') or
+                                to_fmt == 'hsv' or to_fmt == 'hdsv' or to_fmt == 'hsl'
+            if multi_output then
+                local result_str = string.format("            local result = {convert.%s(%s)}",
+                                                func_name, input_str)
+                table.insert(lines, result_str)
                 table.insert(lines, "")
                 table.insert(lines, "            -- Verify results are not nil")
                 table.insert(lines, "            assert.is_not_nil(result[1])")
                 table.insert(lines, "            assert.is_not_nil(result[2])")
                 table.insert(lines, "            assert.is_not_nil(result[3])")
-            elseif to_fmt:match('^cct_') then
-                table.insert(lines, string.format("            local result = conversions.%s(%s)", func_name, input_str))
+            elseif to_fmt:match('^cct') then
+                table.insert(lines, string.format("            local result = convert.%s(%s)",
+                                                 func_name, input_str))
                 table.insert(lines, "")
                 table.insert(lines, "            -- Verify result is not nil")
                 table.insert(lines, "            assert.is_not_nil(result)")

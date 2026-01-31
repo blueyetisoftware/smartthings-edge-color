@@ -109,18 +109,18 @@ end
 --- @return number,number,number Converted normalized RGB values
 local function hex24_to_rgb(hex)
     assert(type(hex) == "number", "hex must be a number")
-    
+
     -- Round float to integer if necessary
     hex = st_utils.round(hex)
-    
+
     -- Validate range (0x000000 to 0xFFFFFF)
     assert(hex >= 0 and hex <= 0xFFFFFF, "hex must be in range 0x000000 to 0xFFFFFF")
-    
+
     -- Extract RGB components
     local r8 = (hex >> 16) & 0xFF
     local g8 = (hex >> 8) & 0xFF
     local b8 = hex & 0xFF
-    
+
     return rgb8_to_rgb(r8, g8, b8)
 end
 
