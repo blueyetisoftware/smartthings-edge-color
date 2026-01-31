@@ -18,58 +18,101 @@ jobs:
     container: ghcr.io/blueyetisoftware/smartthings-edge-sdk-runtime:16.0.59-51ac4bd
 
     steps:
-      - name: Checkout PR branch (full history)
+      - name: Checkout PR branch
         uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
           fetch-depth: 0
           clean: true
 
-      - name: Install git
-        run: apk add --no-cache git
-
-      - name: Regenerate files and verify
+      - name: Regenerate and verify (non-git file comparison)
         run: |
-          echo "Running generators..."
+          echo "=== Step 1: Backup committed (checked-out) versions ==="
+          mkdir -p /tmp/original/color/convert /tmp/original/spec/convert
+
+          cp -r color/convert/* /tmp/original/color/convert/ 2>/dev/null || true
+          cp -r spec/convert/*   /tmp/original/spec/convert/   2>/dev/null || true
+
+          echo "Backup complete. Original files in /tmp/original/"
+          ls -la /tmp/original/color/convert/ | head -n 10 || true
+          ls -la /tmp/original/spec/convert/   | head -n 10 || true
+
+          echo ""
+          echo "=== Step 2: Run generators (overwrites working files) ==="
           lua generate_chains.lua --generate
           lua generate_tests.lua --generate
 
           echo ""
-          echo "Post-regeneration file check:"
-          echo " - color/convert/ contents:"
-          ls -la color/convert/ | head -n 15 || true
-          echo ""
-          echo " - spec/convert/ contents:"
-          ls -la spec/convert/ | head -n 15 || true
+          echo "=== Step 3: Normalize both original and regenerated files ==="
+          echo "(trim trailing whitespace, ensure LF endings, add EOF newline if missing)"
+
+          normalize() {
+            local dir="$1"
+            find "$dir" -type f -name "*.lua" -exec \
+              sed -i 's/[ \t]*$//' {} \; -exec \
+              sed -i '$a\' {} \; \
+              || true
+          }
+
+          normalize color/convert
+          normalize spec/convert
+          normalize /tmp/original/color/convert
+          normalize /tmp/original/spec/convert
 
           echo ""
-          echo "Sample regenerated file size (rgb_cct_spec.lua):"
-          wc -c spec/convert/rgb_cct_spec.lua || true
+          echo "=== Step 4: Compare original vs regenerated (ignoring whitespace variations) ==="
 
-          echo ""
-          echo "Checking for differences (ignoring whitespace/line endings)..."
+          DIFF_FOUND=false
 
-          if git diff --quiet --ignore-all-space --ignore-cr-at-eol --ignore-space-change --ignore-space-at-eol -- color/convert/ spec/convert/; then
-            echo "Generated files are up-to-date ✓"
-            echo "(Any visible differences are only harmless whitespace or line-ending variations)"
-          else
+          check_dir() {
+            local orig_dir="$1"
+            local regen_dir="$2"
+            local label="$3"
+
+            for orig_file in "$orig_dir"/*.lua; do
+              if [ -f "$orig_file" ]; then
+                base=$(basename "$orig_file")
+                regen_file="$regen_dir/$base"
+
+                if [ -f "$regen_file" ]; then
+                  if ! diff -w -B -Z -q "$orig_file" "$regen_file" >/dev/null 2>&1; then
+                    echo "→ Difference detected in $label/$base (beyond whitespace)"
+                    DIFF_FOUND=true
+                    # Show brief context of the difference
+                    echo "First 20 lines of diff:"
+                    diff -w -B -Z --color=always "$orig_file" "$regen_file" | head -n 30 || true
+                    echo ""
+                  fi
+                else
+                  echo "→ Regenerated file missing: $regen_file"
+                  DIFF_FOUND=true
+                fi
+              fi
+            done
+          }
+
+          check_dir /tmp/original/color/convert color/convert "color/convert"
+          check_dir /tmp/original/spec/convert spec/convert "spec/convert"
+
+          if [ "$DIFF_FOUND" = true ]; then
             echo ""
             echo "╔═══════════════════════════════════════════════════════════════╗"
-            echo "║     GENERATED FILES HAVE REAL (non-whitespace) DIFFERENCES    ║"
+            echo "║               REAL CONTENT DIFFERENCES DETECTED               ║"
             echo "╚═══════════════════════════════════════════════════════════════╝"
             echo ""
-            echo "Even ignoring whitespace, line endings, and space changes, differences exist."
-            echo "Likely causes: different Lua version output, float formatting, or logic variation."
+            echo "The regenerated files differ from the committed versions"
+            echo "even after normalizing whitespace and line endings."
             echo ""
-            echo "Files with changes:"
-            git diff --name-only -- color/convert/ spec/convert/ || true
+            echo "Likely causes:"
+            echo "  - Float/number formatting differences (Lua version or env)"
+            echo "  - Subtle string concatenation or table serialization"
+            echo "  - Missing/extra comments, empty lines, or tokens"
             echo ""
-            echo "Strict diff summary:"
-            git diff --stat -- color/convert/ spec/convert/ || true
-            echo ""
-            echo "Whitespace-ignoring summary (for debugging):"
-            git diff --ignore-all-space --ignore-cr-at-eol --stat -- color/convert/ spec/convert/ || echo "No meaningful diff when ignoring whitespace"
+            echo "Suggestion: Regenerate inside the container locally (docker run) and commit those versions."
             exit 1
+          else
+            echo "All generated files match the committed versions ✓"
+            echo "(ignoring whitespace, trailing spaces, blank lines, and line-ending variations)"
           fi
 
       - name: Run conversion tests
