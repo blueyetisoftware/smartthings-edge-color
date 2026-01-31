@@ -1,6 +1,7 @@
 local st_utils = require 'st.utils'
 local clamp_xyy = require 'color.format.xyy'.clamp_xyy
 
+--- @internal
 --- Converts CIE 1931 xyY color space coordinates to RGB color values.
 ---
 --- This function is a pass-through to the SmartThings Edge st_utils.xy_to_rgb function,
