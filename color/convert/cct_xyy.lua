@@ -12,12 +12,10 @@
 
 local cctk_to_rgb = require 'color.core.cctk_to_rgb'
 local rgb_to_xyy = require 'color.core.rgb_to_xyy'
-local from_cctk = require 'color.format.cct'.to_mired
-local from_cctm = require 'color.format.cct'.to_kelvin
+local cctm_to_cctk = require 'color.format.cct'.cctm_to_cctk
+local cctk_to_cctm = require 'color.format.cct'.cctk_to_cctm
 local xyy_to_rgb = require 'color.core.xyy_to_rgb'
 local rgb_to_cctk = require 'color.core.rgb_to_cctk'
-local to_cctk = require 'color.format.cct'.to_kelvin
-local to_cctm = require 'color.format.cct'.to_mired
 
 local M = {}
 
@@ -25,28 +23,28 @@ local M = {}
 function M.cctk_to_xyy(
     kelvin
 )
-    return rgb_to_xyy(cctk_to_rgb(from_cctk(kelvin)))
+    return rgb_to_xyy(cctk_to_rgb(cctm_to_cctk(kelvin)))
 end
 
 -- cctm to xyy
 function M.cctm_to_xyy(
     mired
 )
-    return rgb_to_xyy(cctk_to_rgb(from_cctm(mired)))
+    return rgb_to_xyy(cctk_to_rgb(cctk_to_cctm(mired)))
 end
 
 -- xyy to cctk
 function M.xyy_to_cctk(
     x, y, Y
 )
-    return to_cctk(rgb_to_cctk(xyy_to_rgb(x, y, Y)))
+    return cctk_to_cctm(rgb_to_cctk(xyy_to_rgb(x, y, Y)))
 end
 
 -- xyy to cctm
 function M.xyy_to_cctm(
     x, y, Y
 )
-    return to_cctm(rgb_to_cctk(xyy_to_rgb(x, y, Y)))
+    return cctm_to_cctk(rgb_to_cctk(xyy_to_rgb(x, y, Y)))
 end
 
 return M

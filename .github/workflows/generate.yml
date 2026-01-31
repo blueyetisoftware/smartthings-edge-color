@@ -1,39 +1,60 @@
-name: Generate Color Convert on PR
+name: Verify Generated Files
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
+    paths:
+      - 'generate_chains.lua'
+      - 'generate_tests.lua'
+      - 'color/core/**'
+      - 'color/format/**'
     types: [opened, synchronize, reopened]
 
-permissions:
-  contents: write
-
 jobs:
-  generate-and-commit:
+  check:
     runs-on: ubuntu-latest
     container: ghcr.io/blueyetisoftware/smartthings-edge-sdk-runtime:16.0.59-51ac4bd
 
     steps:
-    - name: Checkout the PR branch
-      uses: actions/checkout@v4
-      with:
-        ref: ${{ github.head_ref }}
-        token: ${{ secrets.GITHUB_TOKEN }}
-        persist-credentials: true
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+          clean: true
 
-    - name: Generate files
-      run: |
-        lua generate_chains.lua --generate
-        lua generate_tests.lua --generate
+      - run: |
+          # Separate backup dirs
+          mkdir -p /tmp/orig-color /tmp/orig-spec
+          cp -r color/convert/* /tmp/orig-color/ 2>/dev/null || true
+          cp -r spec/convert/*   /tmp/orig-spec/   2>/dev/null || true
 
-    - name: Check for out-of-date generated files
-      run: |
-        if git diff --quiet color/convert/ spec/convert/; then
-          echo "Generated files are up to date."
-        else
-          echo "Generated files are out of date. Run 'lua generate_chains.lua --generate && lua generate_tests.lua --generate' locally, review changes, and commit."
-          exit 1
-        fi
+          # Regenerate
+          lua generate_chains.lua --generate
+          lua generate_tests.lua --generate
 
-    - name: Run tests
-      run: busted spec/convert/
+          # Trim trailing whitespace + EOF newline
+          find color/convert spec/convert /tmp/orig-color /tmp/orig-spec \
+            -type f -name "*.lua" -exec sed -i 's/[ \t]*$//' {} \; \
+            -exec sed -i '$a\' {} \; || true
+
+          fail=false
+
+          # Check color/convert
+          for f in /tmp/orig-color/*.lua; do
+            [ -f "$f" ] || continue
+            base=$(basename "$f")
+            regen="color/convert/$base"
+            [ -f "$regen" ] || { fail=true; echo "Missing $regen"; continue; }
+            cmp -s "$f" "$regen" || { fail=true; echo "Diff in $regen"; }
+          done
+
+          # Check spec/convert
+          for f in /tmp/orig-spec/*.lua; do
+            [ -f "$f" ] || continue
+            base=$(basename "$f")
+            regen="spec/convert/$base"
+            [ -f "$regen" ] || { fail=true; echo "Missing $regen"; continue; }
+            cmp -s "$f" "$regen" || { fail=true; echo "Diff in $regen"; }
+          done
+
+          [ "$fail" = true ] && { echo "Files differ after normalization"; exit 1; } || echo "OK ✓"

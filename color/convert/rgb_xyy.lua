@@ -12,12 +12,12 @@
 
 local rgb_to_xyy = require 'color.core.rgb_to_xyy'
 local xyy_to_rgb = require 'color.core.xyy_to_rgb'
-local from_rgb8 = require 'color.format.rgb'.rgb8_to_rgb
-local from_hex24 = require 'color.format.rgb'.hex24_to_rgb
-local from_rgb100 = require 'color.format.rgb'.rgb100_to_rgb
-local to_rgb8 = require 'color.format.rgb'.rgb_to_rgb8
-local to_hex24 = require 'color.format.rgb'.rgb_to_hex24
-local to_rgb100 = require 'color.format.rgb'.rgb_to_rgb100
+local rgb8_to_rgb = require 'color.format.rgb'.rgb8_to_rgb
+local hex24_to_rgb = require 'color.format.rgb'.hex24_to_rgb
+local rgb100_to_rgb = require 'color.format.rgb'.rgb100_to_rgb
+local rgb_to_rgb8 = require 'color.format.rgb'.rgb_to_rgb8
+local rgb_to_hex24 = require 'color.format.rgb'.rgb_to_hex24
+local rgb_to_rgb100 = require 'color.format.rgb'.rgb_to_rgb100
 
 local M = {}
 
@@ -25,42 +25,42 @@ local M = {}
 function M.rgb8_to_xyy(
     red, green, blue
 )
-    return rgb_to_xyy(from_rgb8(red, green, blue))
+    return rgb_to_xyy(rgb8_to_rgb(red, green, blue))
 end
 
 -- hex24 to xyy
 function M.hex24_to_xyy(
-    red, green, blue
+    hex
 )
-    return rgb_to_xyy(from_hex24(red, green, blue))
+    return rgb_to_xyy(hex24_to_rgb(hex))
 end
 
 -- rgb100 to xyy
 function M.rgb100_to_xyy(
     red, green, blue
 )
-    return rgb_to_xyy(from_rgb100(red, green, blue))
+    return rgb_to_xyy(rgb100_to_rgb(red, green, blue))
 end
 
 -- xyy to rgb8
 function M.xyy_to_rgb8(
     x, y, Y
 )
-    return to_rgb8(xyy_to_rgb(x, y, Y))
+    return rgb_to_rgb8(xyy_to_rgb(x, y, Y))
 end
 
 -- xyy to hex24
 function M.xyy_to_hex24(
     x, y, Y
 )
-    return to_hex24(xyy_to_rgb(x, y, Y))
+    return rgb_to_hex24(xyy_to_rgb(x, y, Y))
 end
 
 -- xyy to rgb100
 function M.xyy_to_rgb100(
     x, y, Y
 )
-    return to_rgb100(xyy_to_rgb(x, y, Y))
+    return rgb_to_rgb100(xyy_to_rgb(x, y, Y))
 end
 
 -- rgb to xyy (normalized pass-through)
