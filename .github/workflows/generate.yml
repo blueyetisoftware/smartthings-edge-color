@@ -25,74 +25,69 @@ jobs:
           fetch-depth: 0
           clean: true
 
-      - name: Regenerate and verify (non-git file comparison)
+      - name: Regenerate and verify (BusyBox-compatible diff)
         run: |
-          echo "=== Step 1: Backup committed (checked-out) versions ==="
+          echo "=== Backup committed versions ==="
           mkdir -p /tmp/original/color/convert /tmp/original/spec/convert
 
           cp -r color/convert/* /tmp/original/color/convert/ 2>/dev/null || true
           cp -r spec/convert/*   /tmp/original/spec/convert/   2>/dev/null || true
 
-          echo "Backup complete. Original files in /tmp/original/"
-          ls -la /tmp/original/color/convert/ | head -n 10 || true
-          ls -la /tmp/original/spec/convert/   | head -n 10 || true
+          echo "Backup done. Original files:"
+          ls -la /tmp/original/color/convert/ | head -n 10
+          ls -la /tmp/original/spec/convert/   | head -n 10
 
           echo ""
-          echo "=== Step 2: Run generators (overwrites working files) ==="
+          echo "=== Run generators ==="
           lua generate_chains.lua --generate
           lua generate_tests.lua --generate
 
           echo ""
-          echo "=== Step 3: Normalize both original and regenerated files ==="
-          echo "(trim trailing whitespace, ensure LF endings, add EOF newline if missing)"
-
-          normalize() {
-            local dir="$1"
-            find "$dir" -type f -name "*.lua" -exec \
-              sed -i 's/[ \t]*$//' {} \; -exec \
-              sed -i '$a\' {} \; \
-              || true
+          echo "=== Normalize whitespace on both sides ==="
+          # Trim trailing whitespace + ensure EOF newline
+          trim_ws() {
+            find "$1" -type f -name "*.lua" -exec sed -i 's/[ \t]*$//' {} \; \
+              -exec sed -i '$a\' {} \; || true
           }
 
-          normalize color/convert
-          normalize spec/convert
-          normalize /tmp/original/color/convert
-          normalize /tmp/original/spec/convert
+          trim_ws color/convert
+          trim_ws spec/convert
+          trim_ws /tmp/original/color/convert
+          trim_ws /tmp/original/spec/convert
 
           echo ""
-          echo "=== Step 4: Compare original vs regenerated (ignoring whitespace variations) ==="
+          echo "=== Compare original vs regenerated (BusyBox diff -w -B -b -q) ==="
 
           DIFF_FOUND=false
 
-          check_dir() {
+          check_files() {
             local orig_dir="$1"
             local regen_dir="$2"
             local label="$3"
 
-            for orig_file in "$orig_dir"/*.lua; do
-              if [ -f "$orig_file" ]; then
-                base=$(basename "$orig_file")
-                regen_file="$regen_dir/$base"
+            for orig in "$orig_dir"/*.lua; do
+              if [ -f "$orig" ]; then
+                base=$(basename "$orig")
+                regen="$regen_dir/$base"
 
-                if [ -f "$regen_file" ]; then
-                  if ! diff -w -B -Z -q "$orig_file" "$regen_file" >/dev/null 2>&1; then
-                    echo "→ Difference detected in $label/$base (beyond whitespace)"
+                if [ -f "$regen" ]; then
+                  if ! diff -w -B -b -q "$orig" "$regen" >/dev/null 2>&1; then
+                    echo "→ Difference in $label/$base (even after normalization)"
                     DIFF_FOUND=true
-                    # Show brief context of the difference
-                    echo "First 20 lines of diff:"
-                    diff -w -B -Z --color=always "$orig_file" "$regen_file" | head -n 30 || true
+                    echo "Brief diff:"
+                    diff -w -B -b -u "$orig" "$regen" | head -n 30 || true
                     echo ""
                   fi
                 else
-                  echo "→ Regenerated file missing: $regen_file"
+                  echo "→ Missing regenerated: $regen"
                   DIFF_FOUND=true
                 fi
               fi
             done
           }
 
-          check_dir /tmp/original/color/convert color/convert "color/convert"
-          check_dir /tmp/original/spec/convert spec/convert "spec/convert"
+          check_files /tmp/original/color/convert color/convert "color/convert"
+          check_files /tmp/original/spec/convert spec/convert "spec/convert"
 
           if [ "$DIFF_FOUND" = true ]; then
             echo ""
@@ -100,19 +95,11 @@ jobs:
             echo "║               REAL CONTENT DIFFERENCES DETECTED               ║"
             echo "╚═══════════════════════════════════════════════════════════════╝"
             echo ""
-            echo "The regenerated files differ from the committed versions"
-            echo "even after normalizing whitespace and line endings."
-            echo ""
-            echo "Likely causes:"
-            echo "  - Float/number formatting differences (Lua version or env)"
-            echo "  - Subtle string concatenation or table serialization"
-            echo "  - Missing/extra comments, empty lines, or tokens"
-            echo ""
-            echo "Suggestion: Regenerate inside the container locally (docker run) and commit those versions."
+            echo "Files differ beyond whitespace/blank lines."
+            echo "Regenerate locally using the same container (docker run) and commit the output."
             exit 1
           else
-            echo "All generated files match the committed versions ✓"
-            echo "(ignoring whitespace, trailing spaces, blank lines, and line-ending variations)"
+            echo "All files match ✓ (ignoring whitespace, space changes, blank lines)"
           fi
 
       - name: Run conversion tests
