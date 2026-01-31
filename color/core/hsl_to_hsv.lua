@@ -1,24 +1,29 @@
 --- Converts HSL (Hue/Saturation/Lightness) color values directly to HSV (Hue/Saturation/Value).
 ---
 --- This function provides direct HSL to HSV conversion without going through RGB,
---- which is more efficient since H and S are identical between the two spaces.
+--- which is more efficient since hue is identical between the two spaces.
+---
+--- Key differences between HSL and HSV:
+--- - Hue (H): Identical between HSL and HSV
+--- - Saturation (S): Different definitions - HSL saturation is relative to lightness,
+---   HSV saturation is relative to value. Saturation must be recalculated.
+--- - Brightness: HSL uses Lightness (L), HSV uses Value (V)
 ---
 --- Relationship between HSL Lightness and HSV Value:
 --- - For achromatic colors (S=0): V = L (identical)
 --- - For chromatic colors (S>0): V = L + S × min(L, 1-L)
 ---   Value is always ≥ Lightness, with maximum difference at L=0.5 with high saturation
 ---
+local st_utils = require 'st.utils'
+
 --- @param hue number Hue component (any real number, circular - wraps every 1.0)
---- @param saturation number Saturation component in the range [0,1]
+--- @param saturation number HSL saturation component in the range [0,1]
 --- @param lightness number Lightness component in the range [0,1]
 --- @return number,number,number HSV color values (hue, saturation, value)
 local function hsl_to_hsv(hue, saturation, lightness)
-    -- Hue is identical between HSL and HSV
-    local h = hue
-
     -- Handle achromatic colors (no saturation)
     if saturation == 0 then
-        return h, 0, lightness  -- Value = Lightness when S = 0
+        return hue, 0, lightness  -- Value = Lightness when S = 0
     end
 
     -- Calculate value
@@ -35,9 +40,9 @@ local function hsl_to_hsv(hue, saturation, lightness)
     end
 
     -- Clamp to valid range
-    s = math.max(0, math.min(1, s))
+    s = st_utils.clamp_value(s, 0, 1)
 
-    return h, s, value
+    return hue, s, value
 end
 
 return hsl_to_hsv
