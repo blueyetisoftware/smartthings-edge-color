@@ -24,15 +24,16 @@ jobs:
     - name: Check for Outdated Generated Files
       run: |
         apk add --no-cache git
-
-        # Generate files temporarily to check if they're up to date
+        
+        # Check if generation would change anything
         lua generate_chains.lua --generate
         lua generate_tests.lua --generate
         
-        if git diff --quiet color/convert/ spec/convert/; then
+        if git diff --quiet -- color/convert/ spec/convert/; then
           echo "Generated files are up to date."
         else
           echo "Generated files are out of date. Run 'lua generate_chains.lua --generate && lua generate_tests.lua --generate' locally, review changes, and commit."
+          git diff --name-only -- color/convert/ spec/convert/
           exit 1
         fi
 
