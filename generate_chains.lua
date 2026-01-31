@@ -7,10 +7,10 @@ local lfs = require 'lfs'  -- LuaFileSystem for directory operations
 
 -- Define the color spaces and their formats
 local SPACES = {
-    rgb = { formats = {'rgb8', 'rgb16', 'rgb100'} },
-    hsv = { formats = {'hsv', 'hdsv'} },
-    hsl = { formats = {'hsl'} },
-    cct = { formats = {'cct_kelvin', 'cct_mired'} },
+    rgb = { formats = {'rgb8', 'hex24', 'rgb100'} },
+    hsv = { formats = {'hsv', 'hsv360'} },
+    hsl = { formats = {'hsl', 'hsl360'} },
+    cct = { formats = {'cctk', 'cctm'} },
     xyy = { formats = {'xyy'} }
 }
 
@@ -27,11 +27,12 @@ local CONVERSION_PAIRS = {
 -- Format conversion functions
 local FORMAT_FUNCTIONS = {
     rgb8 = { to = 'to_rgb8', from = 'from_rgb8' },
-    rgb16 = { to = 'to_rgb16', from = 'from_rgb16' },
+    hex24 = { to = 'to_hex24', from = 'from_hex24' },
     rgb100 = { to = 'to_rgb100', from = 'from_rgb100' },
-    hdsv = { to = 'to_hdff', from = 'from_hdff' },
-    cct_mired = { to = 'to_mired', from = 'to_kelvin' },
-    cct_kelvin = { to = 'to_kelvin', from = 'to_mired' }
+    hsv360 = { to = 'to_hsv360', from = 'from_hsv360' },
+    hsl360 = { to = 'to_hsl360', from = 'from_hsl360' },
+    cctk = { to = 'to_kelvin', from = 'to_mired' },
+    cctm = { to = 'to_mired', from = 'to_kelvin' }
 }
 
 -- Generate grouped conversion modules
@@ -47,6 +48,7 @@ local function generate_conversion_modules()
         local from_formats = SPACES[from_space].formats
         local to_formats = SPACES[to_space].formats
 
+        -- Generate conversions from first space formats to second space formats
         for _, from_fmt in ipairs(from_formats) do
             for _, to_fmt in ipairs(to_formats) do
                 if from_fmt ~= to_fmt then  -- Skip identity conversions
@@ -55,6 +57,20 @@ local function generate_conversion_modules()
                         to = to_fmt,
                         from_space = from_space,
                         to_space = to_space
+                    })
+                end
+            end
+        end
+
+        -- Generate conversions from second space formats to first space formats
+        for _, from_fmt in ipairs(to_formats) do
+            for _, to_fmt in ipairs(from_formats) do
+                if from_fmt ~= to_fmt then  -- Skip identity conversions
+                    table.insert(conversions, {
+                        from = from_fmt,
+                        to = to_fmt,
+                        from_space = to_space,
+                        to_space = from_space
                     })
                 end
             end
@@ -70,9 +86,61 @@ end
 local function generate_module_code(module_name, conversions)
     local lines = {}
 
-    -- Header
-    table.insert(lines, string.format("--- %s conversion module", module_name:gsub('_', ' ↔ '):gsub('(%w+)', function(s) return s:sub(1,1):upper() .. s:sub(2) end)))
+    -- Header with detailed documentation
+    local title = module_name:gsub('_', ' ↔ '):gsub('(%w+)', function(s) return s:sub(1,1):upper() .. s:sub(2) end)
+    table.insert(lines, string.format("--- %s conversion module", title))
     table.insert(lines, "--- Contains all format variants for this conversion pair")
+    table.insert(lines, "---")
+    table.insert(lines, "--- This module provides industry-standard color space conversions following")
+    table.insert(lines, "--- established algorithms and best practices for computer graphics.")
+    
+    -- Add specific documentation based on conversion type
+    if module_name == "rgb_cct" then
+        table.insert(lines, "---")
+        table.insert(lines, "--- RGB ↔ CCT conversions use optimized lookup table interpolation")
+        table.insert(lines, "--- with golden section search for accurate color temperature calculation.")
+        table.insert(lines, "--- Provides high accuracy across the full 1000K-30000K range.")
+        table.insert(lines, "---")
+        table.insert(lines, "--- Standards: CIE 1931 color space, correlated color temperature")
+        table.insert(lines, "--- Algorithm: Lookup table interpolation + golden section search")
+        table.insert(lines, "--- Accuracy: < 10K error across standard illuminant range")
+    elseif module_name == "rgb_xyy" then
+        table.insert(lines, "---")
+        table.insert(lines, "--- RGB ↔ xyY conversions use the sRGB color space primaries and")
+        table.insert(lines, "--- standard CIE 1931 color matching functions.")
+        table.insert(lines, "---")
+        table.insert(lines, "--- Standards: CIE 1931, sRGB (IEC 61966-2-1)")
+        table.insert(lines, "--- Algorithm: Linear transformation with proper gamma correction")
+    elseif module_name == "rgb_hsv" then
+        table.insert(lines, "---")
+        table.insert(lines, "--- RGB ↔ HSV conversions follow the standard computer graphics")
+        table.insert(lines, "--- algorithm with proper handling of achromatic colors.")
+        table.insert(lines, "---")
+        table.insert(lines, "--- Standards: Computer graphics standard (Foley et al.)")
+        table.insert(lines, "--- Algorithm: Component-wise maximum/minimum calculations")
+    elseif module_name == "rgb_hsl" then
+        table.insert(lines, "---")
+        table.insert(lines, "--- RGB ↔ HSL conversions use the standard lightness calculation")
+        table.insert(lines, "--- with proper handling of saturation and lightness components.")
+        table.insert(lines, "---")
+        table.insert(lines, "--- Standards: CSS Color Module Level 4, W3C specification")
+        table.insert(lines, "--- Algorithm: Lightness = (max + min)/2, Saturation varies by lightness")
+    elseif module_name == "hsv_hsl" then
+        table.insert(lines, "---")
+        table.insert(lines, "--- HSV ↔ HSL conversions use direct mathematical relationships")
+        table.insert(lines, "--- avoiding RGB intermediate steps for optimal performance.")
+        table.insert(lines, "---")
+        table.insert(lines, "--- Formulas: L = V × (1 - S/2), V = L + S × min(L, 1-L)")
+        table.insert(lines, "--- Algorithm: Direct component transformation (H identical, S/V adjusted)")
+    elseif module_name == "cct_xyy" then
+        table.insert(lines, "---")
+        table.insert(lines, "--- CCT ↔ xyY conversions use the CIE daylight illuminant series")
+        table.insert(lines, "--- approximation for correlated color temperature calculations.")
+        table.insert(lines, "---")
+        table.insert(lines, "--- Standards: CIE daylight illuminants, Planckian locus approximation")
+        table.insert(lines, "--- Algorithm: Polynomial approximation of daylight chromaticity")
+    end
+    
     table.insert(lines, "")
 
     -- Requires
@@ -82,19 +150,36 @@ local function generate_module_code(module_name, conversions)
     for _, conv in ipairs(conversions) do
         local from_space, to_space = conv.from_space, conv.to_space
 
-        -- Add core conversion requires (all conversions go through RGB)
-        if from_space ~= 'rgb' then
-            local core_key = string.format("%s_to_rgb", from_space)
+        -- Add core conversion requires
+        if from_space == 'hsv' and to_space == 'hsl' then
+            -- Direct HSV to HSL conversion
+            local core_key = "hsv_to_hsl"
             if not core_conversions[core_key] then
                 table.insert(requires, string.format("local %s = require 'color.core.%s'", core_key, core_key))
                 core_conversions[core_key] = true
             end
-        end
-        if to_space ~= 'rgb' then
-            local core_key = string.format("rgb_to_%s", to_space)
+        elseif from_space == 'hsl' and to_space == 'hsv' then
+            -- Direct HSL to HSV conversion
+            local core_key = "hsl_to_hsv"
             if not core_conversions[core_key] then
                 table.insert(requires, string.format("local %s = require 'color.core.%s'", core_key, core_key))
                 core_conversions[core_key] = true
+            end
+        else
+            -- Standard conversion through RGB
+            if from_space ~= 'rgb' then
+                local core_key = string.format("%s_to_rgb", from_space)
+                if not core_conversions[core_key] then
+                    table.insert(requires, string.format("local %s = require 'color.core.%s'", core_key, core_key))
+                    core_conversions[core_key] = true
+                end
+            end
+            if to_space ~= 'rgb' then
+                local core_key = string.format("rgb_to_%s", to_space)
+                if not core_conversions[core_key] then
+                    table.insert(requires, string.format("local %s = require 'color.core.%s'", core_key, core_key))
+                    core_conversions[core_key] = true
+                end
             end
         end
 
@@ -114,10 +199,15 @@ local function generate_module_code(module_name, conversions)
 
         -- Add format conversion requires
         if FORMAT_FUNCTIONS[conv.from] then
-            local fmt_module = conv.from:match('^([^0-9_]+)')
-            if fmt_module == 'cct' then fmt_module = 'cct'
-            elseif fmt_module == 'rgb' then fmt_module = 'rgb'
-            elseif fmt_module == 'hdsv' then fmt_module = 'hue'
+            local fmt_module
+            if conv.from:match('^rgb') or conv.from:match('^hex') then
+                fmt_module = 'rgb'
+            elseif conv.from:match('^hsv360') then
+                fmt_module = 'hsv'
+            elseif conv.from:match('^hsl360') then
+                fmt_module = 'hsl'
+            elseif conv.from:match('^cct') then
+                fmt_module = 'cct'
             end
             local fmt_key = string.format("from_%s", conv.from)
             if not core_conversions[fmt_key] then
@@ -128,10 +218,15 @@ local function generate_module_code(module_name, conversions)
         end
 
         if FORMAT_FUNCTIONS[conv.to] then
-            local fmt_module = conv.to:match('^([^0-9_]+)')
-            if fmt_module == 'cct' then fmt_module = 'cct'
-            elseif fmt_module == 'rgb' then fmt_module = 'rgb'
-            elseif fmt_module == 'hdsv' then fmt_module = 'hue'
+            local fmt_module
+            if conv.to:match('^rgb') or conv.to:match('^hex') then
+                fmt_module = 'rgb'
+            elseif conv.to:match('^hsv360') then
+                fmt_module = 'hsv'
+            elseif conv.to:match('^hsl360') then
+                fmt_module = 'hsl'
+            elseif conv.to:match('^cct') then
+                fmt_module = 'cct'
             end
             local fmt_key = string.format("to_%s", conv.to)
             if not core_conversions[fmt_key] then
@@ -162,18 +257,20 @@ local function generate_module_code(module_name, conversions)
 
         -- Function parameters
         local params = {}
-        if conv.from == 'cct_kelvin' then
+        if conv.from == 'cctk' then
             table.insert(params, "kelvin")
-        elseif conv.from == 'cct_mired' then
+        elseif conv.from == 'cctm' then
             table.insert(params, "mired")
         elseif conv.from == 'xyy' then
             table.insert(params, "x, y, Y")
         elseif conv.from == 'hsv' then
             table.insert(params, "hue, saturation, value")
-        elseif conv.from == 'hdsv' then
+        elseif conv.from == 'hsv360' then
             table.insert(params, "hue_degrees, saturation, value")
         elseif conv.from == 'hsl' then
             table.insert(params, "hue, saturation, lightness")
+        elseif conv.from == 'hsl360' then
+            table.insert(params, "hue_degrees, saturation, lightness")
         else
             table.insert(params, "red, green, blue")
         end
@@ -191,17 +288,26 @@ local function generate_module_code(module_name, conversions)
             table.insert(call_chain, table.concat(params, ', '))
         end
 
-        -- Core conversion through RGB
-        if from_space ~= 'rgb' then
-            -- Convert from source space to RGB
-            local from_to_rgb = string.format("%s_to_rgb", from_space)
-            table.insert(call_chain, string.format("%s(%s)", from_to_rgb, call_chain[#call_chain]))
-        end
-        
-        if to_space ~= 'rgb' then
-            -- Convert from RGB to target space
-            local rgb_to_to = string.format("rgb_to_%s", to_space)
-            table.insert(call_chain, string.format("%s(%s)", rgb_to_to, call_chain[#call_chain]))
+        -- Core conversion
+        if from_space == 'hsv' and to_space == 'hsl' then
+            -- Direct HSV to HSL conversion
+            table.insert(call_chain, string.format("hsv_to_hsl(%s)", call_chain[#call_chain]))
+        elseif from_space == 'hsl' and to_space == 'hsv' then
+            -- Direct HSL to HSV conversion
+            table.insert(call_chain, string.format("hsl_to_hsv(%s)", call_chain[#call_chain]))
+        else
+            -- Standard conversion through RGB
+            if from_space ~= 'rgb' then
+                -- Convert from source space to RGB
+                local from_to_rgb = string.format("%s_to_rgb", from_space)
+                table.insert(call_chain, string.format("%s(%s)", from_to_rgb, call_chain[#call_chain]))
+            end
+            
+            if to_space ~= 'rgb' then
+                -- Convert from RGB to target space
+                local rgb_to_to = string.format("rgb_to_%s", to_space)
+                table.insert(call_chain, string.format("%s(%s)", rgb_to_to, call_chain[#call_chain]))
+            end
         end
 
         -- Output format conversion

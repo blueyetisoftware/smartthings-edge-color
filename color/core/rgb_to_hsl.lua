@@ -1,5 +1,5 @@
 local clamp_rgb = require 'color.format.rgb'.clamp_rgb
-local clamp_hff = require 'color.format.hue'.clamp_hff
+local clamp_hsl = require 'color.format.hsl'.clamp_hsl
 
 --- Converts RGB color values to HSL (Hue/Saturation/Lightness) color values.
 ---
@@ -46,6 +46,6 @@ local function fn(red, green, blue)
         hue = (red - green) / delta + 4
     end
     hue = hue / 6
-    return clamp_hff(hue, saturation, lightness)
+    return clamp_hsl(hue, saturation, lightness)
 end
 return fn

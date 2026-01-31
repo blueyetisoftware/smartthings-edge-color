@@ -11,13 +11,16 @@ M.rgb_to_xyy = require 'color.core.rgb_to_xyy'
 
 M.hsv_to_rgb = require 'color.core.hsv_to_rgb'
 M.hsl_to_rgb = require 'color.core.hsl_to_rgb'
+M.hsv_to_hsl = require 'color.core.hsv_to_hsl'
+M.hsl_to_hsv = require 'color.core.hsl_to_hsv'
 M.cct_to_rgb = require 'color.core.cct_to_rgb'
 M.xyy_to_rgb = require 'color.core.xyy_to_rgb'
 
 -- Format conversion modules
 M.format = {
     rgb = require 'color.format.rgb',
-    hue = require 'color.format.hue',
+    hsv = require 'color.format.hsv',
+    hsl = require 'color.format.hsl',
     cct = require 'color.format.cct',
     xyy = require 'color.format.xyy'
 }

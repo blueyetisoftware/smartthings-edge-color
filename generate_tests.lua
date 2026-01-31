@@ -6,10 +6,10 @@ local lfs = require 'lfs'  -- LuaFileSystem for directory operations
 
 -- Define the color spaces and their formats (same as in generate_chains.lua)
 local SPACES = {
-    rgb = { formats = {'rgb8', 'rgb16', 'rgb100'} },
-    hsv = { formats = {'hsv', 'hdsv'} },
-    hsl = { formats = {'hsl'} },
-    cct = { formats = {'cct_kelvin', 'cct_mired'} },
+    rgb = { formats = {'rgb8', 'hex24', 'rgb100'} },
+    hsv = { formats = {'hsv', 'hsv360'} },
+    hsl = { formats = {'hsl', 'hsl360'} },
+    cct = { formats = {'cctk', 'cctm'} },
     xyy = { formats = {'xyy'} }
 }
 
@@ -26,11 +26,12 @@ local CONVERSION_PAIRS = {
 -- Format conversion functions (same as in generate_chains.lua)
 local FORMAT_FUNCTIONS = {
     rgb8 = { to = 'to_rgb8', from = 'from_rgb8' },
-    rgb16 = { to = 'to_rgb16', from = 'from_rgb16' },
+    hex24 = { to = 'to_rgb_hex_int', from = 'from_rgb_hex' },
     rgb100 = { to = 'to_rgb100', from = 'from_rgb100' },
-    hdsv = { to = 'to_hdff', from = 'from_hdff' },
-    cct_mired = { to = 'to_mired', from = 'to_kelvin' },
-    cct_kelvin = { to = 'to_kelvin', from = 'to_mired' }
+    hsv360 = { to = 'to_hsv360', from = 'from_hsv360' },
+    hsl360 = { to = 'to_hsl360', from = 'from_hsl360' },
+    cctk = { to = 'to_kelvin', from = 'to_mired' },
+    cctm = { to = 'to_mired', from = 'to_kelvin' }
 }
 
 -- Get conversions for a module
