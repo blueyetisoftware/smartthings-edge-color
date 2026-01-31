@@ -2,6 +2,7 @@ local clamp_kelvin = require 'color.format.cct'.clamp_kelvin
 local clamp_rgb8 = require 'color.format.rgb'.clamp_rgb8
 local from_rgb8 = require 'color.format.rgb'.rgb8_to_rgb
 
+--- @internal
 --- Converts correlated color temperature (CCT) in Kelvin to RGB color values.
 ---
 --- This function implements Neil Bartlett's 2015 improved approximation algorithm

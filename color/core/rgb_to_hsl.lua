@@ -1,6 +1,7 @@
 local clamp_rgb = require 'color.format.rgb'.clamp_rgb
 local clamp_hsl = require 'color.format.hsl'.clamp_hsl
 
+--- @internal
 --- Converts RGB color values to HSL (Hue/Saturation/Lightness) color values.
 ---
 --- This function implements correct, standard RGB to HSL conversion using normalized [0,1] ranges.

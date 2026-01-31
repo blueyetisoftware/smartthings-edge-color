@@ -1,3 +1,4 @@
+--- @internal
 local st_utils = require 'st.utils'
 local clamp_rgb = require 'color.format.rgb'.clamp_rgb
 local cctk_to_rgb = require 'color.core.cctk_to_rgb'
@@ -110,6 +111,7 @@ local function rgb_to_cct_ratio(r, _g, b)
     return st_utils.round(cct)
 end
 
+--- @internal
 --- Converts RGB color values to correlated color temperature (CCT) in Kelvin.
 ---
 --- ⚠️  IMPORTANT: Uses FAST algorithm by DEFAULT for performance.

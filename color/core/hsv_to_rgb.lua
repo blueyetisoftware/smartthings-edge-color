@@ -1,5 +1,6 @@
 local clamp_hsv = require 'color.format.hsv'.clamp_hsv
 
+--- @internal
 --- Converts HSV (Hue/Saturation/Value) color values to RGB color values.
 ---
 --- This function provides proper HSV to RGB conversion including the Value component.

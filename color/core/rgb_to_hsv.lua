@@ -1,5 +1,6 @@
 local st_utils = require 'st.utils'
 local clamp_rgb = require 'color.format.rgb'.clamp_rgb
+--- @internal
 --- Converts Red/Green/Blue to Hue/Saturation/Value
 ---
 --- This function converts RGB color values to HSV (Hue, Saturation, Value) color space.

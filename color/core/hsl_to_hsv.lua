@@ -1,3 +1,4 @@
+--- @internal
 --- Converts HSL (Hue/Saturation/Lightness) color values directly to HSV (Hue/Saturation/Value).
 ---
 --- This function provides direct HSL to HSV conversion without going through RGB,
