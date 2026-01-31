@@ -16,6 +16,7 @@ jobs:
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         ref: ${{ github.head_ref }}
+        fetch-depth: 0  # Fetch full history for proper git operations
     
     - name: Generate Conversion Modules
       run: |
@@ -28,7 +29,10 @@ jobs:
     
     - name: Commit Generated Files
       run: |
+        pwd
+        ls -la
         apk update && apk add --no-cache git
+        git status
         git add color/conversions/ spec/conversions/
         if ! git diff --cached --quiet; then
           git config --local user.email "action@github.com"
