@@ -410,7 +410,15 @@ local function main()
     print(string.format("Generating %d grouped conversion modules with %d total conversions...",
         #CONVERSION_PAIRS, total_conversions))
 
-    for module_name, conversions in pairs(modules) do
+    -- Sort module names for deterministic output order
+    local module_names = {}
+    for name in pairs(modules) do
+        table.insert(module_names, name)
+    end
+    table.sort(module_names)
+
+    for _, module_name in ipairs(module_names) do
+        local conversions = modules[module_name]
         local filename = string.format("color/convert/%s.lua", module_name)
         local code = generate_module_code(module_name, conversions)
 
