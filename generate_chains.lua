@@ -96,7 +96,7 @@ local function generate_module_code(module_name, convert)
     -- Add specific documentation based on conversion type
     if module_name == "rgb_cct" then
         table.insert(lines, "---")
-        table.insert(lines, "--- RGB ↔ CCT convesions use optimized lookup table interpolation")
+        table.insert(lines, "--- RGB ↔ CCT conversions use optimized lookup table interpolation")
         table.insert(lines, "--- with golden section search for accurate color temperature calculation.")
         table.insert(lines, "--- Provides high accuracy across the full 1000K-30000K range.")
         table.insert(lines, "---")
