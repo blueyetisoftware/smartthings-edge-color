@@ -57,7 +57,18 @@ jobs:
           lua generate_chains.lua --generate
           lua generate_tests.lua --generate
 
+          echo "=== Lua version in CI ==="
+          lua -v || echo "lua -v failed"
+
           echo ""
+          echo "=== First 20 lines of a regenerated file in CI ==="
+          head -n 20 spec/convert/rgb_cct_spec.lua || true
+
+          echo ""
+          echo "=== Byte count of regenerated rgb_cct_spec.lua ==="
+          wc -c spec/convert/rgb_cct_spec.lua || true 
+          echo ""
+
           echo "Checking diff..."
 
           if git diff --quiet -- color/convert/ spec/convert/; then
