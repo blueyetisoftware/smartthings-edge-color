@@ -442,6 +442,22 @@ All 220+ tests should pass, covering:
 - **Input validation and error handling** with type enforcement
 - **Performance characteristics** and algorithm accuracy tradeoffs
 
+### 🤖 Automated Generation & Testing
+
+This library uses **code generation** to create conversion modules and comprehensive tests. GitHub Actions automatically:
+
+- **Generates conversion modules** (`color/conversions/`) and tests (`spec/conversions/`) on pull requests
+- **Commits generated code** only when changes are detected (avoids empty commits)
+- **Runs full test suite** (460+ tests) on generated code to ensure accuracy
+- **Validates PR changes** before merging to maintain quality
+
+To generate locally:
+```bash
+lua generate_chains.lua --generate  # Generate conversion modules
+lua generate_tests.lua --generate   # Generate test files
+busted                                # Run all tests
+```
+
 ## Quality Assurance
 
 This library implements professional color mathematics standards with rigorous validation:
