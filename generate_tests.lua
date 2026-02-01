@@ -13,15 +13,24 @@ local SPACES = {
     xyy = { formats = {'xyy'}, normalized = 'xyy' }
 }
 
--- Define conversion pairs to generate modules for (same as in generate_chains.lua)
-local CONVERSION_PAIRS = {
-    {'rgb', 'hsv'},
-    {'rgb', 'hsl'},
-    {'rgb', 'cct'},
-    {'rgb', 'xyy'},
-    {'hsv', 'hsl'},
-    {'cct', 'xyy'}
-}
+-- Generate all possible conversion pairs (same as in generate_chains.lua)
+local function generate_all_pairs()
+    local spaces_list = {}
+    for space in pairs(SPACES) do
+        table.insert(spaces_list, space)
+    end
+    table.sort(spaces_list)  -- For deterministic order
+    
+    local pairs = {}
+    for i = 1, #spaces_list - 1 do
+        for j = i + 1, #spaces_list do
+            table.insert(pairs, {spaces_list[i], spaces_list[j]})
+        end
+    end
+    return pairs
+end
+
+local CONVERSION_PAIRS = generate_all_pairs()
 
 -- Get conversions for a module
 local function get_module_conversions(module_name)
@@ -29,7 +38,8 @@ local function get_module_conversions(module_name)
 
     for _, pair in ipairs(CONVERSION_PAIRS) do
         local from_space, to_space = pair[1], pair[2]
-        local name = from_space .. '_' .. to_space
+        local name1 = from_space .. '_' .. to_space
+        local name2 = to_space .. '_' .. from_space
 
         -- Get all format combinations for this conversion pair
         local conversions = {}
@@ -63,7 +73,11 @@ local function get_module_conversions(module_name)
             })
         end
 
-        modules[name] = conversions
+        modules[name1] = conversions
+        
+        -- Also populate the reverse direction with the same conversions
+        -- (since the module contains bidirectional conversions)
+        modules[name2] = conversions
     end
 
     return modules[module_name] or {}
@@ -132,34 +146,21 @@ local FORMAT_CONVERTERS = {
         end,
         from = function(r, g, b) return r / 255, g / 255, b / 255 end
     },
-    rgb16 = {
-        to = function(r, g, b)
-            return math.floor(r * 65535 + 0.5), math.floor(g * 65535 + 0.5), math.floor(b * 65535 + 0.5)
-        end,
-        from = function(r, g, b) return r / 65535, g / 65535, b / 65535 end
-    },
     rgb100 = {
         to = function(r, g, b)
             return math.floor(r * 100 + 0.5), math.floor(g * 100 + 0.5), math.floor(b * 100 + 0.5)
         end,
         from = function(r, g, b) return r / 100, g / 100, b / 100 end
     },
-    hex24 = {
-        to = function(r, g, b)
-            return (math.floor(r * 255 + 0.5) << 16) | (math.floor(g * 255 + 0.5) << 8) | math.floor(b * 255 + 0.5)
-        end,
-        from = function(hex)
-            local r = (hex >> 16) & 0xFF
-            local g = (hex >> 8) & 0xFF
-            local b = hex & 0xFF
-            return r / 255, g / 255, b / 255
-        end
-    },
-    hdsv = {
+    hsv360 = {
         to = function(h, s, v) return h * 360, s, v end,
         from = function(h, s, v) return h / 360, s, v end
     },
-    cct_mired = {
+    hsl360 = {
+        to = function(h, s, l) return h * 360, s, l end,
+        from = function(h, s, l) return h / 360, s, l end
+    },
+    cctm = {
         to = function(k) return math.floor(1000000 / k + 0.5) end,
         from = function(m) return 1000000 / m end
     }
@@ -185,7 +186,7 @@ local function generate_test_code(module_name)
 
         -- Get appropriate test data for the input format
         local test_data = TEST_DATA[conv.from_space]
-        if FORMAT_CONVERTERS[from_fmt] and FORMAT_CONVERTERS[from_fmt].from then
+        if FORMAT_CONVERTERS[from_fmt] and FORMAT_CONVERTERS[from_fmt].to and from_fmt ~= 'hex24' then
             -- Convert test data to the specific format
             test_data = {}
             for _, input in ipairs(TEST_DATA[conv.from_space]) do
@@ -223,6 +224,37 @@ local function generate_test_code(module_name)
                 table.insert(lines, "            assert.is_not_nil(result[1])")
                 table.insert(lines, "            assert.is_not_nil(result[2])")
                 table.insert(lines, "            assert.is_not_nil(result[3])")
+                table.insert(lines, "            assert.is_number(result[1])")
+                table.insert(lines, "            assert.is_number(result[2])")
+                table.insert(lines, "            assert.is_number(result[3])")
+                
+                -- Add range validation based on output format
+                if to_fmt == 'xyy' then
+                    table.insert(lines, "            -- xyY should have x,y in 0-1 range, Y >= 0")
+                    table.insert(lines, "            assert.is_true(result[1] >= 0 and result[1] <= 1)")
+                    table.insert(lines, "            assert.is_true(result[2] >= 0 and result[2] <= 1)")
+                    table.insert(lines, "            assert.is_true(result[3] >= 0)")
+                elseif to_fmt == 'rgb8' then
+                    table.insert(lines, "            -- RGB8 should be integers in 0-255 range")
+                    table.insert(lines, "            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and result[1] <= 255)")
+                    table.insert(lines, "            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and result[2] <= 255)")
+                    table.insert(lines, "            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and result[3] <= 255)")
+                elseif to_fmt == 'rgb100' then
+                    table.insert(lines, "            -- RGB100 should be in 0-100 range")
+                    table.insert(lines, "            assert.is_true(result[1] >= 0 and result[1] <= 100)")
+                    table.insert(lines, "            assert.is_true(result[2] >= 0 and result[2] <= 100)")
+                    table.insert(lines, "            assert.is_true(result[3] >= 0 and result[3] <= 100)")
+                elseif to_fmt:match('^rgb') then
+                    table.insert(lines, "            -- RGB should be in 0-1 range")
+                    table.insert(lines, "            assert.is_true(result[1] >= 0 and result[1] <= 1)")
+                    table.insert(lines, "            assert.is_true(result[2] >= 0 and result[2] <= 1)")
+                    table.insert(lines, "            assert.is_true(result[3] >= 0 and result[3] <= 1)")
+                elseif to_fmt == 'hsv' or to_fmt == 'hsl' then
+                    table.insert(lines, string.format("            -- %s should have H in 0-1, S,V/L in 0-1 range", to_fmt:upper()))
+                    table.insert(lines, "            assert.is_true(result[1] >= 0 and result[1] <= 1)")
+                    table.insert(lines, "            assert.is_true(result[2] >= 0 and result[2] <= 1)")
+                    table.insert(lines, "            assert.is_true(result[3] >= 0 and result[3] <= 1)")
+                end
             elseif to_fmt:match('^cct') then
                 table.insert(lines, string.format("            local result = convert.%s(%s)",
                                                  func_name, input_str))
@@ -230,6 +262,8 @@ local function generate_test_code(module_name)
                 table.insert(lines, "            -- Verify result is not nil")
                 table.insert(lines, "            assert.is_not_nil(result)")
                 table.insert(lines, "            assert.is_number(result)")
+                table.insert(lines, "            -- CCT should be positive")
+                table.insert(lines, "            assert.is_true(result > 0)")
             end
 
             table.insert(lines, "        end)")

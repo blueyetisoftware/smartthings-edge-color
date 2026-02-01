@@ -1,8 +1,8 @@
---- Test specifications for rgb ↔ hsl conversion module
+--- Test specifications for hsl ↔ rgb conversion module
 
-local convert = require 'color.convert.rgb_hsl'
+local convert = require 'color.convert.hsl_rgb'
 
-describe('rgb ↔ hsl conversions', function()
+describe('hsl ↔ rgb conversions', function()
 
     describe('hsl_to_rgb8', function()
 

@@ -12,10 +12,10 @@
 
 local cctk_to_rgb = require 'color.core.cctk_to_rgb'
 local rgb_to_xyy = require 'color.core.rgb_to_xyy'
-local cctm_to_cctk = require 'color.format.cct'.cctm_to_cctk
 local cctk_to_cctm = require 'color.format.cct'.cctk_to_cctm
 local xyy_to_rgb = require 'color.core.xyy_to_rgb'
 local rgb_to_cctk = require 'color.core.rgb_to_cctk'
+local cctm_to_cctk = require 'color.format.cct'.cctm_to_cctk
 
 local M = {}
 
@@ -23,7 +23,7 @@ local M = {}
 function M.cctk_to_xyy(
     kelvin
 )
-    return rgb_to_xyy(cctk_to_rgb(cctm_to_cctk(kelvin)))
+    return rgb_to_xyy(cctk_to_rgb(kelvin))
 end
 
 -- cctm to xyy
@@ -37,7 +37,7 @@ end
 function M.xyy_to_cctk(
     x, y, Y
 )
-    return cctk_to_cctm(rgb_to_cctk(xyy_to_rgb(x, y, Y)))
+    return rgb_to_cctk(xyy_to_rgb(x, y, Y))
 end
 
 -- xyy to cctm
