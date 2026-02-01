@@ -20,7 +20,6 @@ local function generate_all_pairs()
         table.insert(spaces_list, space)
     end
     table.sort(spaces_list)  -- For deterministic order
-    
     local pairs = {}
     for i = 1, #spaces_list - 1 do
         for j = i + 1, #spaces_list do
@@ -74,7 +73,6 @@ local function get_module_conversions(module_name)
         end
 
         modules[name1] = conversions
-        
         -- Also populate the reverse direction with the same conversions
         -- (since the module contains bidirectional conversions)
         modules[name2] = conversions
@@ -227,7 +225,6 @@ local function generate_test_code(module_name)
                 table.insert(lines, "            assert.is_number(result[1])")
                 table.insert(lines, "            assert.is_number(result[2])")
                 table.insert(lines, "            assert.is_number(result[3])")
-                
                 -- Add range validation based on output format
                 if to_fmt == 'xyy' then
                     table.insert(lines, "            -- xyY should have x,y in 0-1 range, Y >= 0")
@@ -236,9 +233,12 @@ local function generate_test_code(module_name)
                     table.insert(lines, "            assert.is_true(result[3] >= 0)")
                 elseif to_fmt == 'rgb8' then
                     table.insert(lines, "            -- RGB8 should be integers in 0-255 range")
-                    table.insert(lines, "            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and result[1] <= 255)")
-                    table.insert(lines, "            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and result[2] <= 255)")
-                    table.insert(lines, "            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and result[3] <= 255)")
+                    table.insert(lines, "            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and")
+                    table.insert(lines, "                result[1] <= 255)")
+                    table.insert(lines, "            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and")
+                    table.insert(lines, "                result[2] <= 255)")
+                    table.insert(lines, "            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and")
+                    table.insert(lines, "                result[3] <= 255)")
                 elseif to_fmt == 'rgb100' then
                     table.insert(lines, "            -- RGB100 should be in 0-100 range")
                     table.insert(lines, "            assert.is_true(result[1] >= 0 and result[1] <= 100)")
@@ -250,7 +250,8 @@ local function generate_test_code(module_name)
                     table.insert(lines, "            assert.is_true(result[2] >= 0 and result[2] <= 1)")
                     table.insert(lines, "            assert.is_true(result[3] >= 0 and result[3] <= 1)")
                 elseif to_fmt == 'hsv' or to_fmt == 'hsl' then
-                    table.insert(lines, string.format("            -- %s should have H in 0-1, S,V/L in 0-1 range", to_fmt:upper()))
+                    table.insert(lines, string.format("            -- %s should have H in 0-1, S,V/L in",
+                        to_fmt:upper()) .. " 0-1 range")
                     table.insert(lines, "            assert.is_true(result[1] >= 0 and result[1] <= 1)")
                     table.insert(lines, "            assert.is_true(result[2] >= 0 and result[2] <= 1)")
                     table.insert(lines, "            assert.is_true(result[3] >= 0 and result[3] <= 1)")
