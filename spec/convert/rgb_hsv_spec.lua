@@ -17,9 +17,12 @@ describe('rgb ↔ hsv conversions', function()
             assert.is_number(result[2])
             assert.is_number(result[3])
             -- RGB8 should be integers in 0-255 range
-            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and result[1] <= 255)
-            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and result[2] <= 255)
-            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and result[3] <= 255)
+            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and
+                result[1] <= 255)
+            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and
+                result[2] <= 255)
+            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and
+                result[3] <= 255)
         end)
 
         it('converts test case 2', function()
@@ -33,9 +36,12 @@ describe('rgb ↔ hsv conversions', function()
             assert.is_number(result[2])
             assert.is_number(result[3])
             -- RGB8 should be integers in 0-255 range
-            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and result[1] <= 255)
-            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and result[2] <= 255)
-            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and result[3] <= 255)
+            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and
+                result[1] <= 255)
+            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and
+                result[2] <= 255)
+            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and
+                result[3] <= 255)
         end)
 
         it('converts test case 3', function()
@@ -49,9 +55,12 @@ describe('rgb ↔ hsv conversions', function()
             assert.is_number(result[2])
             assert.is_number(result[3])
             -- RGB8 should be integers in 0-255 range
-            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and result[1] <= 255)
-            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and result[2] <= 255)
-            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and result[3] <= 255)
+            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and
+                result[1] <= 255)
+            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and
+                result[2] <= 255)
+            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and
+                result[3] <= 255)
         end)
 
         it('converts test case 4', function()
@@ -65,9 +74,12 @@ describe('rgb ↔ hsv conversions', function()
             assert.is_number(result[2])
             assert.is_number(result[3])
             -- RGB8 should be integers in 0-255 range
-            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and result[1] <= 255)
-            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and result[2] <= 255)
-            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and result[3] <= 255)
+            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and
+                result[1] <= 255)
+            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and
+                result[2] <= 255)
+            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and
+                result[3] <= 255)
         end)
 
         it('converts test case 5', function()
@@ -81,9 +93,12 @@ describe('rgb ↔ hsv conversions', function()
             assert.is_number(result[2])
             assert.is_number(result[3])
             -- RGB8 should be integers in 0-255 range
-            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and result[1] <= 255)
-            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and result[2] <= 255)
-            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and result[3] <= 255)
+            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and
+                result[1] <= 255)
+            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and
+                result[2] <= 255)
+            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and
+                result[3] <= 255)
         end)
 
         it('converts test case 6', function()
@@ -97,9 +112,12 @@ describe('rgb ↔ hsv conversions', function()
             assert.is_number(result[2])
             assert.is_number(result[3])
             -- RGB8 should be integers in 0-255 range
-            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and result[1] <= 255)
-            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and result[2] <= 255)
-            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and result[3] <= 255)
+            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and
+                result[1] <= 255)
+            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and
+                result[2] <= 255)
+            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and
+                result[3] <= 255)
         end)
 
         it('converts test case 7', function()
@@ -113,9 +131,12 @@ describe('rgb ↔ hsv conversions', function()
             assert.is_number(result[2])
             assert.is_number(result[3])
             -- RGB8 should be integers in 0-255 range
-            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and result[1] <= 255)
-            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and result[2] <= 255)
-            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and result[3] <= 255)
+            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and
+                result[1] <= 255)
+            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and
+                result[2] <= 255)
+            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and
+                result[3] <= 255)
         end)
 
         it('converts test case 8', function()
@@ -129,9 +150,12 @@ describe('rgb ↔ hsv conversions', function()
             assert.is_number(result[2])
             assert.is_number(result[3])
             -- RGB8 should be integers in 0-255 range
-            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and result[1] <= 255)
-            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and result[2] <= 255)
-            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and result[3] <= 255)
+            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and
+                result[1] <= 255)
+            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and
+                result[2] <= 255)
+            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and
+                result[3] <= 255)
         end)
 
         it('converts test case 9', function()
@@ -145,9 +169,12 @@ describe('rgb ↔ hsv conversions', function()
             assert.is_number(result[2])
             assert.is_number(result[3])
             -- RGB8 should be integers in 0-255 range
-            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and result[1] <= 255)
-            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and result[2] <= 255)
-            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and result[3] <= 255)
+            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and
+                result[1] <= 255)
+            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and
+                result[2] <= 255)
+            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and
+                result[3] <= 255)
         end)
 
         it('converts test case 10', function()
@@ -161,9 +188,12 @@ describe('rgb ↔ hsv conversions', function()
             assert.is_number(result[2])
             assert.is_number(result[3])
             -- RGB8 should be integers in 0-255 range
-            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and result[1] <= 255)
-            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and result[2] <= 255)
-            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and result[3] <= 255)
+            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and
+                result[1] <= 255)
+            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and
+                result[2] <= 255)
+            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and
+                result[3] <= 255)
         end)
 
     end)
@@ -379,9 +409,12 @@ describe('rgb ↔ hsv conversions', function()
             assert.is_number(result[2])
             assert.is_number(result[3])
             -- RGB8 should be integers in 0-255 range
-            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and result[1] <= 255)
-            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and result[2] <= 255)
-            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and result[3] <= 255)
+            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and
+                result[1] <= 255)
+            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and
+                result[2] <= 255)
+            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and
+                result[3] <= 255)
         end)
 
         it('converts test case 2', function()
@@ -395,9 +428,12 @@ describe('rgb ↔ hsv conversions', function()
             assert.is_number(result[2])
             assert.is_number(result[3])
             -- RGB8 should be integers in 0-255 range
-            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and result[1] <= 255)
-            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and result[2] <= 255)
-            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and result[3] <= 255)
+            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and
+                result[1] <= 255)
+            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and
+                result[2] <= 255)
+            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and
+                result[3] <= 255)
         end)
 
         it('converts test case 3', function()
@@ -411,9 +447,12 @@ describe('rgb ↔ hsv conversions', function()
             assert.is_number(result[2])
             assert.is_number(result[3])
             -- RGB8 should be integers in 0-255 range
-            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and result[1] <= 255)
-            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and result[2] <= 255)
-            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and result[3] <= 255)
+            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and
+                result[1] <= 255)
+            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and
+                result[2] <= 255)
+            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and
+                result[3] <= 255)
         end)
 
         it('converts test case 4', function()
@@ -427,9 +466,12 @@ describe('rgb ↔ hsv conversions', function()
             assert.is_number(result[2])
             assert.is_number(result[3])
             -- RGB8 should be integers in 0-255 range
-            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and result[1] <= 255)
-            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and result[2] <= 255)
-            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and result[3] <= 255)
+            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and
+                result[1] <= 255)
+            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and
+                result[2] <= 255)
+            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and
+                result[3] <= 255)
         end)
 
         it('converts test case 5', function()
@@ -443,9 +485,12 @@ describe('rgb ↔ hsv conversions', function()
             assert.is_number(result[2])
             assert.is_number(result[3])
             -- RGB8 should be integers in 0-255 range
-            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and result[1] <= 255)
-            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and result[2] <= 255)
-            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and result[3] <= 255)
+            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and
+                result[1] <= 255)
+            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and
+                result[2] <= 255)
+            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and
+                result[3] <= 255)
         end)
 
         it('converts test case 6', function()
@@ -459,9 +504,12 @@ describe('rgb ↔ hsv conversions', function()
             assert.is_number(result[2])
             assert.is_number(result[3])
             -- RGB8 should be integers in 0-255 range
-            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and result[1] <= 255)
-            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and result[2] <= 255)
-            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and result[3] <= 255)
+            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and
+                result[1] <= 255)
+            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and
+                result[2] <= 255)
+            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and
+                result[3] <= 255)
         end)
 
         it('converts test case 7', function()
@@ -475,9 +523,12 @@ describe('rgb ↔ hsv conversions', function()
             assert.is_number(result[2])
             assert.is_number(result[3])
             -- RGB8 should be integers in 0-255 range
-            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and result[1] <= 255)
-            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and result[2] <= 255)
-            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and result[3] <= 255)
+            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and
+                result[1] <= 255)
+            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and
+                result[2] <= 255)
+            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and
+                result[3] <= 255)
         end)
 
         it('converts test case 8', function()
@@ -491,9 +542,12 @@ describe('rgb ↔ hsv conversions', function()
             assert.is_number(result[2])
             assert.is_number(result[3])
             -- RGB8 should be integers in 0-255 range
-            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and result[1] <= 255)
-            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and result[2] <= 255)
-            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and result[3] <= 255)
+            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and
+                result[1] <= 255)
+            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and
+                result[2] <= 255)
+            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and
+                result[3] <= 255)
         end)
 
         it('converts test case 9', function()
@@ -507,9 +561,12 @@ describe('rgb ↔ hsv conversions', function()
             assert.is_number(result[2])
             assert.is_number(result[3])
             -- RGB8 should be integers in 0-255 range
-            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and result[1] <= 255)
-            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and result[2] <= 255)
-            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and result[3] <= 255)
+            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and
+                result[1] <= 255)
+            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and
+                result[2] <= 255)
+            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and
+                result[3] <= 255)
         end)
 
         it('converts test case 10', function()
@@ -523,9 +580,12 @@ describe('rgb ↔ hsv conversions', function()
             assert.is_number(result[2])
             assert.is_number(result[3])
             -- RGB8 should be integers in 0-255 range
-            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and result[1] <= 255)
-            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and result[2] <= 255)
-            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and result[3] <= 255)
+            assert.is_true(type(result[1]) == 'number' and result[1] >= 0 and
+                result[1] <= 255)
+            assert.is_true(type(result[2]) == 'number' and result[2] >= 0 and
+                result[2] <= 255)
+            assert.is_true(type(result[3]) == 'number' and result[3] >= 0 and
+                result[3] <= 255)
         end)
 
     end)

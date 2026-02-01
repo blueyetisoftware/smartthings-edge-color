@@ -8,8 +8,10 @@
 --- using optimized lookup table interpolation for CCT and standard
 --- computer graphics algorithms for HSV.
 ---
---- Standards: CIE 1931 color space, correlated color temperature, computer graphics (Foley et al.)
---- Algorithm: Lookup table interpolation + golden section search → component-wise max/min
+--- Standards: CIE 1931 color space, correlated color temperature,
+--- computer graphics (Foley et al.)
+--- Algorithm: Lookup table interpolation + golden section search →
+--- component-wise max/min
 --- Accuracy: < 10K error for CCT, standard HSV precision
 
 local cctk_to_rgb = require 'color.core.cctk_to_rgb'

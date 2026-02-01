@@ -5,10 +5,13 @@
 --- established algorithms and best practices for computer graphics.
 ---
 --- HSV ↔ xyY conversions chain through RGB intermediate representation
---- using standard computer graphics algorithms and CIE 1931 color matching functions.
+--- using standard computer graphics algorithms and CIE 1931 color
+--- matching functions.
 ---
---- Standards: Computer graphics standard (Foley et al.), CIE 1931, sRGB (IEC 61966-2-1)
---- Algorithm: Component-wise maximum/minimum calculations → Linear transformation with gamma correction
+--- Standards: Computer graphics standard (Foley et al.), CIE 1931,
+--- sRGB (IEC 61966-2-1)
+--- Algorithm: Component-wise maximum/minimum calculations →
+--- Linear transformation with gamma correction
 
 local hsv_to_rgb = require 'color.core.hsv_to_rgb'
 local rgb_to_xyy = require 'color.core.rgb_to_xyy'

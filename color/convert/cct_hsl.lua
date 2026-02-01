@@ -8,8 +8,10 @@
 --- using optimized lookup table interpolation for CCT and standard
 --- lightness calculations for HSL.
 ---
---- Standards: CIE 1931 color space, correlated color temperature, CSS Color Module Level 4
---- Algorithm: Lookup table interpolation + golden section search → Lightness = (max + min)/2
+--- Standards: CIE 1931 color space, correlated color temperature,
+--- CSS Color Module Level 4
+--- Algorithm: Lookup table interpolation + golden section search →
+--- Lightness = (max + min)/2
 --- Accuracy: < 10K error for CCT, standard HSL precision
 
 local cctk_to_rgb = require 'color.core.cctk_to_rgb'
