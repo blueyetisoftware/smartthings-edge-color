@@ -14,15 +14,23 @@ local SPACES = {
     xyy = { formats = {'xyy'}, normalized = 'xyy' }
 }
 
--- Define conversion pairs to generate modules for
-local CONVERSION_PAIRS = {
-    {'rgb', 'hsv'},
-    {'rgb', 'hsl'},
-    {'rgb', 'cct'},
-    {'rgb', 'xyy'},
-    {'hsv', 'hsl'},
-    {'cct', 'xyy'}
-}
+-- Generate all possible conversion pairs
+local function generate_all_pairs()
+    local spaces_list = {}
+    for space in pairs(SPACES) do
+        table.insert(spaces_list, space)
+    end
+    table.sort(spaces_list)  -- For deterministic order
+    local pairs = {}
+    for i = 1, #spaces_list - 1 do
+        for j = i + 1, #spaces_list do
+            table.insert(pairs, {spaces_list[i], spaces_list[j]})
+        end
+    end
+    return pairs
+end
+
+local CONVERSION_PAIRS = generate_all_pairs()
 
 -- Format conversion functions
 local FORMAT_FUNCTIONS = {
@@ -31,7 +39,6 @@ local FORMAT_FUNCTIONS = {
     rgb100 = { to = 'rgb_to_rgb100', from = 'rgb100_to_rgb' },
     hsv360 = { to = 'hsv_to_hsv360', from = 'hsv360_to_hsv' },
     hsl360 = { to = 'hsl_to_hsl360', from = 'hsl360_to_hsl' },
-    cctk = { to = 'cctk_to_cctm', from = 'cctm_to_cctk' },
     cctm = { to = 'cctm_to_cctk', from = 'cctk_to_cctm' }
 }
 
@@ -138,6 +145,45 @@ local function generate_module_code(module_name, convert)
         table.insert(lines, "---")
         table.insert(lines, "--- Standards: CIE daylight illuminants, Planckian locus approximation")
         table.insert(lines, "--- Algorithm: Polynomial approximation of daylight chromaticity")
+    elseif module_name == "cct_hsv" then
+        table.insert(lines, "---")
+        table.insert(lines, "--- CCT ↔ HSV conversions chain through RGB intermediate representation")
+        table.insert(lines, "--- using optimized lookup table interpolation for CCT and standard")
+        table.insert(lines, "--- computer graphics algorithms for HSV.")
+        table.insert(lines, "---")
+        table.insert(lines, "--- Standards: CIE 1931 color space, correlated color temperature,")
+        table.insert(lines, "--- computer graphics (Foley et al.)")
+        table.insert(lines, "--- Algorithm: Lookup table interpolation + golden section search →")
+        table.insert(lines, "--- component-wise max/min")
+        table.insert(lines, "--- Accuracy: < 10K error for CCT, standard HSV precision")
+    elseif module_name == "cct_hsl" then
+        table.insert(lines, "---")
+        table.insert(lines, "--- CCT ↔ HSL conversions chain through RGB intermediate representation")
+        table.insert(lines, "--- using optimized lookup table interpolation for CCT and standard")
+        table.insert(lines, "--- lightness calculations for HSL.")
+        table.insert(lines, "---")
+        table.insert(lines, "--- Standards: CIE 1931 color space, correlated color temperature,")
+        table.insert(lines, "--- CSS Color Module Level 4")
+        table.insert(lines, "--- Algorithm: Lookup table interpolation + golden section search →")
+        table.insert(lines, "--- Lightness = (max + min)/2")
+        table.insert(lines, "--- Accuracy: < 10K error for CCT, standard HSL precision")
+    elseif module_name == "hsl_xyy" then
+        table.insert(lines, "---")
+        table.insert(lines, "--- HSL ↔ xyY conversions chain through RGB intermediate representation")
+        table.insert(lines, "--- using standard lightness calculations and CIE 1931 color matching functions.")
+        table.insert(lines, "---")
+        table.insert(lines, "--- Standards: CSS Color Module Level 4, CIE 1931, sRGB (IEC 61966-2-1)")
+        table.insert(lines, "--- Algorithm: Lightness = (max + min)/2 → Linear transformation with gamma correction")
+    elseif module_name == "hsv_xyy" then
+        table.insert(lines, "---")
+        table.insert(lines, "--- HSV ↔ xyY conversions chain through RGB intermediate representation")
+        table.insert(lines, "--- using standard computer graphics algorithms and CIE 1931 color")
+        table.insert(lines, "--- matching functions.")
+        table.insert(lines, "---")
+        table.insert(lines, "--- Standards: Computer graphics standard (Foley et al.), CIE 1931,")
+        table.insert(lines, "--- sRGB (IEC 61966-2-1)")
+        table.insert(lines, "--- Algorithm: Component-wise maximum/minimum calculations →")
+        table.insert(lines, "--- Linear transformation with gamma correction")
     end
     table.insert(lines, "")
 

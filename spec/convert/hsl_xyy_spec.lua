@@ -1,13 +1,13 @@
---- Test specifications for cct ↔ xyy conversion module
+--- Test specifications for hsl ↔ xyy conversion module
 
-local convert = require 'color.convert.cct_xyy'
+local convert = require 'color.convert.hsl_xyy'
 
-describe('cct ↔ xyy conversions', function()
+describe('hsl ↔ xyy conversions', function()
 
-    describe('cctk_to_xyy', function()
+    describe('hsl_to_xyy', function()
 
         it('converts test case 1', function()
-            local result = {convert.cctk_to_xyy(1000)}
+            local result = {convert.hsl_to_xyy(0, 0, 0)}
 
             -- Verify results are not nil
             assert.is_not_nil(result[1])
@@ -23,7 +23,7 @@ describe('cct ↔ xyy conversions', function()
         end)
 
         it('converts test case 2', function()
-            local result = {convert.cctk_to_xyy(1500)}
+            local result = {convert.hsl_to_xyy(0, 0, 1)}
 
             -- Verify results are not nil
             assert.is_not_nil(result[1])
@@ -39,7 +39,7 @@ describe('cct ↔ xyy conversions', function()
         end)
 
         it('converts test case 3', function()
-            local result = {convert.cctk_to_xyy(2000)}
+            local result = {convert.hsl_to_xyy(0, 1, 0.5)}
 
             -- Verify results are not nil
             assert.is_not_nil(result[1])
@@ -55,7 +55,7 @@ describe('cct ↔ xyy conversions', function()
         end)
 
         it('converts test case 4', function()
-            local result = {convert.cctk_to_xyy(2500)}
+            local result = {convert.hsl_to_xyy(0.333, 1, 0.5)}
 
             -- Verify results are not nil
             assert.is_not_nil(result[1])
@@ -71,7 +71,7 @@ describe('cct ↔ xyy conversions', function()
         end)
 
         it('converts test case 5', function()
-            local result = {convert.cctk_to_xyy(3000)}
+            local result = {convert.hsl_to_xyy(0.667, 1, 0.5)}
 
             -- Verify results are not nil
             assert.is_not_nil(result[1])
@@ -87,7 +87,7 @@ describe('cct ↔ xyy conversions', function()
         end)
 
         it('converts test case 6', function()
-            local result = {convert.cctk_to_xyy(3500)}
+            local result = {convert.hsl_to_xyy(0.167, 1, 0.5)}
 
             -- Verify results are not nil
             assert.is_not_nil(result[1])
@@ -103,7 +103,7 @@ describe('cct ↔ xyy conversions', function()
         end)
 
         it('converts test case 7', function()
-            local result = {convert.cctk_to_xyy(4000)}
+            local result = {convert.hsl_to_xyy(0.833, 1, 0.5)}
 
             -- Verify results are not nil
             assert.is_not_nil(result[1])
@@ -119,7 +119,7 @@ describe('cct ↔ xyy conversions', function()
         end)
 
         it('converts test case 8', function()
-            local result = {convert.cctk_to_xyy(5000)}
+            local result = {convert.hsl_to_xyy(0.5, 1, 0.5)}
 
             -- Verify results are not nil
             assert.is_not_nil(result[1])
@@ -135,7 +135,7 @@ describe('cct ↔ xyy conversions', function()
         end)
 
         it('converts test case 9', function()
-            local result = {convert.cctk_to_xyy(6500)}
+            local result = {convert.hsl_to_xyy(0, 0, 0.5)}
 
             -- Verify results are not nil
             assert.is_not_nil(result[1])
@@ -151,7 +151,7 @@ describe('cct ↔ xyy conversions', function()
         end)
 
         it('converts test case 10', function()
-            local result = {convert.cctk_to_xyy(10000)}
+            local result = {convert.hsl_to_xyy(0.2, 0.9, 0.4)}
 
             -- Verify results are not nil
             assert.is_not_nil(result[1])
@@ -168,10 +168,10 @@ describe('cct ↔ xyy conversions', function()
 
     end)
 
-    describe('cctm_to_xyy', function()
+    describe('hsl360_to_xyy', function()
 
         it('converts test case 1', function()
-            local result = {convert.cctm_to_xyy(1000)}
+            local result = {convert.hsl360_to_xyy(0, 0, 0)}
 
             -- Verify results are not nil
             assert.is_not_nil(result[1])
@@ -187,7 +187,7 @@ describe('cct ↔ xyy conversions', function()
         end)
 
         it('converts test case 2', function()
-            local result = {convert.cctm_to_xyy(667)}
+            local result = {convert.hsl360_to_xyy(0, 0, 1)}
 
             -- Verify results are not nil
             assert.is_not_nil(result[1])
@@ -203,7 +203,7 @@ describe('cct ↔ xyy conversions', function()
         end)
 
         it('converts test case 3', function()
-            local result = {convert.cctm_to_xyy(500)}
+            local result = {convert.hsl360_to_xyy(0, 1, 0.5)}
 
             -- Verify results are not nil
             assert.is_not_nil(result[1])
@@ -219,7 +219,7 @@ describe('cct ↔ xyy conversions', function()
         end)
 
         it('converts test case 4', function()
-            local result = {convert.cctm_to_xyy(400)}
+            local result = {convert.hsl360_to_xyy(119.88, 1, 0.5)}
 
             -- Verify results are not nil
             assert.is_not_nil(result[1])
@@ -235,7 +235,7 @@ describe('cct ↔ xyy conversions', function()
         end)
 
         it('converts test case 5', function()
-            local result = {convert.cctm_to_xyy(333)}
+            local result = {convert.hsl360_to_xyy(240.12, 1, 0.5)}
 
             -- Verify results are not nil
             assert.is_not_nil(result[1])
@@ -251,7 +251,7 @@ describe('cct ↔ xyy conversions', function()
         end)
 
         it('converts test case 6', function()
-            local result = {convert.cctm_to_xyy(286)}
+            local result = {convert.hsl360_to_xyy(60.12, 1, 0.5)}
 
             -- Verify results are not nil
             assert.is_not_nil(result[1])
@@ -267,7 +267,7 @@ describe('cct ↔ xyy conversions', function()
         end)
 
         it('converts test case 7', function()
-            local result = {convert.cctm_to_xyy(250)}
+            local result = {convert.hsl360_to_xyy(299.88, 1, 0.5)}
 
             -- Verify results are not nil
             assert.is_not_nil(result[1])
@@ -283,7 +283,7 @@ describe('cct ↔ xyy conversions', function()
         end)
 
         it('converts test case 8', function()
-            local result = {convert.cctm_to_xyy(200)}
+            local result = {convert.hsl360_to_xyy(180.0, 1, 0.5)}
 
             -- Verify results are not nil
             assert.is_not_nil(result[1])
@@ -299,7 +299,7 @@ describe('cct ↔ xyy conversions', function()
         end)
 
         it('converts test case 9', function()
-            local result = {convert.cctm_to_xyy(154)}
+            local result = {convert.hsl360_to_xyy(0, 0, 0.5)}
 
             -- Verify results are not nil
             assert.is_not_nil(result[1])
@@ -315,7 +315,7 @@ describe('cct ↔ xyy conversions', function()
         end)
 
         it('converts test case 10', function()
-            local result = {convert.cctm_to_xyy(100)}
+            local result = {convert.hsl360_to_xyy(72.0, 0.9, 0.4)}
 
             -- Verify results are not nil
             assert.is_not_nil(result[1])

@@ -1,8 +1,8 @@
---- Test specifications for rgb ↔ hsv conversion module
+--- Test specifications for hsv ↔ rgb conversion module
 
-local convert = require 'color.convert.rgb_hsv'
+local convert = require 'color.convert.hsv_rgb'
 
-describe('rgb ↔ hsv conversions', function()
+describe('hsv ↔ rgb conversions', function()
 
     describe('hsv_to_rgb8', function()
 
